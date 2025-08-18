@@ -1,10 +1,12 @@
 .calendar-wrapper {
-  padding: 1rem;
-  height: 100%;
-  box-sizing: border-box;
+  min-height: calc(100vh - 6rem); // Adjust for header height if needed
+  height: calc(100vh - 6rem); // Adjust for header height if needed
+  display: flex;
+  flex-direction: column;
 }
 
 .calendar-host {
-  max-width: 1100px;
-  margin: 0 auto;
+  flex: 1 1 auto;
+  height: 100%;
+  overflow: hidden;
 }

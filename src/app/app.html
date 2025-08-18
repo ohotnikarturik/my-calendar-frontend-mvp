@@ -1,6 +1,12 @@
+<content-wrapper>
+  <nav>
+    <a routerLink="/">Calendar</a>
+    <a routerLink="/home">Home</a>
+    <a routerLink="/about">About</a>
+  </nav>
+</content-wrapper>
 <nav>
-  <a routerLink="/">Calendar</a>
-  <a routerLink="/home">Home</a>
-  <a routerLink="/about">About</a>
+  <content-wrapper>
+    <router-outlet />
+  </content-wrapper>
 </nav>
-<router-outlet />
