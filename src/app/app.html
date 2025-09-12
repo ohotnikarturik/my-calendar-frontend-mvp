@@ -1,12 +1,23 @@
-<content-wrapper>
-  <nav>
-    <a routerLink="/">Calendar</a>
-    <a routerLink="/home">Home</a>
-    <a routerLink="/about">About</a>
-  </nav>
-</content-wrapper>
-<nav>
+<nav class="main-nav">
+  <content-wrapper>
+    <div class="nav-content">
+      <h1 class="app-title">My Calendar</h1>
+      <div class="nav-links">
+        <a routerLink="/home" routerLinkActive="active">Home</a>
+        <a
+          routerLink="/"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          >Calendar</a
+        >
+        <a routerLink="/about" routerLinkActive="active">About</a>
+      </div>
+    </div>
+  </content-wrapper>
+</nav>
+
+<main class="main-content">
   <content-wrapper>
     <router-outlet />
   </content-wrapper>
-</nav>
+</main>
