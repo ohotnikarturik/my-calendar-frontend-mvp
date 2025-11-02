@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { ContentWrapper } from './components/content-wrapper';
+import { ContentWrapper } from './components/content-wrapper/content-wrapper';
 
 @Component({
   selector: 'app-root',

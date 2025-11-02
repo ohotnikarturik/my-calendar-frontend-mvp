@@ -1,0 +1,87 @@
+<section class="event-modal">
+  <h2 mat-dialog-title class="modal-title">{{ dialogTitle() }}</h2>
+
+  <form class="event-form" [formGroup]="eventForm" (ngSubmit)="onSave()">
+    <div mat-dialog-content class="modal-content">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Event title</mat-label>
+        <input
+          matInput
+          formControlName="title"
+          [attr.maxlength]="titleMaxLength"
+          placeholder="Board meeting"
+          autocomplete="off"
+          required
+        />
+        <mat-hint align="end">{{ titleUsage() }}</mat-hint>
+        @if (shouldShowError('title') && hasError('title', 'required')) {
+        <mat-error>Title is required</mat-error>
+        } @if (shouldShowError('title') && hasError('title', 'maxlength')) {
+        <mat-error
+          >Keep the title under {{ titleMaxLength }} characters</mat-error
+        >
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea
+          matInput
+          formControlName="description"
+          rows="3"
+          placeholder="Add notes for this event"
+        ></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Event date</mat-label>
+        <input matInput [matDatepicker]="datePicker" formControlName="date" />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="datePicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker
+          #datePicker
+          panelClass="custom-calendar"
+        ></mat-datepicker>
+        @if (shouldShowError('date') && hasError('date', 'required')) {
+        <mat-error>Date is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Event type</mat-label>
+        <mat-select formControlName="eventType">
+          @for (option of eventTypeOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+        @if (shouldShowError('eventType') && hasError('eventType', 'required'))
+        {
+        <mat-error>Event type is required</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-slide-toggle formControlName="repeatAnnually">
+        Repeat every year
+      </mat-slide-toggle>
+    </div>
+
+    <div mat-dialog-actions class="modal-actions">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      @if (canDelete()) {
+      <button mat-button color="warn" type="button" (click)="onDelete()">
+        Delete
+      </button>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!canSubmit()"
+      >
+        {{ primaryActionLabel() }}
+      </button>
+    </div>
+  </form>
+</section>

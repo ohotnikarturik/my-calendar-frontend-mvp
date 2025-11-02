@@ -19,7 +19,10 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 
 import { CalendarEventsService } from '../../services/calendar-events.service';
-import { EventModal, type EventModalData } from '../../components/event-modal';
+import {
+  EventModal,
+  type EventModalData,
+} from '../../components/event-modal/event-modal';
 
 @Component({
   selector: 'calendar',
@@ -34,12 +37,15 @@ export class Calendar implements AfterViewInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
 
   private cleanupEffect = effect(() => {
-    if (this.calendar) {
-      this.calendar.removeAllEvents();
-      this.eventsSvc.events().forEach((e) => {
-        this.calendar?.addEvent(e);
-      });
+    const events = this.eventsSvc.events();
+    if (!this.calendar) {
+      return;
     }
+
+    this.calendar.removeAllEvents();
+    events.forEach((event) => {
+      this.calendar?.addEvent(event);
+    });
   });
 
   constructor() {
@@ -49,11 +55,17 @@ export class Calendar implements AfterViewInit, OnDestroy {
         id: '1',
         title: 'All Day Event',
         start: new Date().toISOString().substring(0, 10),
+        allDay: true,
+        repeatAnnually: true,
+        eventType: 'birthday',
       },
       {
         id: '2',
         title: 'All Day Event - 2',
         start: new Date().toISOString().substring(0, 10),
+        allDay: true,
+        repeatAnnually: false,
+        eventType: 'custom',
       },
     ]);
   }
@@ -76,7 +88,7 @@ export class Calendar implements AfterViewInit, OnDestroy {
       selectable: true,
       dayMaxEvents: true,
       events: this.eventsSvc.events(),
-      
+
       // Event interaction handlers
       select: (info) => this.onDateSelect(info),
       eventClick: (info) => this.onEventClick(info),
@@ -89,7 +101,7 @@ export class Calendar implements AfterViewInit, OnDestroy {
 
   onDateSelect(selectInfo: any): void {
     const dialogRef = this.dialog.open(EventModal, {
-      width: '500px',
+      width: '400px',
       data: {
         date: selectInfo.startStr,
         isEdit: false,
@@ -105,11 +117,13 @@ export class Calendar implements AfterViewInit, OnDestroy {
   }
 
   onEventClick(clickInfo: any): void {
-    const event = this.eventsSvc.events().find(e => e.id === clickInfo.event.id);
+    const event = this.eventsSvc
+      .events()
+      .find((e) => e.id === clickInfo.event.id);
     if (!event) return;
 
     const dialogRef = this.dialog.open(EventModal, {
-      width: '500px',
+      width: '400px',
       data: {
         event: event,
         isEdit: true,
@@ -149,7 +163,7 @@ export class Calendar implements AfterViewInit, OnDestroy {
 
   createNewEvent(): void {
     const dialogRef = this.dialog.open(EventModal, {
-      width: '500px',
+      width: '400px',
       data: {
         isEdit: false,
       } as EventModalData,

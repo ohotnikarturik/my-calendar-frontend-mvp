@@ -1,0 +1,54 @@
+.event-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+.event-form {
+  display: contents;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-block: 1rem;
+  max-height: min(60vh, 480px);
+  overflow-y: auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Keep header visible with subtle shadow indicating scroll */
+.modal-title {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding-block: 1.25rem 1rem;
+  background: var(--mat-sys-surface, var(--mat-app-background, #fff));
+  box-shadow: 0 4px 12px -10px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+mat-slide-toggle {
+  margin-top: 0.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  margin: 0;
+  position: sticky;
+  bottom: 0;
+  background: var(--mat-sys-surface, var(--mat-app-background, #fff));
+  box-shadow: 0 -4px 12px -10px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
