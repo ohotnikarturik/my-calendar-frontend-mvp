@@ -6,5 +6,27 @@
       Create Event
     </button>
   </div>
+
   <div class="calendar-host"></div>
+
+  @if (eventsSvc.loading()) {
+  <div class="loading-overlay">
+    <div class="loading-state">
+      <mat-icon>hourglass_empty</mat-icon>
+      <p>Loading events...</p>
+    </div>
+  </div>
+  } @else if (eventsSvc.events().length === 0) {
+  <div class="empty-overlay">
+    <div class="empty-state">
+      <mat-icon>event_busy</mat-icon>
+      <h2>No events yet</h2>
+      <p>Get started by creating your first event</p>
+      <button mat-raised-button color="primary" (click)="createNewEvent()">
+        <mat-icon>add</mat-icon>
+        Create Your First Event
+      </button>
+    </div>
+  </div>
+  }
 </div>

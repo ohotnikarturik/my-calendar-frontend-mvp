@@ -62,9 +62,70 @@
         }
       </mat-form-field>
 
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Category</mat-label>
+        <mat-select formControlName="category">
+          @for (option of categoryOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Color</mat-label>
+        <mat-select formControlName="color">
+          @for (option of colorOptions; track option.value) {
+          <mat-option [value]="option.value">
+            <span class="color-option">
+              <span
+                class="color-preview"
+                [style.background-color]="option.color"
+              ></span>
+              {{ option.label }}
+            </span>
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
       <mat-slide-toggle formControlName="repeatAnnually">
         Repeat every year
       </mat-slide-toggle>
+
+      <div class="reminder-section">
+        <mat-slide-toggle formControlName="reminderEnabled">
+          Enable reminders
+        </mat-slide-toggle>
+
+        @if (eventForm.get('reminderEnabled')?.value) {
+        <div class="reminder-days">
+          <label class="reminder-label">Remind me:</label>
+          <div class="reminder-chips">
+            @for (option of reminderDayOptions; track option.value) {
+            <button
+              mat-raised-button
+              type="button"
+              [class.selected]="isReminderDaySelected(option.value)"
+              (click)="toggleReminderDay(option.value)"
+              class="reminder-chip-button"
+            >
+              {{ option.label }}
+            </button>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea
+          matInput
+          formControlName="notes"
+          rows="2"
+          placeholder="Additional notes (optional)"
+        ></textarea>
+      </mat-form-field>
     </div>
 
     <div mat-dialog-actions class="modal-actions">

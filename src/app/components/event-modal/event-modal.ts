@@ -24,11 +24,12 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
 
 import type { DateInput } from '@fullcalendar/core';
-import type { CalendarEvent, EventType } from '../../types/event.type';
+import type { CalendarEvent, EventType, EventCategory } from '../../types/event.type';
 
 export interface EventModalData {
   event?: CalendarEvent;
@@ -42,10 +43,25 @@ interface EventFormValue {
   date: Date;
   repeatAnnually: boolean;
   eventType: EventType;
+  reminderEnabled: boolean;
+  reminderDaysBefore: number[];
+  category: EventCategory;
+  color: string;
+  notes: string;
 }
 
 interface EventTypeOption {
   value: EventType;
+  label: string;
+}
+
+interface EventCategoryOption {
+  value: EventCategory;
+  label: string;
+}
+
+interface ReminderDayOption {
+  value: number;
   label: string;
 }
 @Component({
@@ -62,6 +78,7 @@ interface EventTypeOption {
     MatNativeDateModule,
     MatSlideToggleModule,
     MatSelectModule,
+    MatCheckboxModule,
   ],
   templateUrl: './event-modal.html',
   styleUrl: './event-modal.scss',
@@ -78,12 +95,46 @@ export class EventModalComponent {
   private readonly initialDate = this.computeInitialDate();
   private readonly initialRepeatAnnually = this.computeInitialRepeatAnnually();
   private readonly initialEventType = this.computeInitialEventType();
+  private readonly initialReminderEnabled = this.computeInitialReminderEnabled();
+  private readonly initialReminderDaysBefore = this.computeInitialReminderDaysBefore();
+  private readonly initialCategory = this.computeInitialCategory();
+  private readonly initialColor = this.computeInitialColor();
 
   readonly eventTypeOptions: EventTypeOption[] = [
     { value: 'birthday', label: 'Birthday' },
     { value: 'anniversary', label: 'Anniversary' },
     { value: 'memorial', label: 'Memorial' },
     { value: 'custom', label: 'Custom' },
+  ];
+
+  readonly categoryOptions: EventCategoryOption[] = [
+    { value: 'birthday', label: 'Birthday' },
+    { value: 'anniversary', label: 'Anniversary' },
+    { value: 'holiday', label: 'Holiday' },
+    { value: 'personal', label: 'Personal' },
+    { value: 'work', label: 'Work' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  readonly reminderDayOptions: ReminderDayOption[] = [
+    { value: 30, label: '30 days' },
+    { value: 14, label: '14 days' },
+    { value: 7, label: '7 days' },
+    { value: 3, label: '3 days' },
+    { value: 1, label: '1 day' },
+  ];
+
+  readonly colorOptions: { value: string; label: string; color: string }[] = [
+    { value: '', label: 'Default', color: '#1976d2' },
+    { value: '#e91e63', label: 'Pink', color: '#e91e63' },
+    { value: '#9c27b0', label: 'Purple', color: '#9c27b0' },
+    { value: '#673ab7', label: 'Deep Purple', color: '#673ab7' },
+    { value: '#3f51b5', label: 'Indigo', color: '#3f51b5' },
+    { value: '#2196f3', label: 'Blue', color: '#2196f3' },
+    { value: '#00bcd4', label: 'Cyan', color: '#00bcd4' },
+    { value: '#4caf50', label: 'Green', color: '#4caf50' },
+    { value: '#ff9800', label: 'Orange', color: '#ff9800' },
+    { value: '#f44336', label: 'Red', color: '#f44336' },
   ];
 
   readonly eventForm = this.fb.group({
@@ -95,6 +146,11 @@ export class EventModalComponent {
     date: [this.initialDate, [Validators.required]],
     repeatAnnually: [this.initialRepeatAnnually],
     eventType: [this.initialEventType, [Validators.required]],
+    reminderEnabled: [this.initialReminderEnabled],
+    reminderDaysBefore: [this.initialReminderDaysBefore],
+    category: [this.initialCategory],
+    color: [this.initialColor],
+    notes: [this.modalData?.event?.notes ?? ''],
   });
 
   private readonly initialFormState =
@@ -179,6 +235,11 @@ export class EventModalComponent {
       start: this.toDateOnlyIso(formValue.date),
       repeatAnnually: formValue.repeatAnnually,
       eventType: formValue.eventType,
+      reminderEnabled: formValue.reminderEnabled,
+      reminderDaysBefore: formValue.reminderEnabled ? formValue.reminderDaysBefore : undefined,
+      category: formValue.category,
+      color: formValue.color || undefined,
+      notes: formValue.notes.trim() || undefined,
       createdAt: this.modalData?.event?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -225,6 +286,41 @@ export class EventModalComponent {
 
   private computeInitialEventType(): EventType {
     return this.modalData?.event?.eventType ?? 'custom';
+  }
+
+  private computeInitialReminderEnabled(): boolean {
+    return this.modalData?.event?.reminderEnabled ?? false;
+  }
+
+  private computeInitialReminderDaysBefore(): number[] {
+    return this.modalData?.event?.reminderDaysBefore ?? [];
+  }
+
+  private computeInitialCategory(): EventCategory {
+    return this.modalData?.event?.category ?? 'other';
+  }
+
+  private computeInitialColor(): string {
+    return this.modalData?.event?.color ?? '';
+  }
+
+  toggleReminderDay(day: number): void {
+    const current = this.eventForm.get('reminderDaysBefore')?.value ?? [];
+    const index = current.indexOf(day);
+    if (index >= 0) {
+      this.eventForm.patchValue({
+        reminderDaysBefore: current.filter((d) => d !== day),
+      });
+    } else {
+      this.eventForm.patchValue({
+        reminderDaysBefore: [...current, day].sort((a, b) => b - a),
+      });
+    }
+  }
+
+  isReminderDaySelected(day: number): boolean {
+    const current = this.eventForm.get('reminderDaysBefore')?.value ?? [];
+    return current.includes(day);
   }
 
   private toDateOnlyIso(date: Date): string {

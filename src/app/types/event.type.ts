@@ -7,6 +7,13 @@ export interface CalendarEvent extends EventInput {
   updatedAt?: string;
   repeatAnnually?: boolean;
   eventType?: EventType;
+  reminderDaysBefore?: number[];
+  reminderEnabled?: boolean;
+  category?: EventCategory;
+  color?: string;
+  notes?: string;
 }
 
 export type EventType = 'birthday' | 'anniversary' | 'memorial' | 'custom';
+
+export type EventCategory = 'birthday' | 'anniversary' | 'holiday' | 'personal' | 'work' | 'other';

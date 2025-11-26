@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  position: relative;
 }
 
 .calendar-header {
@@ -27,34 +28,80 @@
   gap: 0.5rem;
 }
 
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.loading-overlay,
+.empty-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--mat-sys-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-state mat-icon,
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h2 {
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+}
+
+.empty-state p {
+  margin: 0.5rem 0 1.5rem;
+  font-size: 1rem;
+}
+
 .calendar-host {
   flex: 1 1 auto;
   height: 100%;
   overflow: hidden;
-  
+
   // FullCalendar styling improvements
   :global(.fc) {
     font-family: var(--mat-sys-body-medium);
   }
-  
+
   :global(.fc-toolbar-title) {
     font-size: 1.5rem !important;
     font-weight: 500 !important;
     color: var(--mat-sys-on-surface) !important;
   }
-  
+
   :global(.fc-button-primary) {
     background-color: var(--mat-sys-primary) !important;
     border-color: var(--mat-sys-primary) !important;
     color: var(--mat-sys-on-primary) !important;
   }
-  
+
   :global(.fc-button-primary:hover) {
     background-color: var(--mat-sys-primary-container) !important;
     border-color: var(--mat-sys-primary-container) !important;
     color: var(--mat-sys-on-primary-container) !important;
   }
-  
+
   :global(.fc-event) {
     border-radius: 4px !important;
     border: none !important;
@@ -62,16 +109,16 @@
     color: var(--mat-sys-on-primary) !important;
     cursor: pointer !important;
   }
-  
+
   :global(.fc-event:hover) {
     background-color: var(--mat-sys-primary-container) !important;
     color: var(--mat-sys-on-primary-container) !important;
   }
-  
+
   :global(.fc-daygrid-day:hover) {
     background-color: var(--mat-sys-surface-variant) !important;
   }
-  
+
   :global(.fc-day-today) {
     background-color: var(--mat-sys-primary-container) !important;
     opacity: 0.3;
@@ -84,17 +131,17 @@
     gap: 1rem;
     text-align: center;
   }
-  
+
   .calendar-header h1 {
     font-size: 1.5rem;
   }
-  
+
   .calendar-host {
     :global(.fc-toolbar) {
       flex-direction: column !important;
       gap: 0.5rem !important;
     }
-    
+
     :global(.fc-toolbar-chunk) {
       display: flex !important;
       justify-content: center !important;

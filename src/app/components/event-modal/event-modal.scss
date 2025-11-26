@@ -16,7 +16,7 @@
   flex-direction: column;
   gap: 1.5rem;
   padding-block: 1rem;
-  max-height: min(60vh, 480px);
+  max-height: min(70vh, 600px);
   overflow-y: auto;
 }
 
@@ -37,6 +37,64 @@
 
 mat-slide-toggle {
   margin-top: 0.5rem;
+}
+
+.reminder-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 4px;
+  background: var(--mat-sys-surface-container-lowest);
+}
+
+.reminder-days {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reminder-label {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 500;
+}
+
+.reminder-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reminder-chip-button {
+  min-width: auto;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.reminder-chip-button.selected {
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+.reminder-chip-button:not(.selected) {
+  background-color: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.color-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-preview {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--mat-sys-outline-variant);
+  display: inline-block;
 }
 
 .modal-actions {
