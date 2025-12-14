@@ -5,13 +5,27 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 
-
 html {
   @include mat.theme(
     (
       color: (
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+/* Dark theme support using Angular Material's dark mode */
+.theme-dark {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+        theme-type: dark,
       ),
       typography: Roboto,
       density: 0,
@@ -45,4 +59,36 @@ body {
 }
 body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Material Dialog overflow fix - prevent horizontal scroll */
+.mat-mdc-dialog-surface {
+  overflow-x: hidden !important;
+}
+
+.mat-mdc-dialog-content {
+  overflow-x: hidden !important;
+}
+
+/* Ensure form fields don't overflow their containers */
+.mat-mdc-form-field {
+  max-width: 100%;
+}
+
+textarea.mat-mdc-input-element {
+  resize: vertical;
+}
+
+/* Fix icon sizing inside buttons - ensure proper alignment */
+button.mat-mdc-raised-button,
+button.mat-mdc-button,
+button.mat-mdc-outlined-button,
+button.mat-mdc-unelevated-button {
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    margin-right: 4px;
+  }
 }

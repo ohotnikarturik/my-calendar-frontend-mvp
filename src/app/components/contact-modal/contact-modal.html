@@ -1,0 +1,125 @@
+<section class="contact-modal">
+  <h2 mat-dialog-title class="modal-title">{{ dialogTitle() }}</h2>
+
+  <form class="contact-form" [formGroup]="contactForm" (ngSubmit)="onSave()">
+    <div mat-dialog-content class="modal-content">
+      <!-- Name Preview -->
+      <div class="name-preview">
+        <span class="preview-label">Contact:</span>
+        <span class="preview-name">{{ fullNamePreview() }}</span>
+      </div>
+
+      <!-- First Name Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>First Name</mat-label>
+        <input
+          matInput
+          formControlName="firstName"
+          [attr.maxlength]="nameMaxLength"
+          placeholder="John"
+          autocomplete="given-name"
+          required
+        />
+        @if (shouldShowError('firstName') && hasError('firstName', 'required'))
+        {
+        <mat-error>First name is required</mat-error>
+        } @if (shouldShowError('firstName') && hasError('firstName',
+        'maxlength')) {
+        <mat-error
+          >Keep the name under {{ nameMaxLength }} characters</mat-error
+        >
+        }
+      </mat-form-field>
+
+      <!-- Last Name Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Last Name</mat-label>
+        <input
+          matInput
+          formControlName="lastName"
+          [attr.maxlength]="nameMaxLength"
+          placeholder="Doe"
+          autocomplete="family-name"
+          required
+        />
+        @if (shouldShowError('lastName') && hasError('lastName', 'required')) {
+        <mat-error>Last name is required</mat-error>
+        } @if (shouldShowError('lastName') && hasError('lastName', 'maxlength'))
+        {
+        <mat-error
+          >Keep the name under {{ nameMaxLength }} characters</mat-error
+        >
+        }
+      </mat-form-field>
+
+      <!-- Email Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          formControlName="email"
+          type="email"
+          [attr.maxlength]="emailMaxLength"
+          placeholder="john.doe@example.com"
+          autocomplete="email"
+        />
+        @if (shouldShowError('email') && hasError('email', 'email')) {
+        <mat-error>Please enter a valid email address</mat-error>
+        } @if (shouldShowError('email') && hasError('email', 'maxlength')) {
+        <mat-error>Email is too long</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Phone Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Phone</mat-label>
+        <input
+          matInput
+          formControlName="phone"
+          type="tel"
+          [attr.maxlength]="phoneMaxLength"
+          placeholder="+1 234 567 8900"
+          autocomplete="tel"
+        />
+        @if (shouldShowError('phone') && hasError('phone', 'maxlength')) {
+        <mat-error>Phone number is too long</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Notes Field -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea
+          matInput
+          formControlName="notes"
+          rows="3"
+          [attr.maxlength]="notesMaxLength"
+          placeholder="Add any additional notes about this contact"
+        ></textarea>
+        @if (shouldShowError('notes') && hasError('notes', 'maxlength')) {
+        <mat-error
+          >Notes are too long (max {{ notesMaxLength }} characters)</mat-error
+        >
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Dialog Actions -->
+    <div mat-dialog-actions class="modal-actions">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      @if (canDelete()) {
+      <button mat-button color="warn" type="button" (click)="onDelete()">
+        Delete
+      </button>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!canSubmit()"
+      >
+        {{ primaryActionLabel() }}
+      </button>
+    </div>
+  </form>
+</section>

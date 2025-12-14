@@ -1,37 +1,104 @@
-# Build Plan
+# My Calendar - Project Plan
 
-## ✅ Completed (MVP Phase 1)
+_MVP personal calendar app for managing important dates with reminders_
 
-1. ✅ **Lock choices**: Supabase backend, Angular Material UI, English-only now (i18n later), OpenAI for AI, PWA later.
-2. ✅ **Review current implementation**: Material + FullCalendar + events with routes/layout setup.
-3. ✅ **Basic domain models**: CalendarEvent type with eventType, category, reminders, recurrence support.
-4. ✅ **Events CRUD**: Full CRUD operations with modal editing (`EventModal` component).
-5. ✅ **Calendar integration**: FullCalendar with multiple views (month, week, day, list), drag/drop, resize.
-6. ✅ **Upcoming view**: Next 7/30/90 days with search/filter by category and name (`Upcoming` component).
-7. ✅ **Local persistence**: IndexedDB via Dexie (`StorageService`) for offline-first data.
-8. ✅ **Reminders MVP**: In-app reminders service (`RemindersService`) with "Today" notifications, reminder days before calculation.
-9. ✅ **Navigation & routing**: Home, Calendar, Upcoming, About pages with Material navigation.
-10. ✅ **Event features**: Recurring events (repeatAnnually), event types (birthday/anniversary/memorial/custom), categories, colors, notes.
+## Current Status: Phase 3 Complete ✅
 
-## 🚧 Next Steps (MVP Phase 2)
+**App is functional** with local-first storage, Supabase auth/sync ready, and automatic background sync.
 
-11. **Define extended domain models**: User, Contact, Occasion (birthday/anniversary/custom), Reminder, Template (TS types).
-12. **Add Contacts CRUD**: List/create/edit/delete contacts with Material components.
-13. **Add Occasions CRUD**: Link occasions to contacts; support yearly recurrence and optional year-less birthdays.
-14. **Extend Calendar**: Render occasions (recurring) alongside manual events; maintain drag/drop/edit functionality.
-15. **Settings page**: Timezone, reminder lead times, tones, and data export/import (JSON backup).
-16. **Code improvements**: Refactor duplicate date parsing logic, improve error handling, add loading states, enhance accessibility.
+---
 
-## 🔮 Future Enhancements (Phase 3+)
+## Completed Phases
 
-17. **Supabase setup**: Schema (users, contacts, occasions, reminders, templates), RLS policies, and seed data.
-18. **Supabase Auth**: Email + Google authentication; persist session and guard routes.
-19. **Sync layer**: IndexedDB ↔ Supabase with conflict rules and optimistic updates.
-20. **AI features**: Serverless endpoint calling OpenAI to generate congratulations and gift ideas; stream to UI.
-21. **AI UI integration**: Quick-generate buttons in event/occasion detail with copy/share functionality.
-22. **Enhanced reminders**: Push notifications and email scheduling (beyond in-app reminders).
-23. **Internationalization**: Add @angular/localize, extract messages; keep English default for now.
-24. **PWA**: Add @angular/pwa, offline caching, install prompt; plan push (FCM) in v2.
-25. **Google Calendar sync**: Optional v2 feature - read/write birthdays via OAuth; import contacts.
-26. **Holiday calendars**: Option to populate calendar with events/holidays (Ukraine, Finland, etc.).
-27. **Polish**: Onboarding flow, improved empty states, analytics/error reporting, performance optimization passes.
+### ✅ Phase 1: Core Calendar MVP
+
+- FullCalendar integration with month/week/day views
+- Event CRUD (create, read, update, delete)
+- Event modal with date/time pickers
+- IndexedDB persistence via Dexie
+- Responsive Material Design UI
+
+### ✅ Phase 2: Contacts & Occasions
+
+- Contacts management (name, birthday, notes)
+- Occasions system (linked to contacts or standalone)
+- Reminder system (upcoming events view)
+- Date utilities for birthday calculations
+
+### ✅ Phase 3: Supabase Integration
+
+- Email/password and Google OAuth authentication
+- Cloud sync with PostgreSQL backend
+- Automatic background sync (debounced, periodic, on-reconnect)
+- Offline grace period for token expiration
+- Auth guards on all protected routes
+- Settings page with sync preferences
+
+---
+
+## Remaining Work
+
+### Phase 4: Polish & Accessibility
+
+**Goal**: Production-ready UX with accessibility compliance
+
+Tasks:
+
+- [ ] Add loading spinners during async operations
+- [ ] Implement error toast notifications (Material Snackbar)
+- [ ] Add keyboard navigation (Tab, Enter, Escape)
+- [ ] Add ARIA labels to interactive elements
+- [ ] Implement skip links for screen readers
+- [ ] Add focus indicators for keyboard users
+- [ ] Test with VoiceOver/screen readers
+- [ ] Add empty state illustrations
+- [ ] Responsive testing on mobile devices
+
+### Phase 5: PWA & Notifications
+
+**Goal**: Installable app with push reminders
+
+Tasks:
+
+- [ ] Add `@angular/pwa` package
+- [ ] Configure service worker caching
+- [ ] Add install prompt UI
+- [ ] Implement push notifications (FCM)
+- [ ] Background sync for offline changes
+- [ ] App icons and splash screens
+
+### Phase 6: AI Features (Optional)
+
+**Goal**: Smart suggestions and natural language input
+
+Tasks:
+
+- [ ] Natural language event parsing ("Birthday party next Friday at 3pm")
+- [ ] Smart reminder suggestions based on event type
+- [ ] Gift/activity suggestions for occasions
+
+---
+
+## Quick Reference
+
+| Command         | Description                       |
+| --------------- | --------------------------------- |
+| `npm start`     | Start dev server (localhost:4200) |
+| `npm test`      | Run unit tests                    |
+| `npm run lint`  | Run ESLint                        |
+| `npm run build` | Production build                  |
+
+### Dev Mode Toggle
+
+In `src/app/services/supabase.service.ts`:
+
+```typescript
+private readonly DEV_MODE_BYPASS_AUTH = true;  // Set false for production
+```
+
+### Supabase Setup Required
+
+1. Create project at supabase.com
+2. Copy URL and anon key to `src/environments/environment.ts`
+3. Run SQL migrations (see AGENTS.md)
+4. Set `DEV_MODE_BYPASS_AUTH = false`

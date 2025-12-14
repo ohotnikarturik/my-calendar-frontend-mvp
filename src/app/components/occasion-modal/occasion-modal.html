@@ -1,0 +1,155 @@
+<section class="occasion-modal">
+  <h2 mat-dialog-title class="modal-title">{{ dialogTitle() }}</h2>
+
+  <form class="occasion-form" [formGroup]="occasionForm" (ngSubmit)="onSave()">
+    <div mat-dialog-content class="modal-content">
+      <!-- Contact Selector -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Contact</mat-label>
+        <mat-select formControlName="contactId" required>
+          @for (contact of contacts(); track contact.id) {
+          <mat-option [value]="contact.id">
+            {{ getContactName(contact) }}
+          </mat-option>
+          }
+        </mat-select>
+        @if (shouldShowError('contactId') && hasError('contactId', 'required'))
+        {
+        <mat-error>Please select a contact</mat-error>
+        } @if (contacts().length === 0) {
+        <mat-hint>No contacts available. Add a contact first.</mat-hint>
+        }
+      </mat-form-field>
+
+      <!-- Occasion Type -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Occasion Type</mat-label>
+        <mat-select formControlName="type" required>
+          @for (option of occasionTypeOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Title -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input
+          matInput
+          formControlName="title"
+          placeholder="e.g., John's Birthday"
+          maxlength="120"
+          required
+        />
+        @if (shouldShowError('title') && hasError('title', 'required')) {
+        <mat-error>Title is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Date -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="datePicker"
+          formControlName="date"
+          required
+        />
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="datePicker"
+        ></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+        @if (shouldShowError('date') && hasError('date', 'required')) {
+        <mat-error>Date is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Year toggle and input -->
+      <div class="year-section">
+        <mat-slide-toggle formControlName="hasYear">
+          Include birth/start year
+        </mat-slide-toggle>
+        <mat-hint class="year-hint">
+          Enable to track age or years. Leave off for year-less dates.
+        </mat-hint>
+
+        @if (showYearField()) {
+        <mat-form-field appearance="outline" class="year-field">
+          <mat-label>Year</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="year"
+            placeholder="1990"
+            min="1900"
+            [max]="2100"
+          />
+        </mat-form-field>
+        }
+      </div>
+
+      <!-- Repeat Annually -->
+      <mat-slide-toggle formControlName="repeatAnnually">
+        Repeat every year
+      </mat-slide-toggle>
+
+      <!-- Reminder Section -->
+      <div class="reminder-section">
+        <mat-slide-toggle formControlName="reminderEnabled">
+          Enable reminders
+        </mat-slide-toggle>
+
+        @if (occasionForm.get('reminderEnabled')?.value) {
+        <div class="reminder-days">
+          <span class="reminder-label">Remind me:</span>
+          <div class="reminder-chips">
+            @for (option of reminderDayOptions; track option.value) {
+            <button
+              mat-raised-button
+              type="button"
+              [class.selected]="isReminderDaySelected(option.value)"
+              (click)="toggleReminderDay(option.value)"
+              class="reminder-chip-button"
+            >
+              {{ option.label }}
+            </button>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Notes -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea
+          matInput
+          formControlName="notes"
+          rows="2"
+          placeholder="Gift ideas, celebration plans, etc."
+        ></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- Dialog Actions -->
+    <div mat-dialog-actions class="modal-actions">
+      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      @if (canDelete()) {
+      <button mat-button color="warn" type="button" (click)="onDelete()">
+        Delete
+      </button>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!canSubmit()"
+      >
+        {{ primaryActionLabel() }}
+      </button>
+    </div>
+  </form>
+</section>

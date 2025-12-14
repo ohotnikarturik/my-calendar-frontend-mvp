@@ -28,8 +28,12 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
 
-import type { DateInput } from '@fullcalendar/core';
-import type { CalendarEvent, EventType, EventCategory } from '../../types/event.type';
+import type {
+  CalendarEvent,
+  EventType,
+  EventCategory,
+} from '../../types/event.type';
+import { DateUtilsService } from '../../services/date-utils.service';
 
 export interface EventModalData {
   event?: CalendarEvent;
@@ -88,6 +92,7 @@ export class EventModalComponent {
   private readonly dialogRef = inject(MatDialogRef<EventModalComponent>);
   private readonly modalData = inject(MAT_DIALOG_DATA) as EventModalData;
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly dateUtils = inject(DateUtilsService);
   private readonly hasSubmitted = signal(false);
 
   readonly titleMaxLength = 120;
@@ -95,8 +100,10 @@ export class EventModalComponent {
   private readonly initialDate = this.computeInitialDate();
   private readonly initialRepeatAnnually = this.computeInitialRepeatAnnually();
   private readonly initialEventType = this.computeInitialEventType();
-  private readonly initialReminderEnabled = this.computeInitialReminderEnabled();
-  private readonly initialReminderDaysBefore = this.computeInitialReminderDaysBefore();
+  private readonly initialReminderEnabled =
+    this.computeInitialReminderEnabled();
+  private readonly initialReminderDaysBefore =
+    this.computeInitialReminderDaysBefore();
   private readonly initialCategory = this.computeInitialCategory();
   private readonly initialColor = this.computeInitialColor();
 
@@ -232,11 +239,14 @@ export class EventModalComponent {
       title: formValue.title.trim(),
       description: formValue.description.trim() || undefined,
       allDay: true,
-      start: this.toDateOnlyIso(formValue.date),
+      // Use DateUtilsService for consistent date formatting (YYYY-MM-DD)
+      start: this.dateUtils.toDateString(formValue.date),
       repeatAnnually: formValue.repeatAnnually,
       eventType: formValue.eventType,
       reminderEnabled: formValue.reminderEnabled,
-      reminderDaysBefore: formValue.reminderEnabled ? formValue.reminderDaysBefore : undefined,
+      reminderDaysBefore: formValue.reminderEnabled
+        ? formValue.reminderDaysBefore
+        : undefined,
       category: formValue.category,
       color: formValue.color || undefined,
       notes: formValue.notes.trim() || undefined,
@@ -266,14 +276,16 @@ export class EventModalComponent {
 
   private computeInitialDate(): Date {
     if (this.modalData?.event?.start) {
-      return this.asDate(this.modalData.event.start);
+      // Use DateUtilsService for consistent date parsing across the app
+      return this.dateUtils.parseDateInput(this.modalData.event.start);
     }
 
     if (this.modalData?.date) {
-      return this.asDate(this.modalData.date);
+      return this.dateUtils.parseDateInput(this.modalData.date);
     }
 
-    return this.startOfDay(new Date());
+    // Use DateUtilsService for consistent date handling across the app
+    return this.dateUtils.startOfDay(new Date());
   }
 
   private computeInitialRepeatAnnually(): boolean {
@@ -321,38 +333,6 @@ export class EventModalComponent {
   isReminderDaySelected(day: number): boolean {
     const current = this.eventForm.get('reminderDaysBefore')?.value ?? [];
     return current.includes(day);
-  }
-
-  private toDateOnlyIso(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  private asDate(value: DateInput): Date {
-    if (value instanceof Date) {
-      return new Date(value.getTime());
-    }
-
-    if (Array.isArray(value)) {
-      const [year, month = 0, day = 1] = value;
-      return new Date(year, month, day);
-    }
-
-    const isoValue = typeof value === 'string' ? value : String(value);
-    if (isoValue.length === 10) {
-      const [year, month, day] = isoValue.split('-').map(Number);
-      return new Date(year, (month ?? 1) - 1, day ?? 1);
-    }
-
-    return new Date(isoValue);
-  }
-
-  private startOfDay(date: Date): Date {
-    const result = new Date(date);
-    result.setHours(0, 0, 0, 0);
-    return result;
   }
 }
 

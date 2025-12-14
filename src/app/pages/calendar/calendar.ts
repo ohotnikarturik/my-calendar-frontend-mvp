@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -23,6 +23,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 
 import { CalendarEventsService } from '../../services/calendar-events.service';
+import { OccasionsService } from '../../services/occasions.service';
 import { RemindersService } from '../../services/reminders.service';
 import {
   EventModal,
@@ -32,20 +33,22 @@ import {
 @Component({
   selector: 'calendar',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule],
   templateUrl: './calendar.html',
   styleUrls: ['./calendar.scss'],
 })
 export class Calendar implements AfterViewInit, OnDestroy {
   private calendar?: FullCalendar;
   readonly eventsSvc = inject(CalendarEventsService);
+  private readonly occasionsSvc = inject(OccasionsService);
   private readonly remindersSvc = inject(RemindersService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
   private cleanupEffect = effect(() => {
-    // Track events to trigger effect when they change
+    // Track both events and occasions to trigger effect when either changes
     this.eventsSvc.events();
+    this.occasionsSvc.occasions();
     if (!this.calendar) {
       // If calendar not initialized yet, try to initialize it
       setTimeout(() => {
@@ -144,14 +147,36 @@ export class Calendar implements AfterViewInit, OnDestroy {
   private updateCalendarEvents(): void {
     if (!this.calendar) return;
 
+    // Get regular calendar events
     const events = this.eventsSvc.events();
+
+    // Get occasions converted to calendar events
+    // Learning note: Occasions are converted to calendar event format
+    // so FullCalendar can display them alongside regular events
+    const occasionEvents = this.occasionsSvc.toCalendarEvents();
+
     this.calendar.removeAllEvents();
+
+    // Add regular events
     events.forEach((event) => {
       const categoryOrType = event.category || event.eventType || 'custom';
       const fcEvent = {
         ...event,
         backgroundColor: event.color || this.getDefaultColor(categoryOrType),
         borderColor: event.color || this.getDefaultColor(categoryOrType),
+      };
+      this.calendar?.addEvent(fcEvent);
+    });
+
+    // Add occasion events with distinct styling
+    occasionEvents.forEach((event) => {
+      const categoryOrType = event.category || event.eventType || 'custom';
+      const fcEvent = {
+        ...event,
+        backgroundColor: event.color || this.getDefaultColor(categoryOrType),
+        borderColor: event.color || this.getDefaultColor(categoryOrType),
+        // Mark as non-editable since occasions are managed separately
+        editable: false,
       };
       this.calendar?.addEvent(fcEvent);
     });
@@ -168,7 +193,13 @@ export class Calendar implements AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(async (result) => {
       if (result?.action === 'save') {
-        await this.eventsSvc.add(result.event);
+        try {
+          await this.eventsSvc.add(result.event);
+          this.showMessage('Event created successfully');
+        } catch (error) {
+          console.error('Failed to create event:', error);
+          this.showMessage('Failed to create event. Please try again.', true);
+        }
       }
       this.calendar?.unselect();
     });
@@ -190,9 +221,21 @@ export class Calendar implements AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(async (result) => {
       if (result?.action === 'save') {
-        await this.eventsSvc.update(result.event.id, result.event);
+        try {
+          await this.eventsSvc.update(result.event.id, result.event);
+          this.showMessage('Event updated successfully');
+        } catch (error) {
+          console.error('Failed to update event:', error);
+          this.showMessage('Failed to update event. Please try again.', true);
+        }
       } else if (result?.action === 'delete') {
-        await this.eventsSvc.remove(result.eventId);
+        try {
+          await this.eventsSvc.remove(result.eventId);
+          this.showMessage('Event deleted');
+        } catch (error) {
+          console.error('Failed to delete event:', error);
+          this.showMessage('Failed to delete event. Please try again.', true);
+        }
       }
     });
   }
@@ -208,8 +251,14 @@ export class Calendar implements AfterViewInit, OnDestroy {
         end: newEnd?.toISOString(),
         updatedAt: new Date().toISOString(),
       })
+      .then(() => {
+        this.showMessage('Event moved');
+      })
       .catch((error) => {
         console.error('Failed to update event:', error);
+        this.showMessage('Failed to move event. Please try again.', true);
+        // Revert the drag
+        dropInfo.revert();
       });
   }
 
@@ -224,8 +273,12 @@ export class Calendar implements AfterViewInit, OnDestroy {
         end: newEnd?.toISOString(),
         updatedAt: new Date().toISOString(),
       })
+      .then(() => {
+        this.showMessage('Event resized');
+      })
       .catch((error) => {
-        console.error('Failed to update event:', error);
+        console.error('Failed to resize event:', error);
+        this.showMessage('Failed to resize event. Please try again.', true);
       });
   }
 
@@ -239,7 +292,13 @@ export class Calendar implements AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe(async (result) => {
       if (result?.action === 'save') {
-        await this.eventsSvc.add(result.event);
+        try {
+          await this.eventsSvc.add(result.event);
+          this.showMessage('Event created successfully');
+        } catch (error) {
+          console.error('Failed to create event:', error);
+          this.showMessage('Failed to create event. Please try again.', true);
+        }
       }
     });
   }
@@ -247,6 +306,17 @@ export class Calendar implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.cleanupEffect?.destroy();
     this.calendar?.destroy();
+  }
+
+  /**
+   * Show a snackbar message to the user
+   * Learning note: Using a helper method for consistent snackbar styling
+   */
+  private showMessage(message: string, isError = false): void {
+    this.snackBar.open(message, 'Dismiss', {
+      duration: isError ? 5000 : 3000,
+      panelClass: isError ? ['error-snackbar'] : [],
+    });
   }
 
   private getDefaultColor(category: string): string {

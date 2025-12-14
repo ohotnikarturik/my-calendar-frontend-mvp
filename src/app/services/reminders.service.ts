@@ -1,7 +1,7 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
-import type { DateInput } from '@fullcalendar/core';
 import type { CalendarEvent } from '../types/event.type';
 import { CalendarEventsService } from './calendar-events.service';
+import { DateUtilsService } from './date-utils.service';
 
 export interface Reminder {
   eventId: string;
@@ -11,14 +11,22 @@ export interface Reminder {
   reminderDay: number;
 }
 
+/**
+ * Reminders Service
+ *
+ * Learning note: This service computes reminders based on events and their
+ * reminder settings. It uses computed signals to automatically recalculate
+ * when the events change.
+ */
 @Injectable({ providedIn: 'root' })
 export class RemindersService {
   private readonly eventsSvc = inject(CalendarEventsService);
+  private readonly dateUtils = inject(DateUtilsService);
   private readonly _shownReminders = signal<Set<string>>(new Set());
 
   readonly reminders = computed(() => {
     const events = this.eventsSvc.events();
-    const today = this.startOfDay(new Date());
+    const today = this.dateUtils.today();
     const reminders: Reminder[] = [];
 
     for (const event of events) {
@@ -26,8 +34,10 @@ export class RemindersService {
         continue;
       }
 
-      const eventDate = this.parseDate(event.start);
-      if (!eventDate) continue;
+      // Use DateUtilsService for consistent date parsing
+      const eventDate = this.dateUtils.startOfDay(
+        this.dateUtils.parseDateInput(event.start as string | Date | undefined)
+      );
 
       // Handle recurring events
       if (event.repeatAnnually) {
@@ -42,12 +52,7 @@ export class RemindersService {
           currentYearDate = new Date(currentYear + 1, eventMonth, eventDay);
         }
 
-        this.addRemindersForEvent(
-          event,
-          currentYearDate,
-          today,
-          reminders
-        );
+        this.addRemindersForEvent(event, currentYearDate, today, reminders);
       } else {
         // Non-recurring event
         if (eventDate >= today) {
@@ -86,11 +91,9 @@ export class RemindersService {
   }
 
   getRemindersForDate(date: Date): Reminder[] {
-    const targetDate = this.startOfDay(date);
-    const today = this.startOfDay(new Date());
-    const daysDiff = Math.floor(
-      (targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const targetDate = this.dateUtils.startOfDay(date);
+    const today = this.dateUtils.today();
+    const daysDiff = this.dateUtils.daysBetween(today, targetDate);
 
     return this.reminders().filter((r) => r.daysUntil === daysDiff);
   }
@@ -101,9 +104,7 @@ export class RemindersService {
     today: Date,
     reminders: Reminder[]
   ): void {
-    const daysUntil = Math.floor(
-      (eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
+    const daysUntil = this.dateUtils.daysBetween(today, eventDate);
 
     for (const reminderDay of event.reminderDaysBefore || []) {
       const reminderDate = new Date(eventDate);
@@ -113,7 +114,8 @@ export class RemindersService {
         const reminder: Reminder = {
           eventId: event.id,
           eventTitle: event.title || 'Untitled Event',
-          eventDate: this.formatDate(eventDate),
+          // Use DateUtilsService for consistent date formatting
+          eventDate: this.dateUtils.toDateString(eventDate),
           daysUntil: daysUntil,
           reminderDay: reminderDay,
         };
@@ -121,31 +123,6 @@ export class RemindersService {
         reminders.push(reminder);
       }
     }
-  }
-
-  private parseDate(date: DateInput | undefined): Date | null {
-    if (!date) return null;
-
-    if (date instanceof Date) {
-      return this.startOfDay(date);
-    }
-
-    if (typeof date === 'string') {
-      const parsed = new Date(date);
-      return isNaN(parsed.getTime()) ? null : this.startOfDay(parsed);
-    }
-
-    return null;
-  }
-
-  private startOfDay(date: Date): Date {
-    const result = new Date(date);
-    result.setHours(0, 0, 0, 0);
-    return result;
-  }
-
-  private formatDate(date: Date): string {
-    return date.toISOString().substring(0, 10);
   }
 
   private getReminderKey(reminder: Reminder): string {
@@ -173,4 +150,3 @@ export class RemindersService {
     }
   }
 }
-

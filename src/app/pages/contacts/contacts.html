@@ -1,0 +1,117 @@
+<div class="contacts-container">
+  <!-- Header with title and controls -->
+  <div class="contacts-header">
+    <h1>Contacts</h1>
+    <div class="header-controls">
+      <!-- Search input -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search contacts</mat-label>
+        <input
+          matInput
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+          placeholder="Search by name..."
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Add contact button -->
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="openContactModal()"
+        matTooltip="Add a new contact"
+      >
+        <mat-icon>person_add</mat-icon>
+        Add Contact
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (contactsService.loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading contacts...</p>
+  </div>
+  } @else if (filteredContacts().length === 0) {
+  <!-- Empty state -->
+  <div class="empty-state">
+    @if (searchQuery()) {
+    <!-- No search results -->
+    <mat-icon>search_off</mat-icon>
+    <p>No contacts found matching "{{ searchQuery() }}"</p>
+    <p class="empty-subtitle">Try a different search term</p>
+    <button mat-button (click)="searchQuery.set('')">
+      <mat-icon>clear</mat-icon>
+      Clear Search
+    </button>
+    } @else {
+    <!-- No contacts at all -->
+    <mat-icon>person_add</mat-icon>
+    <p>No contacts yet</p>
+    <p class="empty-subtitle">Add your first contact to get started</p>
+    <button mat-raised-button color="primary" (click)="openContactModal()">
+      <mat-icon>add</mat-icon>
+      Add Your First Contact
+    </button>
+    }
+  </div>
+  } @else {
+  <!-- Contact count -->
+  <div class="contacts-count">
+    <span
+      >{{ filteredContacts().length }} contact{{
+        filteredContacts().length === 1 ? "" : "s"
+      }}</span
+    >
+    @if (searchQuery()) {
+    <span class="search-info">matching "{{ searchQuery() }}"</span>
+    }
+  </div>
+
+  <!-- Contacts grid -->
+  <div class="contacts-grid">
+    @for (contact of filteredContacts(); track contact.id) {
+    <mat-card class="contact-card" (click)="openContactModal(contact)">
+      <!-- Contact avatar with initials -->
+      <div class="contact-avatar">
+        {{ getInitials(contact) }}
+      </div>
+
+      <mat-card-content>
+        <h3 class="contact-name">
+          {{ contact.firstName }} {{ contact.lastName }}
+        </h3>
+
+        @if (contact.email) {
+        <div class="contact-detail">
+          <mat-icon>email</mat-icon>
+          <a
+            [href]="'mailto:' + contact.email"
+            (click)="$event.stopPropagation()"
+          >
+            {{ contact.email }}
+          </a>
+        </div>
+        } @if (contact.phone) {
+        <div class="contact-detail">
+          <mat-icon>phone</mat-icon>
+          <a [href]="'tel:' + contact.phone" (click)="$event.stopPropagation()">
+            {{ contact.phone }}
+          </a>
+        </div>
+        } @if (contact.notes) {
+        <p class="contact-notes">{{ contact.notes }}</p>
+        }
+      </mat-card-content>
+
+      <!-- Edit indicator -->
+      <div class="edit-indicator">
+        <mat-icon>edit</mat-icon>
+      </div>
+    </mat-card>
+    }
+  </div>
+  }
+</div>

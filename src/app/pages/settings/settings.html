@@ -1,0 +1,271 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <h1>Settings</h1>
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="resetToDefaults()"
+      matTooltip="Reset all settings to default values"
+    >
+      <mat-icon>restore</mat-icon>
+      Reset to Defaults
+    </button>
+  </div>
+
+  <!-- General Settings -->
+  <mat-card class="settings-section">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings</mat-icon>
+        General Settings
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Timezone -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Timezone</h3>
+          <p>Your local timezone for date calculations</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Select timezone</mat-label>
+          <mat-select
+            [value]="settingsService.settings().timezone"
+            (selectionChange)="updateTimezone($event.value)"
+          >
+            @for (tz of timezones; track tz.value) {
+            <mat-option [value]="tz.value">
+              {{ tz.label }} ({{ tz.offset }})
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Theme -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Theme</h3>
+          <p>Choose your preferred color scheme</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Theme mode</mat-label>
+          <mat-select
+            [value]="settingsService.settings().theme"
+            (selectionChange)="updateTheme($event.value)"
+          >
+            <mat-option value="light">Light</mat-option>
+            <mat-option value="dark">Dark</mat-option>
+            <mat-option value="auto">Auto (System)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Calendar Start of Week -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Week Starts On</h3>
+          <p>First day of the week in calendar view</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Start of week</mat-label>
+          <mat-select
+            [value]="settingsService.settings().calendarStartOfWeek"
+            (selectionChange)="updateStartOfWeek($event.value)"
+          >
+            <mat-option [value]="0">Sunday</mat-option>
+            <mat-option [value]="1">Monday</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Reminder Settings -->
+  <mat-card class="settings-section">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>notifications</mat-icon>
+        Default Reminder Settings
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="setting-row vertical">
+        <div class="setting-info">
+          <h3>Default Reminder Days</h3>
+          <p>
+            When creating new events, these reminder days will be pre-selected
+          </p>
+        </div>
+        <div class="reminder-options">
+          @for (option of reminderOptions; track option.value) {
+          <mat-checkbox
+            [checked]="isReminderDaySelected(option.value)"
+            (change)="toggleReminderDay(option.value)"
+          >
+            {{ option.label }}
+          </mat-checkbox>
+          }
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Data Management -->
+  <mat-card class="settings-section">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>cloud</mat-icon>
+        Data Management
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Export Format -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Export Format</h3>
+          <p>Preferred format for data exports</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Format</mat-label>
+          <mat-select
+            [value]="settingsService.settings().exportFormat"
+            (selectionChange)="updateExportFormat($event.value)"
+          >
+            <mat-option value="json">JSON</mat-option>
+            <mat-option value="csv" disabled>CSV (Coming soon)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Export Data -->
+      <div class="setting-row vertical">
+        <div class="setting-info">
+          <h3>Export Data</h3>
+          <p>Download all your events, contacts, and occasions as a backup</p>
+        </div>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="exportData()"
+          [disabled]="isExporting()"
+        >
+          @if (isExporting()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Exporting...</span>
+          } @else {
+          <span>Export All Data</span>
+          }
+        </button>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Import Data -->
+      <div class="setting-row vertical">
+        <div class="setting-info">
+          <h3>Import Data</h3>
+          <p>Restore your data from a previously exported file</p>
+          <p class="warning-text">⚠️ This will replace all existing data</p>
+        </div>
+        <div class="import-actions">
+          <input
+            #fileInput
+            type="file"
+            accept=".json"
+            (change)="onFileSelected($event)"
+            style="display: none"
+          />
+          <button
+            mat-raised-button
+            (click)="fileInput.click()"
+            [disabled]="isImporting()"
+          >
+            <mat-icon>upload</mat-icon>
+            Select File
+          </button>
+          @if (selectedFile()) {
+          <span class="file-name">{{ selectedFile()?.name }}</span>
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="importData()"
+            [disabled]="isImporting()"
+          >
+            @if (isImporting()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            <span>Importing...</span>
+            } @else {
+            <span>Import</span>
+            }
+          </button>
+          }
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Clear All Data -->
+      <div class="setting-row vertical">
+        <div class="setting-info">
+          <h3>Clear All Data</h3>
+          <p>Permanently delete all events, contacts, and occasions</p>
+          <p class="warning-text">⚠️ This action cannot be undone</p>
+        </div>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="clearAllData()"
+          [disabled]="isClearing()"
+        >
+          @if (isClearing()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Clearing...</span>
+          } @else {
+          <span>Clear All Data</span>
+          }
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Storage Info -->
+  <mat-card class="settings-section info-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>info</mat-icon>
+        Storage Information
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Events:</span>
+          <span class="info-value">{{ eventsService.events().length }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Contacts:</span>
+          <span class="info-value">{{
+            contactsService.contacts().length
+          }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Occasions:</span>
+          <span class="info-value">{{
+            occasionsService.occasions().length
+          }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Storage:</span>
+          <span class="info-value">IndexedDB Enabled</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

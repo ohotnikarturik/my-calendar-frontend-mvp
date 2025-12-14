@@ -53,8 +53,9 @@
   z-index: 10;
 }
 
-.loading-state mat-icon,
-.empty-state mat-icon {
+/* Large icon styling scoped to direct child icons in empty/loading states */
+.loading-state > mat-icon,
+.empty-state > mat-icon {
   font-size: 64px;
   width: 64px;
   height: 64px;

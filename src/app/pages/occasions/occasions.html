@@ -1,0 +1,170 @@
+<div class="occasions-container">
+  <!-- Header -->
+  <div class="occasions-header">
+    <h1>Occasions</h1>
+    <div class="header-controls">
+      <!-- Search -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search</mat-label>
+        <input
+          matInput
+          [value]="searchQuery()"
+          (input)="onSearchInput($event)"
+          placeholder="Search occasions..."
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <!-- Type Filter -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Type</mat-label>
+        <mat-select
+          [value]="filterType()"
+          (selectionChange)="filterType.set($event.value)"
+        >
+          <mat-option value="">All Types</mat-option>
+          <mat-option value="birthday">Birthdays</mat-option>
+          <mat-option value="anniversary">Anniversaries</mat-option>
+          <mat-option value="memorial">Memorials</mat-option>
+          <mat-option value="custom">Custom</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Add button -->
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="openOccasionModal()"
+        [disabled]="contactsService.contacts().length === 0"
+        [matTooltip]="
+          contactsService.contacts().length === 0
+            ? 'Add a contact first'
+            : 'Add a new occasion'
+        "
+      >
+        <mat-icon>celebration</mat-icon>
+        Add Occasion
+      </button>
+    </div>
+  </div>
+
+  <!-- No contacts warning -->
+  @if (contactsService.contacts().length === 0 && !occasionsService.loading()) {
+  <div class="empty-state warning">
+    <mat-icon>person_add</mat-icon>
+    <p>You need to add contacts first</p>
+    <p class="empty-subtitle">
+      Occasions are linked to contacts. Add a contact to get started.
+    </p>
+    <a mat-raised-button color="primary" href="/contacts">
+      <mat-icon>person_add</mat-icon>
+      Go to Contacts
+    </a>
+  </div>
+  } @else if (occasionsService.loading()) {
+  <!-- Loading state -->
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading occasions...</p>
+  </div>
+  } @else if (filteredOccasions().length === 0) {
+  <!-- Empty state -->
+  <div class="empty-state">
+    @if (searchQuery() || filterType()) {
+    <mat-icon>search_off</mat-icon>
+    <p>No occasions match your filters</p>
+    <p class="empty-subtitle">Try adjusting your search or filter criteria</p>
+    <button mat-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Clear Filters
+    </button>
+    } @else {
+    <mat-icon>celebration</mat-icon>
+    <p>No occasions yet</p>
+    <p class="empty-subtitle">
+      Add birthdays, anniversaries, and other important dates
+    </p>
+    <button mat-raised-button color="primary" (click)="openOccasionModal()">
+      <mat-icon>add</mat-icon>
+      Add Your First Occasion
+    </button>
+    }
+  </div>
+  } @else {
+  <!-- Occasions count -->
+  <div class="occasions-count">
+    <span
+      >{{ filteredOccasions().length }} occasion{{
+        filteredOccasions().length === 1 ? "" : "s"
+      }}</span
+    >
+    @if (searchQuery() || filterType()) {
+    <span class="filter-info">
+      @if (filterType()) { ({{ getTypeLabel(filterType()) }}) } @if
+      (searchQuery()) { matching "{{ searchQuery() }}" }
+    </span>
+    }
+  </div>
+
+  <!-- Occasions grid -->
+  <div class="occasions-grid">
+    @for (occasion of filteredOccasions(); track occasion.id) {
+    <mat-card class="occasion-card" (click)="openOccasionModal(occasion)">
+      <!-- Type badge -->
+      <div class="type-badge" [class]="'type-' + occasion.type">
+        <mat-icon>{{ getTypeIcon(occasion.type) }}</mat-icon>
+      </div>
+
+      <mat-card-content>
+        <h3 class="occasion-title">{{ occasion.title }}</h3>
+
+        <!-- Contact name -->
+        @if (occasion.contact) {
+        <div class="occasion-contact">
+          <mat-icon>person</mat-icon>
+          <span
+            >{{ occasion.contact.firstName }}
+            {{ occasion.contact.lastName }}</span
+          >
+        </div>
+        }
+
+        <!-- Date info -->
+        <div class="occasion-date">
+          <mat-icon>event</mat-icon>
+          <span>{{ formatDate(occasion.date) }}</span>
+          @if (occasion.year) {
+          <mat-chip class="age-chip">
+            {{ calculateYears(occasion) }} years
+          </mat-chip>
+          }
+        </div>
+
+        <!-- Next occurrence -->
+        <div class="next-occurrence">
+          <mat-icon>schedule</mat-icon>
+          <span>{{ getDaysUntilText(occasion) }}</span>
+        </div>
+
+        <!-- Tags -->
+        <div class="occasion-tags">
+          @if (occasion.repeatAnnually) {
+          <mat-chip>Recurring</mat-chip>
+          } @if (occasion.reminderEnabled) {
+          <mat-chip>
+            <mat-icon>notifications</mat-icon>
+            Reminders
+          </mat-chip>
+          }
+        </div>
+      </mat-card-content>
+
+      <!-- Edit indicator -->
+      <div class="edit-indicator">
+        <mat-icon>edit</mat-icon>
+      </div>
+    </mat-card>
+    }
+  </div>
+  }
+</div>

@@ -1,10 +1,23 @@
 import { Injectable, signal, inject } from '@angular/core';
 import type { CalendarEvent } from '../types/event.type';
 import { StorageService } from './storage.service';
+import { SyncService } from './sync.service';
 
+/**
+ * Calendar Events Service
+ *
+ * Manages calendar events with offline-first approach:
+ * - Data is saved locally to IndexedDB first
+ * - Syncs to Supabase in background when authenticated
+ *
+ * Learning note: The service uses optimistic updates (UI updates immediately)
+ * and the SyncService handles background synchronization with the remote database.
+ */
 @Injectable({ providedIn: 'root' })
 export class CalendarEventsService {
   private readonly storage = inject(StorageService);
+  // Inject SyncService for background sync with Supabase
+  private readonly syncService = inject(SyncService);
   private readonly _events = signal<CalendarEvent[]>([]);
   private readonly _loading = signal(true);
   private readonly _storageAvailable = signal(true);
@@ -49,10 +62,22 @@ export class CalendarEventsService {
   }
 
   async add(event: CalendarEvent): Promise<void> {
-    this._events.update((list) => [...list, event]);
+    // Add timestamps for sync tracking
+    const eventWithTimestamps = {
+      ...event,
+      createdAt: event.createdAt ?? new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Optimistic update - update UI immediately
+    this._events.update((list) => [...list, eventWithTimestamps]);
+
     if (this._storageAvailable()) {
       try {
-        await this.storage.saveEvent(event);
+        await this.storage.saveEvent(eventWithTimestamps);
+        // Sync to Supabase in background (non-blocking)
+        // Learning note: We don't await this - it runs in background
+        this.syncService.syncEvent(eventWithTimestamps);
       } catch (error) {
         console.error('Failed to save event:', error);
         // Revert on error
@@ -66,13 +91,25 @@ export class CalendarEventsService {
     const currentEvent = this._events().find((e) => e.id === id);
     if (!currentEvent) return;
 
+    // Add updatedAt timestamp for sync tracking
+    const patchWithTimestamp = {
+      ...patch,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
     this._events.update((list) =>
-      list.map((e) => (e.id === id ? { ...e, ...patch } : e))
+      list.map((e) => (e.id === id ? { ...e, ...patchWithTimestamp } : e))
     );
 
     if (this._storageAvailable()) {
       try {
-        await this.storage.updateEvent(id, patch);
+        await this.storage.updateEvent(id, patchWithTimestamp);
+        // Sync to Supabase in background
+        const updatedEvent = this._events().find((e) => e.id === id);
+        if (updatedEvent) {
+          this.syncService.syncEvent(updatedEvent);
+        }
       } catch (error) {
         console.error('Failed to update event:', error);
         // Revert on error
@@ -88,16 +125,34 @@ export class CalendarEventsService {
     const eventToRemove = this._events().find((e) => e.id === id);
     if (!eventToRemove) return;
 
+    // Optimistic update
     this._events.update((list) => list.filter((e) => e.id !== id));
 
     if (this._storageAvailable()) {
       try {
         await this.storage.deleteEvent(id);
+        // Sync deletion to Supabase in background
+        this.syncService.syncEventDeletion(id);
       } catch (error) {
         console.error('Failed to delete event:', error);
         // Revert on error
         this._events.update((list) => [...list, eventToRemove]);
         throw error;
+      }
+    }
+  }
+
+  /**
+   * Refresh events from storage
+   * Useful after a full sync with Supabase
+   */
+  async refresh(): Promise<void> {
+    if (this._storageAvailable()) {
+      try {
+        const events = await this.storage.loadEvents();
+        this._events.set(events);
+      } catch (error) {
+        console.error('Failed to refresh events:', error);
       }
     }
   }

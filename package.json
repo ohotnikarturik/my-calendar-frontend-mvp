@@ -34,6 +34,7 @@
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/list": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
+    "@supabase/supabase-js": "^2.86.0",
     "@typescript-eslint/types": "^8.39.1",
     "@typescript-eslint/utils": "^8.39.1",
     "dexie": "^4.2.1",

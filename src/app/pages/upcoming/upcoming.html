@@ -1,0 +1,92 @@
+<div class="upcoming-container">
+  <div class="upcoming-header">
+    <h1>Upcoming Events</h1>
+    <div class="header-controls">
+      <mat-form-field appearance="outline">
+        <mat-label>Time Range</mat-label>
+        <mat-select
+          [value]="selectedRange()"
+          (selectionChange)="selectedRange.set($event.value)"
+        >
+          <mat-option [value]="7">Next 7 days</mat-option>
+          <mat-option [value]="30">Next 30 days</mat-option>
+          <mat-option [value]="90">Next 90 days</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Category</mat-label>
+        <mat-select
+          [value]="selectedCategory()"
+          (selectionChange)="selectedCategory.set($event.value)"
+        >
+          <mat-option [value]="''">All Categories</mat-option>
+          @for (cat of categoryOptions; track cat.value) {
+          <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Search</mat-label>
+        <input
+          matInput
+          [value]="searchQuery()"
+          (input)="searchQuery.set($event.target.value)"
+          placeholder="Search events..."
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  @if (eventsSvc.loading()) {
+  <div class="loading-state">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading events...</p>
+  </div>
+  } @else if (filteredEvents().length === 0) {
+  <!-- Empty state -->
+  <div class="empty-state">
+    <mat-icon>event_busy</mat-icon>
+    <p>No upcoming events found</p>
+    <p class="empty-subtitle">Try adjusting your filters or add a new event</p>
+    <button mat-raised-button color="primary" (click)="createEvent()">
+      <mat-icon>add</mat-icon>
+      Create Event
+    </button>
+  </div>
+  } @else {
+  <div class="events-grid">
+    @for (event of filteredEvents(); track event.id) {
+    <mat-card class="event-card" (click)="editEvent(event)">
+      <mat-card-header>
+        <div
+          class="event-color"
+          [style.background-color]="event.color || '#1976d2'"
+        ></div>
+        <mat-card-title>{{ event.title }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ formatDate(event.start) }}
+          @if (event.repeatAnnually) {
+          <mat-chip>Recurring</mat-chip>
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        @if (event.description) {
+        <p class="event-description">{{ event.description }}</p>
+        } @if (event.category) {
+        <mat-chip>{{ getCategoryLabel(event.category) }}</mat-chip>
+        }
+        <div class="days-until">
+          <mat-icon>schedule</mat-icon>
+          <span>{{ getDaysUntil(event.start) }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+  }
+</div>

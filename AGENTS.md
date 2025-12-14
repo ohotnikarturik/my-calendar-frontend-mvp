@@ -1,157 +1,136 @@
 # AI Agent Guide
 
-_For use with Cursor, GitHub Copilot, Claude Code, Codex, and other AI coding assistants_
+_For GitHub Copilot, Cursor, Claude Code, and other AI coding assistants_
 
-## Mission & Product Context
+## Quick Start
 
-- **Project**: Personal hobby calendar app for managing important dates (birthdays, anniversaries, events) with reminders.
-- **Purpose**: Learning Angular and related technologies while building a useful tool for personal use and relatives.
-- **Current State**: MVP Phase 1 complete - basic events CRUD, FullCalendar integration, local persistence, reminders, and upcoming view.
-- **Architecture**: Angular 20 standalone components, Angular Material UI, Signals/RxJS for state, Dexie for IndexedDB.
-- **Future**: Contacts/occasions management, Supabase sync/auth, AI features, PWA capabilities (see `plan.md`).
+**Read these files first:**
 
-## Tech Stack & Project Structure
+- `plan.md` - Project roadmap and completed phases
+- `tasks.md` - Current sprint tasks with priorities
 
-### Core Technologies
+## Project Context
 
-- **Angular 20**: Standalone components, signals, reactive forms
-- **Angular Material**: UI components and theming (Material Design 3)
-- **FullCalendar**: Calendar views and drag/drop interactions (`@fullcalendar/*`)
-- **Dexie**: IndexedDB wrapper for offline-first persistence
-- **RxJS**: Reactive programming (used alongside signals)
+| Aspect           | Details                                                    |
+| ---------------- | ---------------------------------------------------------- |
+| **Project**      | Personal calendar app for birthdays, anniversaries, events |
+| **Purpose**      | Learning Angular while building useful tool                |
+| **Status**       | Phase 3 complete (auth + sync ready)                       |
+| **Architecture** | Angular 20 + Supabase + IndexedDB                          |
+
+## Copilot Workflow
+
+### Using Plan Mode
+
+1. **Start**: Describe the feature or task you want to implement
+2. **Plan**: Copilot analyzes codebase and creates step-by-step plan
+3. **Review**: Approve or modify the plan
+4. **Execute**: Copilot implements each step with explanations
+5. **Validate**: Run `npm run lint` and test in browser
+
+### Quick Prompts
+
+```
+"Implement [task] from tasks.md"
+"Add loading spinner to [component]"
+"Add ARIA labels to [component] for accessibility"
+"Fix TypeScript errors in [file]"
+```
+
+### Before Each Task
+
+- Check `tasks.md` for current priorities
+- Check `plan.md` for context on what's done
+- Read relevant service/component code first
+
+## Tech Stack
+
+- **Angular 20**: Standalone components, signals, reactive forms, OnPush
+- **Angular Material**: UI components (Material Design 3)
+- **FullCalendar**: Calendar views and interactions
+- **Supabase**: Auth and PostgreSQL database
+- **Dexie**: IndexedDB for offline-first storage
 - **TypeScript**: Strict typing throughout
 
-### Project Structure
+## Project Structure
 
 ```
 src/app/
-├── components/          # Reusable UI components
-│   ├── event-modal/     # Event create/edit modal
-│   ├── reminders-list/  # Reminders display component
-│   └── content-wrapper/ # Layout wrapper
-├── pages/               # Route-level page components
-│   ├── calendar/        # Main calendar view
-│   ├── upcoming/        # Upcoming events view
-│   ├── home/            # Landing page
-│   └── about/           # About page
-├── services/            # Business logic and state management
-│   ├── calendar-events.service.ts  # Events CRUD operations
-│   ├── storage.service.ts          # IndexedDB persistence
-│   └── reminders.service.ts        # Reminder calculations
-└── types/               # TypeScript type definitions
-    └── event.type.ts    # CalendarEvent interface
+├── components/       # Reusable UI (modals, lists)
+├── pages/            # Route-level components
+├── services/         # Business logic & state
+├── guards/           # Route protection
+└── types/            # TypeScript interfaces
 ```
 
-## Learning-Focused Development Guidelines
+## Angular Best Practices
 
-### Code Comments & Documentation
+### Components
 
-- **Add explanatory comments** for Angular concepts that may not be obvious to learners:
-  - Signal usage and computed signals
-  - Dependency injection patterns
-  - Reactive forms setup and validation
-  - Effect usage and lifecycle hooks
-  - Service patterns and state management
-- **Comment complex logic** or non-obvious implementations (date parsing, reminder calculations, etc.)
-- **Keep comments concise** but educational - explain the "why" not just the "what"
-- **Document patterns** used (e.g., "Using computed signal for derived state" or "Effect tracks events changes")
+- Standalone components (default in Angular 20)
+- Separate .ts, .html, .scss files
+- `OnPush` change detection
+- Use signals (`signal()`, `computed()`, `effect()`)
+- New template syntax (`@if`, `@for`)
 
-### Angular Best Practices (Learning Mode)
+### Services
 
-#### Components
+- `providedIn: 'root'` for singletons
+- `inject()` function for DI
+- Signals for reactive state
 
-- Use **standalone components** (default in Angular 20)
-- Separate component, template, and styles into their own files
-- Use `OnPush` change detection strategy where applicable for performance
-- Keep components lean - move business logic to services
-- Use **signals** for reactive state (`signal()`, `computed()`, `effect()`)
-- Prefer **new template syntax** (`@if`, `@for`) over `*ngIf`, `*ngFor`
+### Forms
 
-#### Services
+- Reactive forms with `NonNullableFormBuilder`
+- Angular validators
 
-- Use `providedIn: 'root'` for singleton services
-- Inject dependencies using `inject()` function (modern approach)
-- Encapsulate stateful logic in services
-- Use signals for reactive state management
-- Handle errors gracefully with try/catch and user feedback
+### Templates
 
-#### Forms
+- Use `async` pipe for observables
+- Angular Material components
+- ARIA labels for accessibility
 
-- Prefer **reactive forms** (`ReactiveFormsModule`) over template-driven
-- Use `NonNullableFormBuilder` for type-safe form building
-- Validate forms with Angular validators
-- Show validation errors appropriately (dirty/touched/submitted states)
+### TypeScript
 
-#### Templates
+- Strict typing, no `any`
+- Prefer `interface` over `type`
 
-- Use `async` pipe for observables (avoids manual subscription management)
-- Avoid logic in templates - use computed signals or methods
-- Use Angular Material components for consistency
-- Ensure accessibility: ARIA labels, keyboard navigation, semantic HTML
-
-#### TypeScript
-
-- **Strict typing**: Avoid `any`, use proper interfaces/types
-- Prefer `interface` over `type` for object shapes
-- Use type guards and null checks appropriately
-- Leverage TypeScript's type inference where helpful
-
-## Development Workflow
-
-### Local Setup
+## Local Development
 
 ```bash
-npm install          # Install dependencies
-npm start           # Start dev server (http://localhost:4200)
-npm test            # Run unit tests
-npm run lint        # Run ESLint
+npm install   # Install dependencies
+npm start     # Dev server (localhost:4200)
+npm test      # Unit tests
+npm run lint  # ESLint
 ```
 
-### AI Agent Delivery Pattern
+## AI Agent Workflow
 
-_This workflow applies to all AI coding assistants (Cursor, GitHub Copilot, Claude Code, Codex, etc.)_
+1. **Assess** – Review `plan.md`, `tasks.md`, and related code
+2. **Plan** – Use planning tool for multi-step work
+3. **Implement** – Follow Angular best practices
+4. **Validate** – Run `npm run lint`
+5. **Report** – Summarize changes with file references
 
-1. **Assess** – Review `plan.md`, existing code, and related files before making changes
-2. **Plan** – For multi-step work, use the planning tool; skip for single-step tasks
-3. **Implement** – Follow Angular best practices, add learning-focused comments where helpful
-4. **Validate** – Run lint/tests for affected code; explain if validation skipped
-5. **Report** – Summarize changes with file references (`path:line`), test status, and follow-ups
+## Key Services
 
-## Coding Standards
+### CalendarEventsService
 
-### State Management
+CRUD operations for events, auto-saves to IndexedDB.
 
-- Use **signals** for component and service state (`signal()`, `computed()`)
-- Use `effect()` sparingly for side effects (e.g., syncing with external libraries)
-- Keep state in services, not components
-- Make signals readonly when exposing them (`asReadonly()`)
+### StorageService
 
-### Error Handling
+IndexedDB persistence via Dexie.
 
-- Handle storage errors gracefully (fallback to in-memory if IndexedDB unavailable)
-- Show user-friendly error messages via Material Snackbar
-- Log errors to console for debugging
-- Revert optimistic updates on error
+### SupabaseService
 
-### Data Persistence
+Authentication and cloud sync. Has `DEV_MODE_BYPASS_AUTH` toggle.
 
-- **StorageService** handles all IndexedDB operations (via Dexie)
-- Components use **CalendarEventsService**, not direct storage access
-- All CRUD operations auto-save to IndexedDB
-- Handle storage unavailability gracefully
+### SyncService
 
-### UI/UX Standards
+Automatic background sync (debounced, periodic, on-reconnect).
 
-- **Responsive design**: Test desktop, tablet, and mobile breakpoints
-- **Empty states**: Show helpful messages when no data exists
-- **Loading states**: Display spinners/indicators during async operations
-- **Error feedback**: Use Material Snackbar for user notifications
-- **Accessibility**: ARIA labels, keyboard navigation, color contrast
-- **Material Design 3**: Use Material components and theming tokens
-
-## Common Patterns & Examples
-
-### Creating a New Service
+### Service with Signals
 
 ```typescript
 import { Injectable, signal, computed, inject } from "@angular/core";
@@ -189,7 +168,6 @@ import { ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
   selector: "my-component",
-  standalone: true,
   imports: [CommonModule /* Material modules */],
   templateUrl: "./my-component.html",
   changeDetection: ChangeDetectionStrategy.OnPush, // Better performance
@@ -236,62 +214,6 @@ export class MyFormComponent {
 }
 ```
 
-## File Organization
-
-- **Components**: One component per file, separate template/styles files
-- **Services**: One service per file, group related functionality
-- **Types**: Centralize type definitions in `src/app/types/`
-- **Styles**: Global styles in `styles.scss`, component styles in component files
-- **Routes**: Define routes in `app.routes.ts`
-
-## Testing & Validation
-
-- Run `npm run lint` before committing changes
-- Write unit tests for services and complex logic
-- Test user flows manually in browser
-- Validate responsive design on different screen sizes
-- Check accessibility with browser dev tools
-
-## Future Integration Notes
-
-### Supabase (Phase 3)
-
-- Plan schema-aware TypeScript types
-- Implement RLS policies for security
-- Build sync layer with conflict resolution
-- Handle optimistic updates
-
-### AI Features (Phase 3)
-
-- Safeguard API keys (never commit to repo)
-- Stream responses for better UX
-- Document prompts and payloads
-- Handle rate limiting and errors
-
-### PWA (Phase 3)
-
-- Use `@angular/pwa` package
-- Implement offline caching strategy
-- Add install prompt
-- Plan push notifications (FCM) for v2
-
-## Resources
-
-- [Angular Documentation](https://angular.io/docs)
-- [Angular Signals Guide](https://angular.io/guide/signals)
-- [Angular Material Components](https://material.angular.io/components)
-- [FullCalendar Angular Integration](https://fullcalendar.io/docs/angular)
-- [Dexie.js Documentation](https://dexie.org/docs/Tutorial/Getting-started)
-- [RxJS Documentation](https://rxjs.dev/guide/overview)
-
-## Collaboration Notes
-
-- Reference files using `path:line` format in summaries
-- Note skipped validations and why
-- Leave TODOs sparingly, tie to roadmap items
-- Update `README.md` when adding new scripts or configs
-- Keep learning-focused comments for educational value
-
 ---
 
-**Remember**: This is a learning project. Prioritize clarity, educational value, and best practices over premature optimization. Keep code maintainable and well-documented for future learning and improvements.
+**Remember**: This is a learning project. Prioritize clarity and best practices over premature optimization.

@@ -1,0 +1,150 @@
+/**
+ * Occasion Modal Styles
+ * Follows the same pattern as event-modal.scss
+ */
+
+.occasion-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+.occasion-form {
+  display: contents;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-block: 1rem;
+  max-height: min(70vh, 550px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Prevent textareas from causing horizontal overflow */
+textarea {
+  resize: vertical;
+  max-width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.modal-title {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding-block: 1.25rem 1rem;
+  background: var(--mat-sys-surface, var(--mat-app-background, #fff));
+  box-shadow: 0 4px 12px -10px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+/* Year section styling */
+.year-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-lowest, #fafafa);
+}
+
+.year-hint {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+  margin-top: -0.25rem;
+}
+
+.year-field {
+  margin-top: 0.5rem;
+  max-width: 150px;
+}
+
+/* Reminder section */
+.reminder-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-lowest, #fafafa);
+}
+
+.reminder-days {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reminder-label {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+  font-weight: 500;
+}
+
+.reminder-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reminder-chip-button {
+  min-width: auto;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.reminder-chip-button.selected {
+  background-color: var(--mat-sys-primary, #1976d2);
+  color: var(--mat-sys-on-primary, #fff);
+}
+
+/* Action buttons */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+
+  button[color="warn"] {
+    margin-right: auto;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .occasion-modal {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    max-height: min(60vh, 450px);
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+
+    button {
+      flex: 1 1 auto;
+      min-width: 80px;
+    }
+
+    button[color="warn"] {
+      margin-right: 0;
+      order: 1;
+      flex-basis: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+}

@@ -1,0 +1,114 @@
+/**
+ * Contact Modal Styles
+ *
+ * Follows the same styling pattern as event-modal.scss
+ * for visual consistency across the application.
+ */
+
+.contact-modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+.contact-form {
+  display: contents;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-block: 1rem;
+  max-height: min(70vh, 500px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Prevent textareas from causing horizontal overflow */
+textarea {
+  resize: vertical;
+  max-width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Header styling with sticky behavior */
+.modal-title {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding-block: 1.25rem 1rem;
+  background: var(--mat-sys-surface, var(--mat-app-background, #fff));
+  box-shadow: 0 4px 12px -10px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+/* Name preview section */
+.name-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--mat-sys-surface-container-low, #f5f5f5);
+  border-radius: 8px;
+  border: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+}
+
+.preview-label {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.preview-name {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface, #333);
+}
+
+/* Action buttons alignment */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+
+  /* Push delete button to the left */
+  button[color="warn"] {
+    margin-right: auto;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .contact-modal {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    max-height: min(60vh, 400px);
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
+
+    button {
+      flex: 1 1 auto;
+      min-width: 80px;
+    }
+
+    button[color="warn"] {
+      margin-right: 0;
+      order: 1;
+      flex-basis: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+}
