@@ -23,10 +23,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { SettingsService } from '../../services/settings.service';
+import { SupabaseService } from '../../services/supabase.service';
 import { CalendarEventsService } from '../../services/calendar-events.service';
 import { ContactsService } from '../../services/contacts.service';
 import { OccasionsService } from '../../services/occasions.service';
-import { StorageService } from '../../services/storage.service';
 import {
   COMMON_TIMEZONES,
   REMINDER_DAY_OPTIONS,
@@ -55,10 +55,10 @@ import {
 export class SettingsComponent {
   // Inject services using inject() function (modern Angular pattern)
   protected readonly settingsService = inject(SettingsService);
+  protected readonly supabase = inject(SupabaseService);
   protected readonly eventsService = inject(CalendarEventsService);
   protected readonly contactsService = inject(ContactsService);
   protected readonly occasionsService = inject(OccasionsService);
-  protected readonly storageService = inject(StorageService);
   private readonly snackBar = inject(MatSnackBar);
 
   // Component state with signals
@@ -151,31 +151,28 @@ export class SettingsComponent {
       const text = await file.text();
       const data = this.settingsService.parseImportData(text);
 
-      // Clear existing data
-      await this.storageService.clearAllEvents();
-      await this.storageService.clearAllContacts();
-      await this.storageService.clearAllOccasions();
-
-      // Import new data
-      if (data.events) {
-        for (const event of data.events) {
-          await this.storageService.saveEvent(event);
-        }
+      // Import to Supabase (will overwrite existing data with same IDs)
+      const promises = [];
+      if (data.events?.length) {
+        promises.push(this.supabase.upsertEvents(data.events));
       }
-      if (data.contacts) {
-        for (const contact of data.contacts) {
-          await this.storageService.saveContact(contact);
-        }
+      if (data.contacts?.length) {
+        promises.push(this.supabase.upsertContacts(data.contacts));
       }
-      if (data.occasions) {
-        for (const occasion of data.occasions) {
-          await this.storageService.saveOccasion(occasion);
-        }
+      if (data.occasions?.length) {
+        promises.push(this.supabase.upsertOccasions(data.occasions));
       }
 
-      this.showSnackbar('Data imported successfully. Reloading...');
-      // Reload the page after a short delay to reinitialize all services
-      setTimeout(() => window.location.reload(), 1500);
+      await Promise.all(promises);
+
+      // Reload data from Supabase
+      await Promise.all([
+        this.eventsService.reload(),
+        this.contactsService.reload(),
+        this.occasionsService.reload(),
+      ]);
+
+      this.showSnackbar('Data imported successfully');
     } catch (error) {
       console.error('Import failed:', error);
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -185,13 +182,15 @@ export class SettingsComponent {
   }
 
   protected async clearAllData(): Promise<void> {
-    if (!confirm('Permanently delete ALL data? This cannot be undone!')) {
+    if (
+      !confirm('Permanently delete ALL data from cloud? This cannot be undone!')
+    ) {
       return;
     }
 
     if (
       !confirm(
-        'Are you absolutely sure? This will delete all events, contacts, and occasions.'
+        'Are you absolutely sure? This will delete all events, contacts, and occasions from Supabase.'
       )
     ) {
       return;
@@ -199,15 +198,32 @@ export class SettingsComponent {
 
     this.isClearing.set(true);
     try {
-      await this.storageService.clearAllEvents();
-      await this.storageService.clearAllContacts();
-      await this.storageService.clearAllOccasions();
-      this.showSnackbar('All data cleared successfully. Reloading...');
-      // Reload the page after a short delay to reinitialize all services
-      setTimeout(() => window.location.reload(), 1500);
+      // Get all current data
+      const events = this.eventsService.events();
+      const contacts = this.contactsService.contacts();
+      const occasions = this.occasionsService.occasions();
+
+      // Delete all from Supabase
+      const deletePromises = [
+        ...events.map((e) => this.supabase.deleteEvent(e.id)),
+        ...contacts.map((c) => this.supabase.deleteContact(c.id)),
+        ...occasions.map((o) => this.supabase.deleteOccasion(o.id)),
+      ];
+
+      await Promise.all(deletePromises);
+
+      // Reload services (will now be empty)
+      await Promise.all([
+        this.eventsService.reload(),
+        this.contactsService.reload(),
+        this.occasionsService.reload(),
+      ]);
+
+      this.showSnackbar('All data cleared successfully');
     } catch (error) {
       console.error('Clear data failed:', error);
       this.showSnackbar('Failed to clear data. Please try again.');
+    } finally {
       this.isClearing.set(false);
     }
   }

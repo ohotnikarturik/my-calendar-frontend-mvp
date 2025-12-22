@@ -1,7 +1,7 @@
 /**
  * Contacts Service
  *
- * Manages the contacts state and CRUD operations.
+ * Manages the contacts state and CRUD operations with direct Supabase integration.
  * Follows the same signal-based pattern as CalendarEventsService.
  *
  * Learning note: This service demonstrates the Angular service pattern
@@ -11,27 +11,21 @@
 
 import { Injectable, signal, computed, inject } from '@angular/core';
 import type { Contact, NewContact } from '../types/contact.type';
-import { StorageService } from './storage.service';
-import { SyncService } from './sync.service';
+import { SupabaseService } from './supabase.service';
 
 @Injectable({ providedIn: 'root' })
 export class ContactsService {
-  // Inject the storage service for IndexedDB persistence
-  private readonly storage = inject(StorageService);
-  // Inject SyncService for background sync with Supabase
-  private readonly syncService = inject(SyncService);
+  private readonly supabase = inject(SupabaseService);
 
   // Private signals for internal state management
   // Learning note: Using private signals with public readonly accessors
   // ensures state can only be modified through service methods
   private readonly _contacts = signal<Contact[]>([]);
   private readonly _loading = signal(true);
-  private readonly _storageAvailable = signal(true);
 
   // Public readonly signals for components to consume
   readonly contacts = this._contacts.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly storageAvailable = this._storageAvailable.asReadonly();
 
   // Computed signal for contact count
   // Learning note: computed() creates a derived signal that automatically
@@ -48,26 +42,37 @@ export class ContactsService {
   });
 
   constructor() {
-    // Initialize contacts from storage on service creation
     this.initialize();
   }
 
   /**
-   * Initialize contacts from IndexedDB storage
-   * Called automatically when service is created
+   * Initialize by loading contacts from Supabase
+   * Automatically called on service creation
    */
   private async initialize(): Promise<void> {
     try {
-      const available = await this.storage.isAvailable();
-      this._storageAvailable.set(available);
-
-      if (available) {
-        const contacts = await this.storage.loadContacts();
+      if (this.supabase.isAuthenticated()) {
+        const contacts = await this.supabase.fetchContacts();
         this._contacts.set(contacts);
       }
     } catch (error) {
       console.error('Failed to initialize contacts:', error);
-      this._storageAvailable.set(false);
+    } finally {
+      this._loading.set(false);
+    }
+  }
+
+  /**
+   * Reload contacts from Supabase
+   * Useful after login or to refresh data
+   */
+  async reload(): Promise<void> {
+    this._loading.set(true);
+    try {
+      const contacts = await this.supabase.fetchContacts();
+      this._contacts.set(contacts);
+    } catch (error) {
+      console.error('Failed to reload contacts:', error);
     } finally {
       this._loading.set(false);
     }
@@ -75,7 +80,7 @@ export class ContactsService {
 
   /**
    * Add a new contact
-   * Uses optimistic updates - updates UI immediately, then persists to storage
+   * Uses optimistic updates - updates UI immediately, reverts on error
    *
    * @param contactData - New contact data (without id, createdAt, updatedAt)
    * @returns The created contact with generated id and timestamps
@@ -84,27 +89,24 @@ export class ContactsService {
     const now = new Date().toISOString();
     const contact: Contact = {
       ...contactData,
-      id: crypto.randomUUID(), // Generate unique ID using Web Crypto API
+      id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
     };
 
-    // Optimistic update - add to local state immediately
+    // Optimistic update
     this._contacts.update((list) => [...list, contact]);
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.saveContact(contact);
-        // Sync to Supabase in background (non-blocking)
-        this.syncService.syncContact(contact);
-      } catch (error) {
-        console.error('Failed to save contact:', error);
-        // Revert optimistic update on error
-        this._contacts.update((list) =>
-          list.filter((c) => c.id !== contact.id)
-        );
-        throw error;
+    try {
+      const success = await this.supabase.upsertContacts([contact]);
+      if (!success) {
+        throw new Error('Failed to save contact to Supabase');
       }
+    } catch (error) {
+      console.error('Failed to add contact:', error);
+      // Revert on error
+      this._contacts.update((list) => list.filter((c) => c.id !== contact.id));
+      throw error;
     }
 
     return contact;
@@ -112,6 +114,7 @@ export class ContactsService {
 
   /**
    * Update an existing contact
+   * Uses optimistic updates - UI updates immediately, reverts on error
    *
    * @param id - Contact ID to update
    * @param patch - Partial contact data to merge
@@ -125,37 +128,35 @@ export class ContactsService {
       throw new Error(`Contact with id ${id} not found`);
     }
 
-    const updatedPatch = {
+    const updatedContact = {
+      ...currentContact,
       ...patch,
       updatedAt: new Date().toISOString(),
     };
 
     // Optimistic update
     this._contacts.update((list) =>
-      list.map((c) => (c.id === id ? { ...c, ...updatedPatch } : c))
+      list.map((c) => (c.id === id ? updatedContact : c))
     );
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.updateContact(id, updatedPatch);
-        // Sync to Supabase in background
-        const updatedContact = this._contacts().find((c) => c.id === id);
-        if (updatedContact) {
-          this.syncService.syncContact(updatedContact);
-        }
-      } catch (error) {
-        console.error('Failed to update contact:', error);
-        // Revert on error
-        this._contacts.update((list) =>
-          list.map((c) => (c.id === id ? currentContact : c))
-        );
-        throw error;
+    try {
+      const success = await this.supabase.upsertContacts([updatedContact]);
+      if (!success) {
+        throw new Error('Failed to update contact in Supabase');
       }
+    } catch (error) {
+      console.error('Failed to update contact:', error);
+      // Revert on error
+      this._contacts.update((list) =>
+        list.map((c) => (c.id === id ? currentContact : c))
+      );
+      throw error;
     }
   }
 
   /**
    * Remove a contact by ID
+   * Uses optimistic updates - UI updates immediately, reverts on error
    *
    * @param id - Contact ID to delete
    */
@@ -166,17 +167,16 @@ export class ContactsService {
     // Optimistic update
     this._contacts.update((list) => list.filter((c) => c.id !== id));
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.deleteContact(id);
-        // Sync deletion to Supabase in background
-        this.syncService.syncContactDeletion(id);
-      } catch (error) {
-        console.error('Failed to delete contact:', error);
-        // Revert on error
-        this._contacts.update((list) => [...list, contactToRemove]);
-        throw error;
+    try {
+      const success = await this.supabase.deleteContact(id);
+      if (!success) {
+        throw new Error('Failed to delete contact from Supabase');
       }
+    } catch (error) {
+      console.error('Failed to delete contact:', error);
+      // Revert on error
+      this._contacts.update((list) => [...list, contactToRemove]);
+      throw error;
     }
   }
 
@@ -212,20 +212,5 @@ export class ContactsService {
    */
   getFullName(contact: Contact): string {
     return `${contact.firstName} ${contact.lastName}`.trim();
-  }
-
-  /**
-   * Refresh contacts from storage
-   * Useful after a full sync with Supabase
-   */
-  async refresh(): Promise<void> {
-    if (this._storageAvailable()) {
-      try {
-        const contacts = await this.storage.loadContacts();
-        this._contacts.set(contacts);
-      } catch (error) {
-        console.error('Failed to refresh contacts:', error);
-      }
-    }
   }
 }

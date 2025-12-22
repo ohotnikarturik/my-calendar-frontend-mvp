@@ -29,7 +29,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SupabaseService } from '../../../services/supabase.service';
-import { SyncService } from '../../../services/sync.service';
+import { CalendarEventsService } from '../../../services/calendar-events.service';
+import { ContactsService } from '../../../services/contacts.service';
+import { OccasionsService } from '../../../services/occasions.service';
 
 @Component({
   selector: 'app-login',
@@ -51,7 +53,9 @@ import { SyncService } from '../../../services/sync.service';
 export class Login {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly supabase = inject(SupabaseService);
-  private readonly syncService = inject(SyncService);
+  private readonly eventsService = inject(CalendarEventsService);
+  private readonly contactsService = inject(ContactsService);
+  private readonly occasionsService = inject(OccasionsService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -84,14 +88,19 @@ export class Login {
       const result = await this.supabase.signIn(email, password);
 
       if (result.success) {
-        // Trigger initial sync after login
-        this.syncService.syncAll();
+        // Reload data from Supabase after login
+        await Promise.all([
+          this.eventsService.reload(),
+          this.contactsService.reload(),
+          this.occasionsService.reload(),
+        ]);
 
         this.snackBar.open('Welcome back!', 'Close', { duration: 3000 });
         this.router.navigate(['/']);
       } else {
         // Show error message
-        const errorMsg = result.error?.message ?? 'Login failed. Please try again.';
+        const errorMsg =
+          result.error?.message ?? 'Login failed. Please try again.';
         this.errorMessage.set(errorMsg);
       }
     } catch (error) {

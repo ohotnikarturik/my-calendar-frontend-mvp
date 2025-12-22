@@ -99,7 +99,7 @@
 
         @if (eventForm.get('reminderEnabled')?.value) {
         <div class="reminder-days">
-          <label class="reminder-label">Remind me:</label>
+          <span class="reminder-label">Remind me:</span>
           <div class="reminder-chips">
             @for (option of reminderDayOptions; track option.value) {
             <button

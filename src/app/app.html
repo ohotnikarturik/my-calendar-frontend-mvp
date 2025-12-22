@@ -20,16 +20,14 @@
         <a routerLink="/about" routerLinkActive="active">About</a>
         }
 
-        <!-- Sync status indicator (subtle, non-interactive - syncs automatically) -->
+        <!-- Online status indicator -->
         @if (isAuthenticated() && supabase.isConfigured()) {
         <span
           class="sync-indicator"
-          [class.syncing]="syncStatus() === 'syncing'"
           [class.offline]="!isOnline()"
-          [class.error]="syncStatus() === 'error'"
-          [matTooltip]="syncTooltip()"
+          [matTooltip]="isOnline() ? 'Connected' : 'Offline'"
         >
-          <mat-icon>{{ syncIcon() }}</mat-icon>
+          <mat-icon>{{ isOnline() ? "cloud_done" : "cloud_off" }}</mat-icon>
         </span>
         }
 

@@ -6,11 +6,18 @@
  * a route to handle the redirect and navigate the user appropriately.
  */
 
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SupabaseService } from '../../../services/supabase.service';
-import { SyncService } from '../../../services/sync.service';
+import { CalendarEventsService } from '../../../services/calendar-events.service';
+import { ContactsService } from '../../../services/contacts.service';
+import { OccasionsService } from '../../../services/occasions.service';
 
 @Component({
   selector: 'app-auth-callback',
@@ -42,7 +49,9 @@ import { SyncService } from '../../../services/sync.service';
 })
 export class AuthCallback implements OnInit {
   private readonly supabase = inject(SupabaseService);
-  private readonly syncService = inject(SyncService);
+  private readonly eventsService = inject(CalendarEventsService);
+  private readonly contactsService = inject(ContactsService);
+  private readonly occasionsService = inject(OccasionsService);
   private readonly router = inject(Router);
 
   async ngOnInit(): Promise<void> {
@@ -59,8 +68,12 @@ export class AuthCallback implements OnInit {
 
     // Check if authenticated
     if (this.supabase.isAuthenticated()) {
-      // Trigger initial sync after login
-      this.syncService.syncAll();
+      // Reload data from Supabase after OAuth login
+      await Promise.all([
+        this.eventsService.reload(),
+        this.contactsService.reload(),
+        this.occasionsService.reload(),
+      ]);
       this.router.navigate(['/']);
     } else {
       // Not authenticated, redirect to login

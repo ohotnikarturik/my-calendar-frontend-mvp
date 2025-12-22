@@ -14,7 +14,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsService } from './services/settings.service';
 import { SupabaseService } from './services/supabase.service';
-import { SyncService } from './services/sync.service';
 import type { ThemeMode } from './types/settings.type';
 
 /**
@@ -45,7 +44,6 @@ import type { ThemeMode } from './types/settings.type';
 export class App {
   private readonly settingsService = inject(SettingsService);
   readonly supabase = inject(SupabaseService);
-  private readonly syncService = inject(SyncService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -56,9 +54,7 @@ export class App {
   readonly isAuthenticated = this.supabase.isAuthenticated;
   readonly userEmail = this.supabase.userEmail;
 
-  // Sync state
-  readonly syncStatus = this.syncService.status;
-  readonly pendingCount = this.syncService.pendingCount;
+  // Online status
   readonly isOnline = this.supabase.isOnline;
 
   // Icon to display based on current theme
@@ -84,41 +80,6 @@ export class App {
         return 'Dark mode (click for auto)';
       case 'auto':
         return 'Auto mode (click for light)';
-    }
-  });
-
-  // Sync icon based on status
-  readonly syncIcon = computed(() => {
-    if (!this.isOnline()) return 'cloud_off';
-
-    switch (this.syncStatus()) {
-      case 'syncing':
-        return 'sync';
-      case 'success':
-        return 'cloud_done';
-      case 'error':
-        return 'cloud_off';
-      default:
-        return 'cloud_queue';
-    }
-  });
-
-  // Sync tooltip (informational only - sync happens automatically)
-  readonly syncTooltip = computed(() => {
-    if (!this.isOnline()) return 'Offline - changes saved locally';
-
-    const pending = this.pendingCount();
-    switch (this.syncStatus()) {
-      case 'syncing':
-        return 'Syncing...';
-      case 'success':
-        return 'Synced with cloud';
-      case 'error':
-        return `Sync error - will retry (${pending} pending)`;
-      default:
-        return pending > 0
-          ? `${pending} changes pending sync`
-          : 'Synced with cloud';
     }
   });
 

@@ -1,7 +1,7 @@
 /**
  * Occasions Service
  *
- * Manages occasions (birthdays, anniversaries, etc.) linked to contacts.
+ * Manages occasions (birthdays, anniversaries, etc.) linked to contacts with direct Supabase integration.
  * Occasions can generate calendar events for display in FullCalendar.
  *
  * Learning note: This service shows how to work with related entities
@@ -16,28 +16,23 @@ import type {
   OccasionType,
 } from '../types/occasion.type';
 import type { CalendarEvent } from '../types/event.type';
-import { StorageService } from './storage.service';
+import { SupabaseService } from './supabase.service';
 import { ContactsService } from './contacts.service';
 import { DateUtilsService } from './date-utils.service';
-import { SyncService } from './sync.service';
 
 @Injectable({ providedIn: 'root' })
 export class OccasionsService {
-  private readonly storage = inject(StorageService);
+  private readonly supabase = inject(SupabaseService);
   private readonly contactsService = inject(ContactsService);
   private readonly dateUtils = inject(DateUtilsService);
-  // Inject SyncService for background sync with Supabase
-  private readonly syncService = inject(SyncService);
 
   // Private signals for internal state
   private readonly _occasions = signal<Occasion[]>([]);
   private readonly _loading = signal(true);
-  private readonly _storageAvailable = signal(true);
 
   // Public readonly signals
   readonly occasions = this._occasions.asReadonly();
   readonly loading = this._loading.asReadonly();
-  readonly storageAvailable = this._storageAvailable.asReadonly();
 
   // Computed: occasion count
   readonly occasionCount = computed(() => this._occasions().length);
@@ -87,20 +82,33 @@ export class OccasionsService {
   }
 
   /**
-   * Initialize occasions from storage
+   * Initialize by loading occasions from Supabase
+   * Automatically called on service creation
    */
   private async initialize(): Promise<void> {
     try {
-      const available = await this.storage.isAvailable();
-      this._storageAvailable.set(available);
-
-      if (available) {
-        const occasions = await this.storage.loadOccasions();
+      if (this.supabase.isAuthenticated()) {
+        const occasions = await this.supabase.fetchOccasions();
         this._occasions.set(occasions);
       }
     } catch (error) {
       console.error('Failed to initialize occasions:', error);
-      this._storageAvailable.set(false);
+    } finally {
+      this._loading.set(false);
+    }
+  }
+
+  /**
+   * Reload occasions from Supabase
+   * Useful after login or to refresh data
+   */
+  async reload(): Promise<void> {
+    this._loading.set(true);
+    try {
+      const occasions = await this.supabase.fetchOccasions();
+      this._occasions.set(occasions);
+    } catch (error) {
+      console.error('Failed to reload occasions:', error);
     } finally {
       this._loading.set(false);
     }
@@ -108,6 +116,7 @@ export class OccasionsService {
 
   /**
    * Add a new occasion
+   * Uses optimistic updates - updates UI immediately, reverts on error
    */
   async add(occasionData: NewOccasion): Promise<Occasion> {
     const now = this.dateUtils.nowISO();
@@ -121,18 +130,17 @@ export class OccasionsService {
     // Optimistic update
     this._occasions.update((list) => [...list, occasion]);
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.saveOccasion(occasion);
-        // Sync to Supabase in background (non-blocking)
-        this.syncService.syncOccasion(occasion);
-      } catch (error) {
-        console.error('Failed to save occasion:', error);
-        this._occasions.update((list) =>
-          list.filter((o) => o.id !== occasion.id)
-        );
-        throw error;
+    try {
+      const success = await this.supabase.upsertOccasions([occasion]);
+      if (!success) {
+        throw new Error('Failed to save occasion to Supabase');
       }
+    } catch (error) {
+      console.error('Failed to add occasion:', error);
+      this._occasions.update((list) =>
+        list.filter((o) => o.id !== occasion.id)
+      );
+      throw error;
     }
 
     return occasion;
@@ -140,6 +148,7 @@ export class OccasionsService {
 
   /**
    * Update an existing occasion
+   * Uses optimistic updates - UI updates immediately, reverts on error
    */
   async update(
     id: string,
@@ -150,36 +159,34 @@ export class OccasionsService {
       throw new Error(`Occasion with id ${id} not found`);
     }
 
-    const updatedPatch = {
+    const updatedOccasion = {
+      ...currentOccasion,
       ...patch,
       updatedAt: this.dateUtils.nowISO(),
     };
 
     // Optimistic update
     this._occasions.update((list) =>
-      list.map((o) => (o.id === id ? { ...o, ...updatedPatch } : o))
+      list.map((o) => (o.id === id ? updatedOccasion : o))
     );
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.updateOccasion(id, updatedPatch);
-        // Sync to Supabase in background
-        const updatedOccasion = this._occasions().find((o) => o.id === id);
-        if (updatedOccasion) {
-          this.syncService.syncOccasion(updatedOccasion);
-        }
-      } catch (error) {
-        console.error('Failed to update occasion:', error);
-        this._occasions.update((list) =>
-          list.map((o) => (o.id === id ? currentOccasion : o))
-        );
-        throw error;
+    try {
+      const success = await this.supabase.upsertOccasions([updatedOccasion]);
+      if (!success) {
+        throw new Error('Failed to update occasion in Supabase');
       }
+    } catch (error) {
+      console.error('Failed to update occasion:', error);
+      this._occasions.update((list) =>
+        list.map((o) => (o.id === id ? currentOccasion : o))
+      );
+      throw error;
     }
   }
 
   /**
    * Remove an occasion
+   * Uses optimistic updates - UI updates immediately, reverts on error
    */
   async remove(id: string): Promise<void> {
     const occasionToRemove = this._occasions().find((o) => o.id === id);
@@ -188,22 +195,22 @@ export class OccasionsService {
     // Optimistic update
     this._occasions.update((list) => list.filter((o) => o.id !== id));
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.deleteOccasion(id);
-        // Sync deletion to Supabase in background
-        this.syncService.syncOccasionDeletion(id);
-      } catch (error) {
-        console.error('Failed to delete occasion:', error);
-        this._occasions.update((list) => [...list, occasionToRemove]);
-        throw error;
+    try {
+      const success = await this.supabase.deleteOccasion(id);
+      if (!success) {
+        throw new Error('Failed to delete occasion from Supabase');
       }
+    } catch (error) {
+      console.error('Failed to delete occasion:', error);
+      this._occasions.update((list) => [...list, occasionToRemove]);
+      throw error;
     }
   }
 
   /**
    * Remove all occasions for a contact
    * Called when a contact is deleted
+   * Note: Supabase RLS policies handle cascade deletion automatically via ON DELETE SET NULL
    */
   async removeByContact(contactId: string): Promise<void> {
     const occasionsToRemove = this._occasions().filter(
@@ -211,19 +218,26 @@ export class OccasionsService {
     );
     if (occasionsToRemove.length === 0) return;
 
-    // Optimistic update
+    // Optimistic update - remove from local state
     this._occasions.update((list) =>
       list.filter((o) => o.contactId !== contactId)
     );
 
-    if (this._storageAvailable()) {
-      try {
-        await this.storage.deleteOccasionsByContact(contactId);
-      } catch (error) {
-        console.error('Failed to delete occasions by contact:', error);
-        this._occasions.update((list) => [...list, ...occasionsToRemove]);
-        throw error;
+    try {
+      // Delete each occasion via Supabase
+      const deletePromises = occasionsToRemove.map((o) =>
+        this.supabase.deleteOccasion(o.id)
+      );
+      const results = await Promise.all(deletePromises);
+
+      if (results.some((success) => !success)) {
+        throw new Error('Failed to delete some occasions from Supabase');
       }
+    } catch (error) {
+      console.error('Failed to delete occasions by contact:', error);
+      // Revert on error
+      this._occasions.update((list) => [...list, ...occasionsToRemove]);
+      throw error;
     }
   }
 
@@ -361,20 +375,5 @@ export class OccasionsService {
       custom: 'Custom',
     };
     return labels[type];
-  }
-
-  /**
-   * Refresh occasions from storage
-   * Useful after a full sync with Supabase
-   */
-  async refresh(): Promise<void> {
-    if (this._storageAvailable()) {
-      try {
-        const occasions = await this.storage.loadOccasions();
-        this._occasions.set(occasions);
-      } catch (error) {
-        console.error('Failed to refresh occasions:', error);
-      }
-    }
   }
 }
