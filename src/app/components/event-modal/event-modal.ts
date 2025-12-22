@@ -235,7 +235,7 @@ export class EventModalComponent {
 
     const event: CalendarEvent = {
       ...this.modalData?.event,
-      id: this.modalData?.event?.id ?? Date.now().toString(),
+      id: this.modalData?.event?.id ?? crypto.randomUUID(),
       title: formValue.title.trim(),
       description: formValue.description.trim() || undefined,
       allDay: true,

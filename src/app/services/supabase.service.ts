@@ -93,7 +93,7 @@ export class SupabaseService {
   // ==================== DEV MODE TOGGLE ====================
   // Set to true to bypass authentication during development
   // Set to false to require Supabase authentication (production mode)
-  private readonly DEV_MODE_BYPASS_AUTH = true;
+  private readonly DEV_MODE_BYPASS_AUTH = false;
 
   // Supabase client instance (null if not configured)
   // Learning note: We allow null to handle cases where Supabase isn't configured yet

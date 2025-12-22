@@ -69,6 +69,7 @@ export class SyncService {
   private readonly SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   private syncDebounceTimer: ReturnType<typeof setTimeout> | null = null;
   private syncIntervalTimer: ReturnType<typeof setInterval> | null = null;
+  private hasPerformedInitialSync = false;
 
   constructor() {
     // Load pending operations from localStorage
@@ -81,6 +82,13 @@ export class SyncService {
       const hasPending = this.hasPendingOperations();
 
       if (canSync) {
+        // Perform initial sync when first authenticated
+        if (!this.hasPerformedInitialSync) {
+          console.log('Performing initial sync on app start');
+          this.hasPerformedInitialSync = true;
+          this.syncAll();
+        }
+
         // Start periodic sync when authenticated and online
         this.startPeriodicSync();
 

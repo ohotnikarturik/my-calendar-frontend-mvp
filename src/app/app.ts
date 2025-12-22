@@ -149,7 +149,8 @@ export class App {
       this.snackBar.open('Signed out successfully', 'Close', {
         duration: 2000,
       });
-      this.router.navigate(['/']);
+      // Navigate to login page after sign out
+      this.router.navigate(['/auth/login']);
     } else {
       this.snackBar.open('Failed to sign out', 'Close', { duration: 3000 });
     }
