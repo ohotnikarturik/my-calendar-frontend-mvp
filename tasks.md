@@ -2,87 +2,62 @@
 
 _Active work items for My Calendar MVP_
 
+## ✅ Completed
+
+### Phase 3 & 3.5: Supabase Integration & Simplification
+
+- ✅ Created Supabase project with PostgreSQL backend
+- ✅ Ran database migrations (events, contacts, occasions tables)
+- ✅ Configured RLS policies for secure data access
+- ✅ Implemented authentication (email/password + Google OAuth)
+- ✅ Removed IndexedDB/Dexie complexity (~1000 lines)
+- ✅ Refactored to cloud-only Supabase architecture
+- ✅ Implemented optimistic updates for better UX
+- ✅ Configured Google OAuth in production
+- ✅ Tested authentication flows (signup/login/Google)
+- ✅ Verified CRUD operations (events, contacts, occasions)
+- ✅ Confirmed data persistence in Supabase
+
+---
+
 ## Priority: High 🔴
 
-### 1. Supabase Project Setup
+### 1. Error Handling & User Feedback
 
-Create Supabase project and configure environment.
+**Goal**: Improve user experience with better error messages and loading states
 
-**Steps:**
+- [ ] Implement global error handler service
+- [ ] Add Material Snackbar for success/error notifications
+- [ ] Show loading spinners during async operations
+- [ ] Add "try again" options for failed operations
+- [ ] Handle network errors gracefully
+- [ ] Add validation feedback in forms
 
-1. Go to supabase.com → New Project
-2. Copy project URL and anon key
-3. Update `src/environments/environment.ts`:
-   ```typescript
-   supabaseUrl: 'your-project-url',
-   supabaseKey: 'your-anon-key'
-   ```
-4. Set `DEV_MODE_BYPASS_AUTH = false` in supabase.service.ts
+### 2. Disable DEV_MODE_BYPASS_AUTH
 
-### 2. Database Migrations
+**Goal**: Remove development bypass and require real authentication
 
-Run these SQL commands in Supabase SQL Editor:
-
-```sql
--- Events table
-CREATE TABLE events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  start_date TIMESTAMPTZ NOT NULL,
-  end_date TIMESTAMPTZ,
-  all_day BOOLEAN DEFAULT false,
-  description TEXT,
-  color TEXT,
-  reminder_days INTEGER[] DEFAULT ARRAY[]::INTEGER[],
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Contacts table
-CREATE TABLE contacts (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  birthday DATE,
-  notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Occasions table
-CREATE TABLE occasions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  contact_id UUID REFERENCES contacts(id) ON DELETE SET NULL,
-  title TEXT NOT NULL,
-  date DATE NOT NULL,
-  recurring BOOLEAN DEFAULT false,
-  notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- RLS policies
-ALTER TABLE events ENABLE ROW LEVEL SECURITY;
-ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE occasions ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can manage own events" ON events
-  FOR ALL USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can manage own contacts" ON contacts
-  FOR ALL USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can manage own occasions" ON occasions
-  FOR ALL USING (auth.uid() = user_id);
-```
+- [ ] Set `DEV_MODE_BYPASS_AUTH = false` in [supabase.service.ts](src/app/services/supabase.service.ts)
+- [ ] Test that unauthenticated users are redirected to login
+- [ ] Verify auth guards work on all protected routes
+- [ ] Test session expiration handling
 
 ---
 
 ## Priority: Medium 🟡
 
-### 3. Accessibility Improvements
+### 1. UI/UX Polish
+
+**Goal**: Make the app feel more polished and professional
+
+- [ ] Add empty state messages/illustrations (no events, no contacts, etc.)
+- [ ] Improve mobile responsiveness (test on phone)
+- [ ] Add smooth transitions and animations
+- [ ] Improve calendar color scheme consistency
+- [ ] Add confirmation dialogs for delete actions
+- [ ] Improve form validation feedback
+
+### 2. Accessibility Improvements
 
 - Add ARIA labels to all buttons and interactive elements
 - Implement keyboard shortcuts (Escape to close modals)
@@ -105,13 +80,15 @@ CREATE POLICY "Users can manage own occasions" ON occasions
 
 ## Priority: Low 🟢
 
-### 6. UI Polish
+### 1. Advanced Features
 
-- Empty state illustrations
-- Smooth animations on transitions
-- Better mobile navigation
+- [ ] Recurring events (weekly, monthly, yearly)
+- [ ] Event categories/tags with filtering
+- [ ] Search functionality across events/contacts
+- [ ] Bulk operations (delete multiple, export filtered)
+- [ ] Dark mode support
 
-### 7. Testing
+### 2. Testing
 
 - Unit tests for services
 - Component tests for modals
@@ -121,9 +98,14 @@ CREATE POLICY "Users can manage own occasions" ON occasions
 
 ## Completed Recently ✅
 
-- [x] Automatic background sync (debounced + periodic)
-- [x] Offline grace period for auth
-- [x] Auth guards on all routes
-- [x] Nav links hidden when not authenticated
-- [x] Data Storage & Privacy section in About page
-- [x] DEV_MODE_BYPASS_AUTH toggle
+- [x] Removed IndexedDB/Dexie (~1000 lines of code)
+- [x] Simplified to cloud-only Supabase architecture
+- [x] Google OAuth authentication working
+- [x] Email/password authentication working
+- [x] Events CRUD fully functional
+- [x] Contacts CRUD fully functional
+- [x] Occasions CRUD fully functional
+- [x] Optimistic UI updates with error rollback
+- [x] Auth guards on all protected routes
+- [x] Production Supabase configuration
+- [x] Database migrations with RLS policies

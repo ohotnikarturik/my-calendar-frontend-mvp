@@ -15,8 +15,8 @@ _For GitHub Copilot, Cursor, Claude Code, and other AI coding assistants_
 | ---------------- | ---------------------------------------------------------- |
 | **Project**      | Personal calendar app for birthdays, anniversaries, events |
 | **Purpose**      | Learning Angular while building useful tool                |
-| **Status**       | Phase 3 complete (auth + sync ready)                       |
-| **Architecture** | Angular 20 + Supabase + IndexedDB                          |
+| **Status**       | Phase 3 complete (Supabase-only architecture)              |
+| **Architecture** | Angular 20 + Supabase (cloud-only)                         |
 
 ## Copilot Workflow
 
@@ -48,8 +48,7 @@ _For GitHub Copilot, Cursor, Claude Code, and other AI coding assistants_
 - **Angular 20**: Standalone components, signals, reactive forms, OnPush
 - **Angular Material**: UI components (Material Design 3)
 - **FullCalendar**: Calendar views and interactions
-- **Supabase**: Auth and PostgreSQL database
-- **Dexie**: IndexedDB for offline-first storage
+- **Supabase**: Auth and PostgreSQL database (cloud-only)
 - **TypeScript**: Strict typing throughout
 
 ## Project Structure
@@ -116,29 +115,30 @@ npm run lint  # ESLint
 
 ### CalendarEventsService
 
-CRUD operations for events, auto-saves to IndexedDB.
+CRUD operations for events with direct Supabase integration. Uses optimistic updates for better UX.
 
-### StorageService
+### ContactsService
 
-IndexedDB persistence via Dexie.
+CRUD operations for contacts with direct Supabase integration.
+
+### OccasionsService
+
+CRUD operations for occasions (birthdays/anniversaries) with direct Supabase integration.
 
 ### SupabaseService
 
-Authentication and cloud sync. Has `DEV_MODE_BYPASS_AUTH` toggle.
-
-### SyncService
-
-Automatic background sync (debounced, periodic, on-reconnect).
+Authentication and PostgreSQL database operations. Has `DEV_MODE_BYPASS_AUTH` toggle for development.
 
 ### Service with Signals
 
 ```typescript
 import { Injectable, signal, computed, inject } from "@angular/core";
+import { SupabaseService } from "./supabase.service";
 
 @Injectable({ providedIn: "root" })
 export class MyService {
   // Use inject() for dependency injection (modern Angular approach)
-  private readonly storage = inject(StorageService);
+  private readonly supabase = inject(SupabaseService);
 
   // Private signal for internal state
   private readonly _items = signal<Item[]>([]);
@@ -149,13 +149,19 @@ export class MyService {
   // Computed signal for derived state
   readonly itemCount = computed(() => this._items().length);
 
-  // Async initialization
-  ngOnInit(): void {
+  constructor() {
+    // Initialize loads data from Supabase
     this.initialize();
   }
 
   private async initialize(): Promise<void> {
-    // Load data...
+    const items = await this.supabase.fetchItems();
+    this._items.set(items);
+  }
+
+  async reload(): Promise<void> {
+    // Manually refresh from Supabase
+    await this.initialize();
   }
 }
 ```

@@ -1,4 +1,23 @@
-# MyCalendarFrontendMvp
+# My Calendar - Frontend MVP
+
+**Personal calendar app** for managing birthdays, anniversaries, and important events.
+
+## Tech Stack
+
+- **Angular 20** - Standalone components, signals, reactive state
+- **Angular Material** - UI components (Material Design 3)
+- **FullCalendar** - Calendar views and interactions
+- **Supabase** - Authentication and PostgreSQL database
+- **TypeScript** - Strict typing throughout
+
+## Architecture
+
+Cloud-only architecture with direct Supabase integration:
+
+- All data stored in PostgreSQL via Supabase
+- Optimistic UI updates for better user experience
+- Authentication via email/password or Google OAuth
+- Row-level security (RLS) policies for data protection
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.3.
 

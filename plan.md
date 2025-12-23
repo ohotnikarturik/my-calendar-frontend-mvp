@@ -2,9 +2,9 @@
 
 _MVP personal calendar app for managing important dates with reminders_
 
-## Current Status: Phase 3 Complete ✅
+## Current Status: Phase 3.5 Complete ✅
 
-**App is functional** with local-first storage, Supabase auth/sync ready, and automatic background sync.
+**App is functional** with cloud-only Supabase storage, authentication, and optimistic updates for better UX.
 
 ---
 
@@ -15,7 +15,6 @@ _MVP personal calendar app for managing important dates with reminders_
 - FullCalendar integration with month/week/day views
 - Event CRUD (create, read, update, delete)
 - Event modal with date/time pickers
-- IndexedDB persistence via Dexie
 - Responsive Material Design UI
 
 ### ✅ Phase 2: Contacts & Occasions
@@ -27,12 +26,29 @@ _MVP personal calendar app for managing important dates with reminders_
 
 ### ✅ Phase 3: Supabase Integration
 
-- Email/password and Google OAuth authentication
-- Cloud sync with PostgreSQL backend
+- Email/password and Google OAuth authentication (UI complete)
+- Cloud sync with PostgreSQL backend (service complete)
 - Automatic background sync (debounced, periodic, on-reconnect)
 - Offline grace period for token expiration
 - Auth guards on all protected routes
 - Settings page with sync preferences
+- Local-first architecture (IndexedDB + Supabase sync)
+
+### ✅ Phase 3.5: Architecture Simplification
+
+- Removed IndexedDB and Dexie dependency (~1000 lines)
+- Simplified to cloud-only Supabase architecture
+- Direct CRUD operations with optimistic UI updates
+- Removed StorageService and SyncService
+- Refactored all data services to use SupabaseService directly
+- Maintained good UX with optimistic updates and error rollback
+
+**Finalization Steps (in progress):**
+
+- [ ] Run database migrations in Supabase SQL Editor
+- [ ] Configure Google OAuth in Supabase + Google Cloud Console
+- [ ] Test end-to-end auth and sync flows
+- [ ] Update production environment credentials
 
 ---
 
