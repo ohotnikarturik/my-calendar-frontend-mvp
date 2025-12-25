@@ -37,10 +37,12 @@ _Active work items for My Calendar MVP_
 
 **Goal**: Remove development bypass and require real authentication
 
-- [ ] Set `DEV_MODE_BYPASS_AUTH = false` in [supabase.service.ts](src/app/services/supabase.service.ts)
-- [ ] Test that unauthenticated users are redirected to login
-- [ ] Verify auth guards work on all protected routes
-- [ ] Test session expiration handling
+- [x] Set `DEV_MODE_BYPASS_AUTH = false` in [supabase.service.ts](src/app/services/supabase.service.ts)
+- [x] Test that unauthenticated users are redirected to login
+- [x] Verify auth guards work on all protected routes
+- [x] Test session expiration handling
+
+**Status**: ✅ Complete - All routes now require authentication. See [AUTH_TEST_PLAN.md](AUTH_TEST_PLAN.md) for testing instructions.
 
 ---
 
@@ -98,6 +100,11 @@ _Active work items for My Calendar MVP_
 
 ## Completed Recently ✅
 
+- [x] Global error handler with user-friendly messages
+- [x] Material Snackbar notifications (success/error/warning/info)
+- [x] Retry buttons for failed operations
+- [x] Loading states with mat-spinner across all pages
+- [x] Comprehensive form validation feedback
 - [x] Removed IndexedDB/Dexie (~1000 lines of code)
 - [x] Simplified to cloud-only Supabase architecture
 - [x] Google OAuth authentication working

@@ -168,7 +168,7 @@ export class OccasionsComponent {
     try {
       if (isEdit) {
         await this.occasionsService.update(occasion.id, occasion);
-        this.showMessage('Occasion updated successfully');
+        // Success notification shown by service
       } else {
         await this.occasionsService.add({
           contactId: occasion.contactId,
@@ -181,21 +181,21 @@ export class OccasionsComponent {
           reminderDaysBefore: occasion.reminderDaysBefore,
           notes: occasion.notes,
         });
-        this.showMessage('Occasion added successfully');
+        // Success notification shown by service
       }
     } catch (error) {
       console.error('Failed to save occasion:', error);
-      this.showMessage('Failed to save occasion. Please try again.', true);
+      // Error notification shown by service
     }
   }
 
   private async handleDeleteOccasion(occasionId: string): Promise<void> {
     try {
       await this.occasionsService.remove(occasionId);
-      this.showMessage('Occasion deleted');
+      // Success notification shown by service
     } catch (error) {
       console.error('Failed to delete occasion:', error);
-      this.showMessage('Failed to delete occasion. Please try again.', true);
+      // Error notification shown by service
     }
   }
 

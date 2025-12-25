@@ -9,6 +9,22 @@ export class NotificationService {
   private readonly snackBar = inject(MatSnackBar);
 
   /**
+   * Check if error is a network error
+   */
+  private isNetworkError(error: unknown): boolean {
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      return (
+        message.includes('networkerror') ||
+        message.includes('failed to fetch') ||
+        message.includes('network') ||
+        message.includes('offline')
+      );
+    }
+    return false;
+  }
+
+  /**
    * Show a success message
    */
   success(message: string, duration = 3000): void {
@@ -70,5 +86,25 @@ export class NotificationService {
     snackBarRef.onAction().subscribe(() => {
       retryFn();
     });
+  }
+
+  /**
+   * Show an error with automatic network detection and retry option
+   */
+  errorWithAutoRetry(
+    error: unknown,
+    defaultMessage: string,
+    retryFn?: () => void
+  ): void {
+    const isNetwork = this.isNetworkError(error);
+    const message = isNetwork
+      ? 'Network error. Please check your connection and try again.'
+      : defaultMessage;
+
+    if (isNetwork && retryFn) {
+      this.errorWithRetry(message, retryFn);
+    } else {
+      this.error(message);
+    }
   }
 }

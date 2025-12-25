@@ -202,10 +202,10 @@ export class Calendar implements AfterViewInit, OnDestroy {
       if (result?.action === 'save') {
         try {
           await this.eventsSvc.add(result.event);
-          this.showMessage('Event created successfully');
+          // Success notification shown by service
         } catch (error) {
           console.error('Failed to create event:', error);
-          this.showMessage('Failed to create event. Please try again.', true);
+          // Error notification shown by service
         }
       }
       this.calendar?.unselect();
@@ -230,18 +230,18 @@ export class Calendar implements AfterViewInit, OnDestroy {
       if (result?.action === 'save') {
         try {
           await this.eventsSvc.update(result.event.id, result.event);
-          this.showMessage('Event updated successfully');
+          // Success notification shown by service
         } catch (error) {
           console.error('Failed to update event:', error);
-          this.showMessage('Failed to update event. Please try again.', true);
+          // Error notification shown by service
         }
       } else if (result?.action === 'delete') {
         try {
           await this.eventsSvc.remove(result.eventId);
-          this.showMessage('Event deleted');
+          // Success notification shown by service
         } catch (error) {
           console.error('Failed to delete event:', error);
-          this.showMessage('Failed to delete event. Please try again.', true);
+          // Error notification shown by service
         }
       }
     });
@@ -259,11 +259,11 @@ export class Calendar implements AfterViewInit, OnDestroy {
         updatedAt: new Date().toISOString(),
       })
       .then(() => {
-        this.showMessage('Event moved');
+        // Success notification shown by service
       })
       .catch((error) => {
         console.error('Failed to update event:', error);
-        this.showMessage('Failed to move event. Please try again.', true);
+        // Error notification shown by service
         // Revert the drag
         dropInfo.revert();
       });
@@ -281,11 +281,11 @@ export class Calendar implements AfterViewInit, OnDestroy {
         updatedAt: new Date().toISOString(),
       })
       .then(() => {
-        this.showMessage('Event resized');
+        // Success notification shown by service
       })
       .catch((error) => {
         console.error('Failed to resize event:', error);
-        this.showMessage('Failed to resize event. Please try again.', true);
+        // Error notification shown by service
       });
   }
 

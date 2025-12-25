@@ -136,7 +136,7 @@ export class ContactsComponent {
     try {
       if (isEdit) {
         await this.contactsService.update(contact.id, contact);
-        this.showMessage('Contact updated successfully');
+        // Success notification shown by service
       } else {
         await this.contactsService.add({
           firstName: contact.firstName,
@@ -145,11 +145,11 @@ export class ContactsComponent {
           phone: contact.phone,
           notes: contact.notes,
         });
-        this.showMessage('Contact added successfully');
+        // Success notification shown by service
       }
     } catch (error) {
       console.error('Failed to save contact:', error);
-      this.showMessage('Failed to save contact. Please try again.', true);
+      // Error notification shown by service
     }
   }
 
@@ -159,10 +159,10 @@ export class ContactsComponent {
   private async handleDeleteContact(contactId: string): Promise<void> {
     try {
       await this.contactsService.remove(contactId);
-      this.showMessage('Contact deleted');
+      // Success notification shown by service
     } catch (error) {
       console.error('Failed to delete contact:', error);
-      this.showMessage('Failed to delete contact. Please try again.', true);
+      // Error notification shown by service
     }
   }
 

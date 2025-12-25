@@ -18,6 +18,7 @@ import { SupabaseService } from '../../../services/supabase.service';
 import { CalendarEventsService } from '../../../services/calendar-events.service';
 import { ContactsService } from '../../../services/contacts.service';
 import { OccasionsService } from '../../../services/occasions.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-auth-callback',
@@ -52,6 +53,7 @@ export class AuthCallback implements OnInit {
   private readonly eventsService = inject(CalendarEventsService);
   private readonly contactsService = inject(ContactsService);
   private readonly occasionsService = inject(OccasionsService);
+  private readonly notificationSvc = inject(NotificationService);
   private readonly router = inject(Router);
 
   async ngOnInit(): Promise<void> {
@@ -74,9 +76,11 @@ export class AuthCallback implements OnInit {
         this.contactsService.reload(),
         this.occasionsService.reload(),
       ]);
+      this.notificationSvc.success('Login successful!');
       this.router.navigate(['/']);
     } else {
       // Not authenticated, redirect to login
+      this.notificationSvc.error('Login failed. Please try again.');
       this.router.navigate(['/auth/login']);
     }
   }

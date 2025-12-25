@@ -32,6 +32,7 @@ import { SupabaseService } from '../../../services/supabase.service';
 import { CalendarEventsService } from '../../../services/calendar-events.service';
 import { ContactsService } from '../../../services/contacts.service';
 import { OccasionsService } from '../../../services/occasions.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -56,6 +57,7 @@ export class Login {
   private readonly eventsService = inject(CalendarEventsService);
   private readonly contactsService = inject(ContactsService);
   private readonly occasionsService = inject(OccasionsService);
+  private readonly notificationSvc = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -102,10 +104,13 @@ export class Login {
         const errorMsg =
           result.error?.message ?? 'Login failed. Please try again.';
         this.errorMessage.set(errorMsg);
+        this.notificationSvc.error(errorMsg);
       }
     } catch (error) {
       console.error('Login error:', error);
-      this.errorMessage.set('An unexpected error occurred. Please try again.');
+      const errorMsg = 'An unexpected error occurred. Please try again.';
+      this.errorMessage.set(errorMsg);
+      this.notificationSvc.error(errorMsg);
     } finally {
       this.isLoading.set(false);
     }
