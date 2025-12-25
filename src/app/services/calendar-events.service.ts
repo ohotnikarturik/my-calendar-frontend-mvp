@@ -58,9 +58,8 @@ export class CalendarEventsService {
       this._events.set(events);
     } catch (error) {
       console.error('Failed to reload events:', error);
-      this.notificationSvc.errorWithRetry(
-        'Failed to load events',
-        () => this.reload()
+      this.notificationSvc.errorWithRetry('Failed to load events', () =>
+        this.reload()
       );
     } finally {
       this._loading.set(false);

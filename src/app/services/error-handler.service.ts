@@ -22,12 +22,18 @@ export class GlobalErrorHandler implements ErrorHandler {
   private getErrorMessage(error: Error | unknown): string {
     if (error instanceof Error) {
       // Handle network errors
-      if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+      if (
+        error.message.includes('NetworkError') ||
+        error.message.includes('Failed to fetch')
+      ) {
         return 'Network error. Please check your connection and try again.';
       }
 
       // Handle Supabase errors
-      if (error.message.includes('AuthApiError') || error.message.includes('authentication')) {
+      if (
+        error.message.includes('AuthApiError') ||
+        error.message.includes('authentication')
+      ) {
         return 'Authentication error. Please log in again.';
       }
 

@@ -76,9 +76,8 @@ export class ContactsService {
       this._contacts.set(contacts);
     } catch (error) {
       console.error('Failed to reload contacts:', error);
-      this.notificationSvc.errorWithRetry(
-        'Failed to load contacts',
-        () => this.reload()
+      this.notificationSvc.errorWithRetry('Failed to load contacts', () =>
+        this.reload()
       );
     } finally {
       this._loading.set(false);

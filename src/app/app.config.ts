@@ -1,6 +1,14 @@
-import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  ErrorHandler,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
+import {
+  MAT_DATE_LOCALE,
+  provideNativeDateAdapter,
+} from '@angular/material/core';
 
 import { routes } from './app.routes';
 import { GlobalErrorHandler } from './services/error-handler.service';
@@ -25,7 +33,11 @@ function detectLocale(): string {
 
   const finnishCandidate = candidates.find((locale) => {
     const normalized = locale.toLowerCase();
-    return normalized === 'fi' || normalized.startsWith('fi-') || normalized.endsWith('-fi');
+    return (
+      normalized === 'fi' ||
+      normalized.startsWith('fi-') ||
+      normalized.endsWith('-fi')
+    );
   });
 
   if (finnishCandidate) {
@@ -63,6 +75,6 @@ export const appConfig: ApplicationConfig = {
       useClass: GlobalErrorHandler,
     },
     provideNativeDateAdapter(),
-    provideRouter(routes)
-  ]
+    provideRouter(routes),
+  ],
 };

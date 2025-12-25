@@ -112,9 +112,8 @@ export class OccasionsService {
       this._occasions.set(occasions);
     } catch (error) {
       console.error('Failed to reload occasions:', error);
-      this.notificationSvc.errorWithRetry(
-        'Failed to load occasions',
-        () => this.reload()
+      this.notificationSvc.errorWithRetry('Failed to load occasions', () =>
+        this.reload()
       );
     } finally {
       this._loading.set(false);
@@ -148,7 +147,9 @@ export class OccasionsService {
       this._occasions.update((list) =>
         list.filter((o) => o.id !== occasion.id)
       );
-      this.notificationSvc.error('Failed to create occasion. Please try again.');
+      this.notificationSvc.error(
+        'Failed to create occasion. Please try again.'
+      );
       throw error;
     }
 
@@ -190,7 +191,9 @@ export class OccasionsService {
       this._occasions.update((list) =>
         list.map((o) => (o.id === id ? currentOccasion : o))
       );
-      this.notificationSvc.error('Failed to update occasion. Please try again.');
+      this.notificationSvc.error(
+        'Failed to update occasion. Please try again.'
+      );
       throw error;
     }
   }
@@ -215,7 +218,9 @@ export class OccasionsService {
     } catch (error) {
       console.error('Failed to delete occasion:', error);
       this._occasions.update((list) => [...list, occasionToRemove]);
-      this.notificationSvc.error('Failed to delete occasion. Please try again.');
+      this.notificationSvc.error(
+        'Failed to delete occasion. Please try again.'
+      );
       throw error;
     }
   }

@@ -34,7 +34,13 @@ import {
 @Component({
   selector: 'calendar',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule],
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './calendar.html',
   styleUrls: ['./calendar.scss'],
 })
