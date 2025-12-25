@@ -19,12 +19,14 @@ import type { CalendarEvent } from '../types/event.type';
 import { SupabaseService } from './supabase.service';
 import { ContactsService } from './contacts.service';
 import { DateUtilsService } from './date-utils.service';
+import { NotificationService } from './notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class OccasionsService {
   private readonly supabase = inject(SupabaseService);
   private readonly contactsService = inject(ContactsService);
   private readonly dateUtils = inject(DateUtilsService);
+  private readonly notificationSvc = inject(NotificationService);
 
   // Private signals for internal state
   private readonly _occasions = signal<Occasion[]>([]);
@@ -93,6 +95,7 @@ export class OccasionsService {
       }
     } catch (error) {
       console.error('Failed to initialize occasions:', error);
+      this.notificationSvc.error('Failed to load occasions. Please try again.');
     } finally {
       this._loading.set(false);
     }
@@ -109,6 +112,10 @@ export class OccasionsService {
       this._occasions.set(occasions);
     } catch (error) {
       console.error('Failed to reload occasions:', error);
+      this.notificationSvc.errorWithRetry(
+        'Failed to load occasions',
+        () => this.reload()
+      );
     } finally {
       this._loading.set(false);
     }
@@ -135,11 +142,13 @@ export class OccasionsService {
       if (!success) {
         throw new Error('Failed to save occasion to Supabase');
       }
+      this.notificationSvc.success('Occasion created successfully');
     } catch (error) {
       console.error('Failed to add occasion:', error);
       this._occasions.update((list) =>
         list.filter((o) => o.id !== occasion.id)
       );
+      this.notificationSvc.error('Failed to create occasion. Please try again.');
       throw error;
     }
 
@@ -175,11 +184,13 @@ export class OccasionsService {
       if (!success) {
         throw new Error('Failed to update occasion in Supabase');
       }
+      this.notificationSvc.success('Occasion updated successfully');
     } catch (error) {
       console.error('Failed to update occasion:', error);
       this._occasions.update((list) =>
         list.map((o) => (o.id === id ? currentOccasion : o))
       );
+      this.notificationSvc.error('Failed to update occasion. Please try again.');
       throw error;
     }
   }
@@ -200,9 +211,11 @@ export class OccasionsService {
       if (!success) {
         throw new Error('Failed to delete occasion from Supabase');
       }
+      this.notificationSvc.success('Occasion deleted successfully');
     } catch (error) {
       console.error('Failed to delete occasion:', error);
       this._occasions.update((list) => [...list, occasionToRemove]);
+      this.notificationSvc.error('Failed to delete occasion. Please try again.');
       throw error;
     }
   }

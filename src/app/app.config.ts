@@ -1,8 +1,9 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, ErrorHandler, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 
 import { routes } from './app.routes';
+import { GlobalErrorHandler } from './services/error-handler.service';
 
 function detectLocale(): string {
   const fallbackLocale = 'en-US';
@@ -56,6 +57,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: MAT_DATE_LOCALE,
       useFactory: () => detectLocale(),
+    },
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler,
     },
     provideNativeDateAdapter(),
     provideRouter(routes)

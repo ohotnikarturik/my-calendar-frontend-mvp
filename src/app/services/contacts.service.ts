@@ -12,10 +12,12 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import type { Contact, NewContact } from '../types/contact.type';
 import { SupabaseService } from './supabase.service';
+import { NotificationService } from './notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class ContactsService {
   private readonly supabase = inject(SupabaseService);
+  private readonly notificationSvc = inject(NotificationService);
 
   // Private signals for internal state management
   // Learning note: Using private signals with public readonly accessors
@@ -57,6 +59,7 @@ export class ContactsService {
       }
     } catch (error) {
       console.error('Failed to initialize contacts:', error);
+      this.notificationSvc.error('Failed to load contacts. Please try again.');
     } finally {
       this._loading.set(false);
     }
@@ -73,6 +76,10 @@ export class ContactsService {
       this._contacts.set(contacts);
     } catch (error) {
       console.error('Failed to reload contacts:', error);
+      this.notificationSvc.errorWithRetry(
+        'Failed to load contacts',
+        () => this.reload()
+      );
     } finally {
       this._loading.set(false);
     }
@@ -102,10 +109,12 @@ export class ContactsService {
       if (!success) {
         throw new Error('Failed to save contact to Supabase');
       }
+      this.notificationSvc.success('Contact created successfully');
     } catch (error) {
       console.error('Failed to add contact:', error);
       // Revert on error
       this._contacts.update((list) => list.filter((c) => c.id !== contact.id));
+      this.notificationSvc.error('Failed to create contact. Please try again.');
       throw error;
     }
 
@@ -144,12 +153,14 @@ export class ContactsService {
       if (!success) {
         throw new Error('Failed to update contact in Supabase');
       }
+      this.notificationSvc.success('Contact updated successfully');
     } catch (error) {
       console.error('Failed to update contact:', error);
       // Revert on error
       this._contacts.update((list) =>
         list.map((c) => (c.id === id ? currentContact : c))
       );
+      this.notificationSvc.error('Failed to update contact. Please try again.');
       throw error;
     }
   }
@@ -172,10 +183,12 @@ export class ContactsService {
       if (!success) {
         throw new Error('Failed to delete contact from Supabase');
       }
+      this.notificationSvc.success('Contact deleted successfully');
     } catch (error) {
       console.error('Failed to delete contact:', error);
       // Revert on error
       this._contacts.update((list) => [...list, contactToRemove]);
+      this.notificationSvc.error('Failed to delete contact. Please try again.');
       throw error;
     }
   }
