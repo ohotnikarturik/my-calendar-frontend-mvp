@@ -116,23 +116,42 @@ export class Signup {
       const result = await this.supabase.signUp(email, password);
 
       if (result.success) {
-        // Show success message about email confirmation
-        this.successMessage.set(
-          "Account created successfully! Please check your email to confirm your account before signing in. (Check spam folder if you don't see it)"
-        );
-        // Don't reset form - user might need to see the email they used
-        // Disable form inputs instead
-        this.signupForm.disable();
-        this.isSignupComplete.set(true);
-        // Show success notification
-        this.snackBar.open(
-          'Account created! Check your email to confirm.',
-          'Close',
-          {
-            duration: 5000,
-            panelClass: ['success-snackbar'],
-          }
-        );
+        // Check if user is immediately logged in (email confirmation disabled)
+        // Learning note: When email confirmation is disabled in Supabase,
+        // the user is automatically logged in after signup
+        const session = this.supabase.session();
+
+        if (session) {
+          // Email confirmation disabled - user is logged in immediately
+          this.snackBar.open(
+            'Account created successfully! Welcome!',
+            'Close',
+            {
+              duration: 3000,
+              panelClass: ['success-snackbar'],
+            }
+          );
+          // Redirect to home page
+          await this.router.navigate(['/home']);
+        } else {
+          // Email confirmation enabled - user needs to check email
+          this.successMessage.set(
+            "Account created successfully! Please check your email to confirm your account before signing in. (Check spam folder if you don't see it)"
+          );
+          // Don't reset form - user might need to see the email they used
+          // Disable form inputs instead
+          this.signupForm.disable();
+          this.isSignupComplete.set(true);
+          // Show success notification
+          this.snackBar.open(
+            'Account created! Check your email to confirm.',
+            'Close',
+            {
+              duration: 5000,
+              panelClass: ['success-snackbar'],
+            }
+          );
+        }
       } else {
         // Handle specific error cases
         let errorMsg =

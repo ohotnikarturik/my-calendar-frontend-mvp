@@ -254,8 +254,17 @@ export class SupabaseService {
       } = await this.supabase.auth.getSession();
 
       if (session) {
-        this._session.set(session);
-        this._currentUser.set(session.user);
+        // Validate that the user still exists in the database
+        const userStillExists = await this.validateUserExists(session.user.id);
+
+        if (userStillExists) {
+          this._session.set(session);
+          this._currentUser.set(session.user);
+        } else {
+          // User was deleted from database - force logout
+          console.warn('User no longer exists in database - logging out');
+          await this.forceLogout();
+        }
       }
 
       // Listen for auth state changes (login, logout, token refresh)
@@ -272,6 +281,55 @@ export class SupabaseService {
       console.error('Failed to initialize auth:', error);
     } finally {
       this._isInitialized.set(true);
+    }
+  }
+
+  /**
+   * Validate that the authenticated user still exists in the database
+   * Returns false if user was deleted from Supabase dashboard
+   */
+  private async validateUserExists(userId: string): Promise<boolean> {
+    if (!this.supabase) return false;
+
+    try {
+      // Try to fetch the user's auth data
+      const { data, error } = await this.supabase.auth.getUser();
+
+      if (error || !data.user) {
+        console.warn('User validation failed:', error?.message);
+        return false;
+      }
+
+      return data.user.id === userId;
+    } catch (error) {
+      console.error('Error validating user:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Force logout when user is deleted or session is invalid
+   * Clears local storage and resets auth state
+   */
+  private async forceLogout(): Promise<void> {
+    if (!this.supabase) return;
+
+    try {
+      // Sign out from Supabase (clears tokens)
+      await this.supabase.auth.signOut();
+
+      // Clear auth state
+      this._session.set(null);
+      this._currentUser.set(null);
+
+      // Redirect to login
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error during force logout:', error);
+      // Even if signOut fails, clear local state and redirect
+      this._session.set(null);
+      this._currentUser.set(null);
+      window.location.href = '/login';
     }
   }
 
@@ -515,6 +573,33 @@ export class SupabaseService {
   // They're designed to work with the SyncService for offline-first functionality.
 
   /**
+   * Handle database errors and detect deleted/invalid users
+   * Returns true if error was handled (user logged out), false otherwise
+   */
+  private async handleDatabaseError(error: any): Promise<boolean> {
+    // Check for common "user deleted" error patterns
+    const errorMessage = error?.message?.toLowerCase() || '';
+    const errorCode = error?.code;
+
+    // JWT expired or invalid user errors
+    const isInvalidUser =
+      errorCode === 'PGRST301' || // JWT expired
+      errorCode === '42501' || // Insufficient privilege (RLS blocked)
+      errorMessage.includes('jwt') ||
+      errorMessage.includes('expired') ||
+      errorMessage.includes('invalid') ||
+      errorMessage.includes('not found');
+
+    if (isInvalidUser) {
+      console.warn('Detected invalid/deleted user - forcing logout');
+      await this.forceLogout();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Convert local CalendarEvent to Supabase format
    * Learning note: We need to handle type conversions between local and remote formats
    */
@@ -676,12 +761,15 @@ export class SupabaseService {
 
       if (error) {
         console.error('Failed to fetch events:', error);
+        // Check if user was deleted
+        await this.handleDatabaseError(error);
         return [];
       }
 
       return (data as SupabaseEvent[]).map((e) => this.fromSupabaseEvent(e));
     } catch (error) {
       console.error('Error fetching events:', error);
+      await this.handleDatabaseError(error);
       return [];
     }
   }
@@ -767,6 +855,8 @@ export class SupabaseService {
 
       if (error) {
         console.error('Failed to fetch contacts:', error);
+        // Check if user was deleted
+        await this.handleDatabaseError(error);
         return [];
       }
 
@@ -775,6 +865,7 @@ export class SupabaseService {
       );
     } catch (error) {
       console.error('Error fetching contacts:', error);
+      await this.handleDatabaseError(error);
       return [];
     }
   }
@@ -862,6 +953,8 @@ export class SupabaseService {
 
       if (error) {
         console.error('Failed to fetch occasions:', error);
+        // Check if user was deleted
+        await this.handleDatabaseError(error);
         return [];
       }
 
@@ -870,6 +963,7 @@ export class SupabaseService {
       );
     } catch (error) {
       console.error('Error fetching occasions:', error);
+      await this.handleDatabaseError(error);
       return [];
     }
   }
