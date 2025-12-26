@@ -16,6 +16,7 @@ import {
   MatDialogModule,
   MatDialogRef,
   MAT_DIALOG_DATA,
+  MatDialog,
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -34,6 +35,7 @@ import type {
   EventCategory,
 } from '../../types/event.type';
 import { DateUtilsService } from '../../services/date-utils.service';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
 export interface EventModalData {
   event?: CalendarEvent;
@@ -93,6 +95,7 @@ export class EventModalComponent {
   private readonly modalData = inject(MAT_DIALOG_DATA) as EventModalData;
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly dateUtils = inject(DateUtilsService);
+  private readonly dialog = inject(MatDialog);
   private readonly hasSubmitted = signal(false);
 
   readonly titleMaxLength = 120;
@@ -263,7 +266,23 @@ export class EventModalComponent {
       return;
     }
 
-    this.dialogRef.close({ action: 'delete', eventId: id });
+    // Show confirmation dialog
+    const confirmRef = this.dialog.open(ConfirmDialog, {
+      data: {
+        title: 'Delete Event?',
+        message:
+          'This will permanently delete this event. This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        isDangerous: true,
+      },
+    });
+
+    confirmRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.dialogRef.close({ action: 'delete', eventId: id });
+      }
+    });
   }
 
   onCancel(): void {

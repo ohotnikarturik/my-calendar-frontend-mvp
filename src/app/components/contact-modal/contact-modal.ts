@@ -28,6 +28,7 @@ import {
   MatDialogModule,
   MatDialogRef,
   MAT_DIALOG_DATA,
+  MatDialog,
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -36,6 +37,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
 
 import type { Contact } from '../../types/contact.type';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
 /**
  * Data passed to the contact modal
@@ -91,6 +93,7 @@ export class ContactModalComponent {
     MAT_DIALOG_DATA
   ) as ContactModalData | null;
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly dialog = inject(MatDialog);
 
   // Track if form has been submitted (for validation display)
   private readonly hasSubmitted = signal(false);
@@ -249,16 +252,32 @@ export class ContactModalComponent {
 
   /**
    * Handle delete button click
-   * Closes dialog with delete action
+   * Shows confirmation dialog before deleting
    */
   onDelete(): void {
     const id = this.modalData?.contact?.id;
     if (!id) return;
 
-    this.dialogRef.close({
-      action: 'delete',
-      contactId: id,
-    } as ContactModalResult);
+    // Show confirmation dialog
+    const confirmRef = this.dialog.open(ConfirmDialog, {
+      data: {
+        title: 'Delete Contact?',
+        message:
+          'This will permanently delete this contact and all associated occasions. This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        isDangerous: true,
+      },
+    });
+
+    confirmRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.dialogRef.close({
+          action: 'delete',
+          contactId: id,
+        } as ContactModalResult);
+      }
+    });
   }
 
   /**

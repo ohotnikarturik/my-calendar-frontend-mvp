@@ -1,0 +1,21 @@
+h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .warning-icon {
+    color: var(--mat-sys-error, #ba1a1a);
+  }
+}
+
+mat-dialog-content {
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant, #49454f);
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  gap: 8px;
+}

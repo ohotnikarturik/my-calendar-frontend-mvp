@@ -26,6 +26,7 @@ import {
   MatDialogModule,
   MatDialogRef,
   MAT_DIALOG_DATA,
+  MatDialog,
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -42,6 +43,7 @@ import type { Occasion, OccasionType } from '../../types/occasion.type';
 import { OCCASION_TYPE_OPTIONS } from '../../types/occasion.type';
 import type { Contact } from '../../types/contact.type';
 import { ContactsService } from '../../services/contacts.service';
+import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 
 /**
  * Data passed to the occasion modal
@@ -111,6 +113,7 @@ export class OccasionModalComponent implements OnInit {
   ) as OccasionModalData | null;
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly contactsService = inject(ContactsService);
+  private readonly dialog = inject(MatDialog);
 
   private readonly hasSubmitted = signal(false);
 
@@ -344,10 +347,26 @@ export class OccasionModalComponent implements OnInit {
     const id = this.modalData?.occasion?.id;
     if (!id) return;
 
-    this.dialogRef.close({
-      action: 'delete',
-      occasionId: id,
-    } as OccasionModalResult);
+    // Show confirmation dialog
+    const confirmRef = this.dialog.open(ConfirmDialog, {
+      data: {
+        title: 'Delete Occasion?',
+        message:
+          'This will permanently delete this occasion. This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        isDangerous: true,
+      },
+    });
+
+    confirmRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.dialogRef.close({
+          action: 'delete',
+          occasionId: id,
+        } as OccasionModalResult);
+      }
+    });
   }
 
   onCancel(): void {
