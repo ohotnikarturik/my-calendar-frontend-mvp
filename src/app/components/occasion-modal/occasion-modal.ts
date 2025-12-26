@@ -204,14 +204,38 @@ export class OccasionModalComponent implements OnInit {
 
   readonly showYearField = computed(() => this.currentFormState().hasYear);
 
+  // For edit mode: require form to be dirty (changed) before allowing submit
+  // For create mode: always allow submit if valid
   readonly canSubmit = computed(() => {
     const status = this.formStatus();
     const state = this.currentFormState();
-    return (
+    const isValid =
       status === 'VALID' &&
       state.contactId.length > 0 &&
-      state.title.trim().length > 0
-    );
+      state.title.trim().length > 0;
+
+    if (!this.isEdit()) {
+      return isValid; // Create mode: just check validity
+    }
+
+    // Edit mode: check if values actually changed from initial
+    const current = this.currentFormState();
+    const initial = this.initialFormState;
+
+    const hasChanges =
+      current.contactId !== initial.contactId ||
+      current.title.trim() !== initial.title.trim() ||
+      current.type !== initial.type ||
+      current.date.getTime() !== initial.date.getTime() ||
+      current.hasYear !== initial.hasYear ||
+      current.year !== initial.year ||
+      current.repeatAnnually !== initial.repeatAnnually ||
+      current.reminderEnabled !== initial.reminderEnabled ||
+      JSON.stringify([...current.reminderDaysBefore].sort()) !==
+        JSON.stringify([...initial.reminderDaysBefore].sort()) ||
+      current.notes.trim() !== initial.notes.trim();
+
+    return isValid && hasChanges;
   });
 
   // Selected contact name for display

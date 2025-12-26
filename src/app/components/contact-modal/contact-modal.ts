@@ -188,15 +188,32 @@ export class ContactModalComponent {
     return `${firstName} ${lastName}`.trim() || 'New Contact';
   });
 
-  // Form can be submitted when valid and has required fields
+  // For edit mode: require form to be dirty (changed) before allowing submit
+  // For create mode: always allow submit if valid
   readonly canSubmit = computed(() => {
     const status = this.formStatus();
     const state = this.currentFormState();
-    return (
+    const isValid =
       status === 'VALID' &&
       state.firstName.trim().length > 0 &&
-      state.lastName.trim().length > 0
-    );
+      state.lastName.trim().length > 0;
+
+    if (!this.isEdit()) {
+      return isValid; // Create mode: just check validity
+    }
+
+    // Edit mode: check if values actually changed from initial
+    const current = this.currentFormState();
+    const initial = this.initialFormState;
+
+    const hasChanges =
+      current.firstName.trim() !== initial.firstName.trim() ||
+      current.lastName.trim() !== initial.lastName.trim() ||
+      current.email.trim() !== initial.email.trim() ||
+      current.phone.trim() !== initial.phone.trim() ||
+      current.notes.trim() !== initial.notes.trim();
+
+    return isValid && hasChanges;
   });
 
   /**

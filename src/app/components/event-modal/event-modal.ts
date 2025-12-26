@@ -209,9 +209,34 @@ export class EventModalComponent {
       }`
   );
 
+  // For edit mode: require form to be dirty (changed) before allowing submit
+  // For create mode: always allow submit if valid
   readonly canSubmit = computed(() => {
     const status = this.formStatus();
-    return status === 'VALID' && this.trimmedTitle().length > 0;
+    const isValid = status === 'VALID' && this.trimmedTitle().length > 0;
+
+    if (!this.isEdit()) {
+      return isValid; // Create mode: just check validity
+    }
+
+    // Edit mode: check if values actually changed from initial
+    const current = this.currentFormState();
+    const initial = this.initialFormState;
+
+    const hasChanges =
+      current.title.trim() !== initial.title.trim() ||
+      current.description.trim() !== initial.description.trim() ||
+      current.date.getTime() !== initial.date.getTime() ||
+      current.repeatAnnually !== initial.repeatAnnually ||
+      current.eventType !== initial.eventType ||
+      current.reminderEnabled !== initial.reminderEnabled ||
+      JSON.stringify([...current.reminderDaysBefore].sort()) !==
+        JSON.stringify([...initial.reminderDaysBefore].sort()) ||
+      current.category !== initial.category ||
+      current.color !== initial.color ||
+      current.notes.trim() !== initial.notes.trim();
+
+    return isValid && hasChanges;
   });
 
   shouldShowError(control: 'title' | 'date' | 'eventType'): boolean {
