@@ -62,6 +62,7 @@
           matSuffix
           type="button"
           (click)="togglePasswordVisibility()"
+          [disabled]="signupForm.disabled"
           [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
         >
           <mat-icon>{{
@@ -92,6 +93,7 @@
           matSuffix
           type="button"
           (click)="toggleConfirmPasswordVisibility()"
+          [disabled]="signupForm.disabled"
           [attr.aria-label]="
             hideConfirmPassword() ? 'Show password' : 'Hide password'
           "
@@ -133,7 +135,7 @@
       mat-stroked-button
       class="full-width google-button"
       (click)="onGoogleSignup()"
-      [disabled]="isLoading()"
+      [disabled]="isLoading() || isSignupComplete()"
     >
       <mat-icon class="google-icon">g_mobiledata</mat-icon>
       Continue with Google
@@ -141,9 +143,16 @@
   </mat-card-content>
 
   <mat-card-actions class="card-actions-center">
+    @if (!isSignupComplete()) {
     <span class="login-text">
       Already have an account?
       <a routerLink="/auth/login" class="login-link">Sign in</a>
     </span>
+    } @else {
+    <span class="login-text success-text">
+      <mat-icon>check_circle</mat-icon>
+      Check your email to activate your account
+    </span>
+    }
   </mat-card-actions>
 </mat-card>

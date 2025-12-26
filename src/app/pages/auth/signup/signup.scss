@@ -150,6 +150,20 @@
       text-decoration: underline;
     }
   }
+
+  &.success-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--mat-sys-tertiary, #4a6c3e);
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
 }
 
 // Dark mode adjustments
