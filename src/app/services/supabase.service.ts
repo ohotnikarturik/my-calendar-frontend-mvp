@@ -336,6 +336,9 @@ export class SupabaseService {
    * Sign up with email and password
    * Learning note: By default, Supabase sends a confirmation email.
    * User needs to confirm email before they can sign in.
+   *
+   * Important: Supabase returns success even if email already exists (security feature)
+   * to prevent email enumeration attacks. Check for identities to detect this case.
    */
   async signUp(email: string, password: string): Promise<AuthResult> {
     if (!this.supabase) {
@@ -356,6 +359,24 @@ export class SupabaseService {
 
       if (error) {
         return { success: false, error };
+      }
+
+      // Check if user already exists with this email
+      // If identities array is empty, the email is already registered
+      if (
+        data.user &&
+        data.user.identities &&
+        data.user.identities.length === 0
+      ) {
+        return {
+          success: false,
+          error: {
+            message:
+              'This email is already registered. Please sign in instead or use a different email.',
+            name: 'AuthApiError',
+            status: 400,
+          } as AuthError,
+        };
       }
 
       return { success: true, user: data.user ?? undefined };

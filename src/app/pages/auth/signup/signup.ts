@@ -91,6 +91,7 @@ export class Signup {
 
   // UI state
   readonly isLoading = signal(false);
+  readonly isSignupComplete = signal(false);
   readonly hidePassword = signal(true);
   readonly hideConfirmPassword = signal(true);
   readonly errorMessage = signal<string | null>(null);
@@ -117,17 +118,50 @@ export class Signup {
       if (result.success) {
         // Show success message about email confirmation
         this.successMessage.set(
-          'Account created! Please check your email to confirm your account before signing in.'
+          "Account created successfully! Please check your email to confirm your account before signing in. (Check spam folder if you don't see it)"
         );
-        this.signupForm.reset();
+        // Don't reset form - user might need to see the email they used
+        // Disable form inputs instead
+        this.signupForm.disable();
+        this.isSignupComplete.set(true);
+        // Show success notification
+        this.snackBar.open(
+          'Account created! Check your email to confirm.',
+          'Close',
+          {
+            duration: 5000,
+            panelClass: ['success-snackbar'],
+          }
+        );
       } else {
-        const errorMsg =
+        // Handle specific error cases
+        let errorMsg =
           result.error?.message ?? 'Signup failed. Please try again.';
+
+        // Provide helpful message for common errors
+        if (errorMsg.includes('already registered')) {
+          errorMsg =
+            'This email is already registered. Please sign in instead or try a different email.';
+        } else if (errorMsg.includes('Invalid email')) {
+          errorMsg = 'Please enter a valid email address.';
+        } else if (errorMsg.includes('Password')) {
+          errorMsg = 'Password must be at least 6 characters long.';
+        }
+
         this.errorMessage.set(errorMsg);
+        this.snackBar.open(errorMsg, 'Close', {
+          duration: 5000,
+          panelClass: ['error-snackbar'],
+        });
       }
     } catch (error) {
       console.error('Signup error:', error);
-      this.errorMessage.set('An unexpected error occurred. Please try again.');
+      const errorMsg = 'An unexpected error occurred. Please try again.';
+      this.errorMessage.set(errorMsg);
+      this.snackBar.open(errorMsg, 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar'],
+      });
     } finally {
       this.isLoading.set(false);
     }

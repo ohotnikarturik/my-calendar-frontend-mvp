@@ -65,7 +65,7 @@
 
 .error-message {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 12px 16px;
   margin-bottom: 16px;
@@ -76,6 +76,24 @@
 
   mat-icon {
     flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+
+    .error-link {
+      color: var(--mat-sys-primary, #006c4c);
+      text-decoration: underline;
+      font-weight: 500;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
   }
 }
 

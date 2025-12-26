@@ -7,18 +7,23 @@
   <mat-card-content>
     <!-- Success message display -->
     @if (successMessage()) {
-      <div class="success-message">
-        <mat-icon>check_circle</mat-icon>
-        <span>{{ successMessage() }}</span>
-      </div>
+    <div class="success-message">
+      <mat-icon>check_circle</mat-icon>
+      <span>{{ successMessage() }}</span>
+    </div>
     }
 
     <!-- Error message display -->
     @if (errorMessage()) {
-      <div class="error-message">
-        <mat-icon>error_outline</mat-icon>
+    <div class="error-message">
+      <mat-icon>error_outline</mat-icon>
+      <div class="error-content">
         <span>{{ errorMessage() }}</span>
+        @if (errorMessage()?.includes('already registered')) {
+        <a routerLink="/auth/login" class="error-link">Go to Sign In</a>
+        }
       </div>
+    </div>
     }
 
     <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
@@ -33,11 +38,12 @@
           placeholder="your@email.com"
         />
         <mat-icon matPrefix>email</mat-icon>
-        @if (signupForm.get('email')?.hasError('required') && signupForm.get('email')?.touched) {
-          <mat-error>Email is required</mat-error>
-        }
-        @if (signupForm.get('email')?.hasError('email') && signupForm.get('email')?.touched) {
-          <mat-error>Please enter a valid email</mat-error>
+        @if (signupForm.get('email')?.hasError('required') &&
+        signupForm.get('email')?.touched) {
+        <mat-error>Email is required</mat-error>
+        } @if (signupForm.get('email')?.hasError('email') &&
+        signupForm.get('email')?.touched) {
+        <mat-error>Please enter a valid email</mat-error>
         }
       </mat-form-field>
 
@@ -58,13 +64,16 @@
           (click)="togglePasswordVisibility()"
           [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
         >
-          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-icon>{{
+            hidePassword() ? "visibility_off" : "visibility"
+          }}</mat-icon>
         </button>
-        @if (signupForm.get('password')?.hasError('required') && signupForm.get('password')?.touched) {
-          <mat-error>Password is required</mat-error>
-        }
-        @if (signupForm.get('password')?.hasError('minlength') && signupForm.get('password')?.touched) {
-          <mat-error>Password must be at least 6 characters</mat-error>
+        @if (signupForm.get('password')?.hasError('required') &&
+        signupForm.get('password')?.touched) {
+        <mat-error>Password is required</mat-error>
+        } @if (signupForm.get('password')?.hasError('minlength') &&
+        signupForm.get('password')?.touched) {
+        <mat-error>Password must be at least 6 characters</mat-error>
         }
       </mat-form-field>
 
@@ -83,15 +92,20 @@
           matSuffix
           type="button"
           (click)="toggleConfirmPasswordVisibility()"
-          [attr.aria-label]="hideConfirmPassword() ? 'Show password' : 'Hide password'"
+          [attr.aria-label]="
+            hideConfirmPassword() ? 'Show password' : 'Hide password'
+          "
         >
-          <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-icon>{{
+            hideConfirmPassword() ? "visibility_off" : "visibility"
+          }}</mat-icon>
         </button>
-        @if (signupForm.get('confirmPassword')?.hasError('required') && signupForm.get('confirmPassword')?.touched) {
-          <mat-error>Please confirm your password</mat-error>
-        }
-        @if (signupForm.get('confirmPassword')?.hasError('passwordMismatch') && signupForm.get('confirmPassword')?.touched) {
-          <mat-error>Passwords do not match</mat-error>
+        @if (signupForm.get('confirmPassword')?.hasError('required') &&
+        signupForm.get('confirmPassword')?.touched) {
+        <mat-error>Please confirm your password</mat-error>
+        } @if (signupForm.get('confirmPassword')?.hasError('passwordMismatch')
+        && signupForm.get('confirmPassword')?.touched) {
+        <mat-error>Passwords do not match</mat-error>
         }
       </mat-form-field>
 
@@ -101,13 +115,12 @@
         color="primary"
         type="submit"
         class="full-width submit-button"
-        [disabled]="isLoading()"
+        [disabled]="isLoading() || isSignupComplete()"
       >
         @if (isLoading()) {
-          <mat-spinner diameter="20"></mat-spinner>
-        } @else {
-          Create Account
-        }
+        <mat-spinner diameter="20"></mat-spinner>
+        } @else if (isSignupComplete()) { ✅ Account Created } @else { Create
+        Account }
       </button>
     </form>
 
