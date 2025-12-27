@@ -1,5 +1,5 @@
 <div class="calendar-wrapper">
-  <div class="calendar-header">
+  <div class="calendar-header slide-in-down">
     <h1>Calendar</h1>
     <button mat-raised-button color="primary" (click)="createNewEvent()">
       <mat-icon>add</mat-icon>
@@ -7,18 +7,18 @@
     </button>
   </div>
 
-  <div class="calendar-host"></div>
+  <div class="calendar-host fade-in"></div>
 
   @if (eventsSvc.loading()) {
-  <div class="loading-overlay">
+  <div class="loading-overlay fade-in">
     <div class="loading-state">
       <mat-spinner diameter="48"></mat-spinner>
       <p>Loading events...</p>
     </div>
   </div>
   } @else if (eventsSvc.events().length === 0) {
-  <div class="empty-overlay">
-    <div class="empty-state">
+  <div class="empty-overlay fade-in">
+    <div class="empty-state scale-in">
       <mat-icon>event_busy</mat-icon>
       <h2>No events yet</h2>
       <p>Get started by creating your first event</p>

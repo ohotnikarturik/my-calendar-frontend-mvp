@@ -1,5 +1,5 @@
 <div class="upcoming-container">
-  <div class="upcoming-header">
+  <div class="upcoming-header slide-in-down">
     <h1>Upcoming Events</h1>
     <div class="header-controls">
       <mat-form-field appearance="outline">
@@ -42,13 +42,13 @@
 
   <!-- Loading state -->
   @if (eventsSvc.loading()) {
-  <div class="loading-state">
+  <div class="loading-state fade-in">
     <mat-spinner diameter="48"></mat-spinner>
     <p>Loading events...</p>
   </div>
   } @else if (filteredEvents().length === 0) {
   <!-- Empty state -->
-  <div class="empty-state">
+  <div class="empty-state fade-in">
     <mat-icon>event_busy</mat-icon>
     <p>No upcoming events found</p>
     <p class="empty-subtitle">Try adjusting your filters or add a new event</p>
@@ -58,9 +58,9 @@
     </button>
   </div>
   } @else {
-  <div class="events-grid">
+  <div class="events-grid stagger-list">
     @for (event of filteredEvents(); track event.id) {
-    <mat-card class="event-card" (click)="editEvent(event)">
+    <mat-card class="event-card hover-lift" (click)="editEvent(event)">
       <mat-card-header>
         <div
           class="event-color"

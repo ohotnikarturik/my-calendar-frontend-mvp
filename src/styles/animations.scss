@@ -1,0 +1,312 @@
+/**
+ * Global Animations
+ *
+ * Reusable CSS animations for smooth transitions throughout the app
+ */
+
+/* ========================================
+   FADE IN/OUT ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   SLIDE ANIMATIONS
+   ======================================== */
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   SCALE ANIMATIONS
+   ======================================== */
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* ✅ CURRENTLY USED */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+  /* Used in: loading states, empty states, settings sections */
+}
+
+/* 📦 AVAILABLE FOR FUTURE USE */
+.fade-out {
+  animation: fadeOut 0.3s ease-in-out;
+  /* Suggested for: toast notifications exit, modal close, element removal */
+}
+
+/* 📦 AVAILABLE FOR FUTURE USE */
+.slide-in-up {
+  animation: slideInUp 0.4s ease-out;
+  /* Suggested for: bottom toast notifications, bottom sheets, snackbar messages */
+}
+
+/* ✅ CURRENTLY USED */
+.slide-in-down {
+  animation: slideInDown 0.4s ease-out;
+  /* Used in: page headers (calendar, upcoming, home, settings, about) */
+}
+
+/* 📦 AVAILABLE FOR FUTURE USE */
+.slide-in-left {
+  animation: slideInLeft 0.4s ease-out;
+  /* Suggested for: sidebar drawers, navigation menus opening from left */
+}
+
+/* 📦 AVAILABLE FOR FUTURE USE */
+.slide-in-right {
+  animation: slideInRight 0.4s ease-out;
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+    /* Suggested for: sidebar drawers, action panels opening from right, notification panels */
+  }
+
+  /* ✅ CURRENTLY USED */
+  .scale-in {
+    animation: scaleIn 0.3s ease-out;
+    /* Used in: empty state messages for emphasis */
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .scale-out {
+    animation: scaleOut 0.3s ease-out;
+    /* Suggested for: modal close, dialog dismiss, removing items from view */
+  }
+
+  /* ========================================
+   STAGGERED LIST ANIMATIONS
+   ======================================== */
+
+  /* ✅ CURRENTLY USED */
+  .stagger-list > * {
+    animation: slideInUp 0.5s ease-out backwards;
+    /* Used in: feature cards, event cards, reminder cards, info cards */
+    /* Cards appear one after another with progressive delays */
+  }
+
+  .stagger-list > *:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  .stagger-list > *:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .stagger-list > *:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .stagger-list > *:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+  .stagger-list > *:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+  .stagger-list > *:nth-child(6) {
+    animation-delay: 0.6s;
+  }
+  .stagger-list > *:nth-child(7) {
+    animation-delay: 0.7s;
+  }
+  .stagger-list > *:nth-child(8) {
+    animation-delay: 0.8s;
+  }
+  .stagger-list > *:nth-child(9) {
+    animation-delay: 0.9s;
+  }
+  .stagger-list > *:nth-child(10) {
+    animation-delay: 1s;
+  }
+
+  /* ========================================
+   SMOOTH TRANSITIONS
+   ======================================== */
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .smooth-transition {
+    transition: all 0.3s ease-in-out;
+    /* Suggested for: general purpose transitions, form field changes, button state changes */
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .smooth-opacity {
+    transition: opacity 0.3s ease-in-out;
+    /* Suggested for: fade effects on hover, showing/hiding elements, disabled states */
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .smooth-transform {
+    transition: transform 0.3s ease-in-out;
+    /* Suggested for: rotation effects, position changes, custom transformations */
+  }
+
+  /* ========================================
+   HOVER EFFECTS
+   ======================================== */
+
+  /* ✅ CURRENTLY USED */
+  .hover-lift {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    /* Used in: event cards, feature cards, reminder cards, info cards */
+    /* Cards lift up slightly with shadow on hover */
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .hover-scale {
+    transition: transform 0.2s ease-in-out;
+    /* Suggested for: images, icons, buttons that should grow on hover */
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .hover-glow {
+    transition: box-shadow 0.2s ease-in-out;
+    /* Suggested for: focused inputs, active buttons, highlighted elements */
+
+    &:hover {
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* ========================================
+   LOADING ANIMATIONS
+   ======================================== */
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    /* Suggested for: "new" badges, notification dots, attention-grabbing elements */
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* 📦 AVAILABLE FOR FUTURE USE */
+  .spin {
+    animation: spin 1s linear infinite;
+    /* Suggested for: custom loading indicators, refresh icons during data fetch */
+  }
+
+  /* ========================================
+   ROUTE TRANSITION SUPPORT
+   ======================================== */
+
+  /* ✅ CURRENTLY USED */
+  /* Automatic smooth transitions when navigating between pages */
+  /* Enabled via withViewTransitions() in app.config.ts */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.3s;
+  }
+
+  ::view-transition-old(root) {
+    animation-name: fadeOut;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: fadeIn;
+  }
+}

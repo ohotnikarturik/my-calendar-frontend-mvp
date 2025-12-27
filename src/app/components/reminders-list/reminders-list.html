@@ -1,13 +1,13 @@
 <div class="reminders-container">
   @if (reminders().length === 0) {
-  <div class="empty-state">
+  <div class="empty-state fade-in">
     <mat-icon>notifications_off</mat-icon>
     <p>No upcoming reminders</p>
   </div>
   } @else {
-  <div class="reminders-list">
+  <div class="reminders-list stagger-list">
     @for (reminder of reminders(); track reminderKey(reminder)) {
-    <mat-card class="reminder-card">
+    <mat-card class="reminder-card hover-lift">
       <mat-card-header>
         <mat-icon mat-card-avatar>event</mat-icon>
         <mat-card-title>{{ reminder.eventTitle }}</mat-card-title>
