@@ -81,6 +81,7 @@
         (keydown.enter)="toggleTheme()"
         (keydown.space)="toggleTheme()"
         tabindex="0"
+        [attr.aria-label]="themeTooltip()"
       >
         <mat-icon matListItemIcon>{{ themeIcon() }}</mat-icon>
         <span matListItemTitle>{{ themeTooltip() }}</span>
@@ -99,13 +100,19 @@
         (keydown.enter)="onLogout(); closeDrawer()"
         (keydown.space)="onLogout(); closeDrawer()"
         tabindex="0"
+        aria-label="Sign out of your account"
       >
         <mat-icon matListItemIcon>logout</mat-icon>
         <span matListItemTitle>Sign Out</span>
       </a>
       } @else {
       <!-- Login option when not authenticated -->
-      <a mat-list-item routerLink="/auth/login" (click)="closeDrawer()">
+      <a
+        mat-list-item
+        routerLink="/auth/login"
+        (click)="closeDrawer()"
+        aria-label="Sign in to your account"
+      >
         <mat-icon matListItemIcon>login</mat-icon>
         <span matListItemTitle>Sign In</span>
       </a>
@@ -124,7 +131,7 @@
               mat-icon-button
               class="hamburger-button"
               (click)="toggleDrawer()"
-              aria-label="Open menu"
+              aria-label="Open navigation menu"
             >
               <mat-icon>menu</mat-icon>
             </button>
@@ -156,6 +163,7 @@
               class="theme-toggle"
               (click)="toggleTheme()"
               [matTooltip]="themeTooltip()"
+              [attr.aria-label]="themeTooltip()"
             >
               <mat-icon>{{ themeIcon() }}</mat-icon>
             </button>
@@ -168,6 +176,7 @@
               [matMenuTriggerFor]="userMenu"
               class="user-menu-button"
               [matTooltip]="userEmail() ?? 'Account'"
+              aria-label="Open user menu"
             >
               <mat-icon>account_circle</mat-icon>
             </button>
@@ -176,14 +185,23 @@
                 <mat-icon>email</mat-icon>
                 <span>{{ userEmail() }}</span>
               </div>
-              <button mat-menu-item (click)="onLogout()">
+              <button
+                mat-menu-item
+                (click)="onLogout()"
+                aria-label="Sign out of your account"
+              >
                 <mat-icon>logout</mat-icon>
                 <span>Sign Out</span>
               </button>
             </mat-menu>
             } @else {
             <!-- Login button when not logged in -->
-            <a mat-stroked-button routerLink="/auth/login" class="login-button">
+            <a
+              mat-stroked-button
+              routerLink="/auth/login"
+              class="login-button"
+              aria-label="Sign in to your account"
+            >
               Sign In
             </a>
             }

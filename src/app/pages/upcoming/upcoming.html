@@ -1,6 +1,11 @@
 <div class="upcoming-container">
   <page-header [title]="'Upcoming Events'">
-    <button mat-raised-button color="primary" (click)="createEvent()">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="createEvent()"
+      aria-label="Create new event"
+    >
       <mat-icon>add</mat-icon>
       Create Event
     </button>
@@ -13,6 +18,7 @@
       <mat-select
         [value]="selectedRange()"
         (selectionChange)="selectedRange.set($event.value)"
+        aria-label="Filter by time range"
       >
         <mat-option [value]="7">Next 7 days</mat-option>
         <mat-option [value]="30">Next 30 days</mat-option>
@@ -25,6 +31,7 @@
       <mat-select
         [value]="selectedCategory()"
         (selectionChange)="selectedCategory.set($event.value)"
+        aria-label="Filter by category"
       >
         <mat-option [value]="''">All Categories</mat-option>
         @for (cat of categoryOptions; track cat.value) {
@@ -40,6 +47,7 @@
         [value]="searchQuery()"
         (input)="searchQuery.set($event.target.value)"
         placeholder="Search events..."
+        aria-label="Search events by title or description"
       />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
@@ -62,7 +70,12 @@
       [title]="'No upcoming events'"
       [description]="'Get started by creating your first event'"
     >
-      <button mat-raised-button color="primary" (click)="createEvent()">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="createEvent()"
+        aria-label="Create your first event"
+      >
         <mat-icon>add</mat-icon>
         Create Your First Event
       </button>
@@ -79,6 +92,7 @@
       <button
         mat-raised-button
         (click)="selectedCategory.set(''); searchQuery.set('')"
+        aria-label="Clear all filters"
       >
         <mat-icon>clear</mat-icon>
         Clear Filters
@@ -88,7 +102,17 @@
   } @else {
   <div class="events-grid stagger-list">
     @for (event of filteredEvents(); track event.id) {
-    <mat-card class="event-card hover-lift" (click)="editEvent(event)">
+    <mat-card
+      class="event-card hover-lift"
+      (click)="editEvent(event)"
+      [attr.aria-label]="
+        'Edit event: ' + event.title + ' on ' + formatDate(event.start)
+      "
+      role="button"
+      tabindex="0"
+      (keydown.enter)="editEvent(event)"
+      (keydown.space)="editEvent(event)"
+    >
       <mat-card-header>
         <div
           class="event-color"

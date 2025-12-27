@@ -118,6 +118,7 @@
         type="submit"
         class="full-width submit-button"
         [disabled]="isLoading() || isSignupComplete()"
+        aria-label="Create new account"
       >
         @if (isLoading()) {
         <mat-spinner diameter="20"></mat-spinner>
@@ -136,6 +137,7 @@
       class="full-width google-button"
       (click)="onGoogleSignup()"
       [disabled]="isLoading() || isSignupComplete()"
+      aria-label="Sign up with Google"
     >
       <mat-icon class="google-icon">g_mobiledata</mat-icon>
       Continue with Google

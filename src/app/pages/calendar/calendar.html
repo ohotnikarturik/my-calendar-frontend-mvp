@@ -1,6 +1,11 @@
 <div class="calendar-wrapper">
   <page-header [title]="'Calendar'">
-    <button mat-raised-button color="primary" (click)="createNewEvent()">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="createNewEvent()"
+      aria-label="Create new event"
+    >
       <mat-icon>add</mat-icon>
       Create Event
     </button>
@@ -22,7 +27,12 @@
       [title]="'No events yet'"
       [description]="'Get started by creating your first event'"
     >
-      <button mat-raised-button color="primary" (click)="createNewEvent()">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="createNewEvent()"
+        aria-label="Create your first event"
+      >
         <mat-icon>add</mat-icon>
         Create Your First Event
       </button>

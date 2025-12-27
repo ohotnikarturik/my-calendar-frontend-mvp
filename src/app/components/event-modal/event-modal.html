@@ -1,7 +1,12 @@
 <section class="event-modal">
   <h2 mat-dialog-title class="modal-title">{{ dialogTitle() }}</h2>
 
-  <form class="event-form" [formGroup]="eventForm" (ngSubmit)="onSave()">
+  <form
+    class="event-form"
+    [formGroup]="eventForm"
+    (ngSubmit)="onSave()"
+    aria-label="Event form"
+  >
     <div mat-dialog-content class="modal-content">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Event title</mat-label>
@@ -12,6 +17,8 @@
           placeholder="Board meeting"
           autocomplete="off"
           required
+          aria-label="Event title"
+          aria-required="true"
         />
         <mat-hint align="end">{{ titleUsage() }}</mat-hint>
         @if (shouldShowError('title') && hasError('title', 'required')) {
@@ -30,15 +37,23 @@
           formControlName="description"
           rows="3"
           placeholder="Add notes for this event"
+          aria-label="Event description"
         ></textarea>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Event date</mat-label>
-        <input matInput [matDatepicker]="datePicker" formControlName="date" />
+        <input
+          matInput
+          [matDatepicker]="datePicker"
+          formControlName="date"
+          aria-label="Event date"
+          aria-required="true"
+        />
         <mat-datepicker-toggle
           matIconSuffix
           [for]="datePicker"
+          aria-label="Open calendar to select date"
         ></mat-datepicker-toggle>
         <mat-datepicker
           #datePicker
@@ -51,7 +66,11 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Event type</mat-label>
-        <mat-select formControlName="eventType">
+        <mat-select
+          formControlName="eventType"
+          aria-label="Event type"
+          aria-required="true"
+        >
           @for (option of eventTypeOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
           }
@@ -64,7 +83,7 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Category</mat-label>
-        <mat-select formControlName="category">
+        <mat-select formControlName="category" aria-label="Event category">
           @for (option of categoryOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
           }
@@ -73,7 +92,7 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Color</mat-label>
-        <mat-select formControlName="color">
+        <mat-select formControlName="color" aria-label="Event color">
           @for (option of colorOptions; track option.value) {
           <mat-option [value]="option.value">
             <span class="color-option">
@@ -88,12 +107,18 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-slide-toggle formControlName="repeatAnnually">
+      <mat-slide-toggle
+        formControlName="repeatAnnually"
+        aria-label="Repeat event annually"
+      >
         Repeat every year
       </mat-slide-toggle>
 
       <div class="reminder-section">
-        <mat-slide-toggle formControlName="reminderEnabled">
+        <mat-slide-toggle
+          formControlName="reminderEnabled"
+          aria-label="Enable event reminders"
+        >
           Enable reminders
         </mat-slide-toggle>
 
@@ -108,6 +133,9 @@
               [class.selected]="isReminderDaySelected(option.value)"
               (click)="toggleReminderDay(option.value)"
               class="reminder-chip-button"
+              [attr.aria-label]="'Remind ' + option.label + ' before event'"
+              [attr.aria-checked]="isReminderDaySelected(option.value)"
+              role="checkbox"
             >
               {{ option.label }}
             </button>
@@ -124,14 +152,28 @@
           formControlName="notes"
           rows="2"
           placeholder="Additional notes (optional)"
+          aria-label="Additional notes"
         ></textarea>
       </mat-form-field>
     </div>
 
     <div mat-dialog-actions class="modal-actions">
-      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button
+        mat-button
+        type="button"
+        (click)="onCancel()"
+        aria-label="Cancel and close dialog"
+      >
+        Cancel
+      </button>
       @if (canDelete()) {
-      <button mat-button color="warn" type="button" (click)="onDelete()">
+      <button
+        mat-button
+        color="warn"
+        type="button"
+        (click)="onDelete()"
+        aria-label="Delete this event"
+      >
         Delete
       </button>
       }
@@ -140,6 +182,7 @@
         color="primary"
         type="submit"
         [disabled]="!canSubmit()"
+        [attr.aria-label]="primaryActionLabel() + ' event'"
       >
         {{ primaryActionLabel() }}
       </button>

@@ -28,7 +28,11 @@
         </div>
       </mat-card-content>
       <mat-card-actions>
-        <button mat-button (click)="dismissReminder(reminder)">
+        <button
+          mat-button
+          (click)="dismissReminder(reminder)"
+          [attr.aria-label]="'Dismiss reminder for ' + reminder.eventTitle"
+        >
           <mat-icon>close</mat-icon>
           Dismiss
         </button>

@@ -1,6 +1,11 @@
 <div class="settings-container">
   <page-header [title]="'Settings'">
-    <button mat-raised-button color="warn" (click)="resetToDefaults()">
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="resetToDefaults()"
+      aria-label="Reset all settings to defaults"
+    >
       <mat-icon>restore</mat-icon>
       Reset to Defaults
     </button>
@@ -26,6 +31,7 @@
           <mat-select
             [value]="settingsService.settings().timezone"
             (selectionChange)="updateTimezone($event.value)"
+            aria-label="Select your timezone"
           >
             @for (tz of timezones; track tz.value) {
             <mat-option [value]="tz.value">
@@ -49,6 +55,7 @@
           <mat-select
             [value]="settingsService.settings().theme"
             (selectionChange)="updateTheme($event.value)"
+            aria-label="Select theme mode"
           >
             <mat-option value="light">Light</mat-option>
             <mat-option value="dark">Dark</mat-option>
@@ -70,6 +77,7 @@
           <mat-select
             [value]="settingsService.settings().calendarStartOfWeek"
             (selectionChange)="updateStartOfWeek($event.value)"
+            aria-label="Select first day of the week"
           >
             <mat-option [value]="0">Sunday</mat-option>
             <mat-option [value]="1">Monday</mat-option>
@@ -100,6 +108,9 @@
           <mat-checkbox
             [checked]="isReminderDaySelected(option.value)"
             (change)="toggleReminderDay(option.value)"
+            [attr.aria-label]="
+              'Set default reminder for ' + option.label + ' before events'
+            "
           >
             {{ option.label }}
           </mat-checkbox>
@@ -129,6 +140,7 @@
           <mat-select
             [value]="settingsService.settings().exportFormat"
             (selectionChange)="updateExportFormat($event.value)"
+            aria-label="Select export file format"
           >
             <mat-option value="json">JSON</mat-option>
             <mat-option value="csv" disabled>CSV (Coming soon)</mat-option>
@@ -149,6 +161,7 @@
           color="primary"
           (click)="exportData()"
           [disabled]="isExporting()"
+          aria-label="Export all data to file"
         >
           @if (isExporting()) {
           <mat-spinner diameter="20"></mat-spinner>
@@ -175,11 +188,13 @@
             accept=".json"
             (change)="onFileSelected($event)"
             style="display: none"
+            aria-label="Select JSON file to import"
           />
           <button
             mat-raised-button
             (click)="fileInput.click()"
             [disabled]="isImporting()"
+            aria-label="Select file to import"
           >
             <mat-icon>upload</mat-icon>
             Select File
@@ -191,6 +206,7 @@
             color="accent"
             (click)="importData()"
             [disabled]="isImporting()"
+            aria-label="Import data from selected file"
           >
             @if (isImporting()) {
             <mat-spinner diameter="20"></mat-spinner>
@@ -217,6 +233,7 @@
           color="warn"
           (click)="clearAllData()"
           [disabled]="isClearing()"
+          aria-label="Permanently delete all data"
         >
           @if (isClearing()) {
           <mat-spinner diameter="20"></mat-spinner>

@@ -71,6 +71,7 @@
           type="button"
           (click)="onForgotPassword()"
           [disabled]="isLoading()"
+          aria-label="Forgot password"
         >
           Forgot password?
         </button>
@@ -83,6 +84,7 @@
         type="submit"
         class="full-width submit-button"
         [disabled]="isLoading()"
+        aria-label="Sign in to your account"
       >
         @if (isLoading()) {
         <mat-spinner diameter="20"></mat-spinner>
@@ -100,6 +102,7 @@
       class="full-width google-button"
       (click)="onGoogleLogin()"
       [disabled]="isLoading()"
+      aria-label="Continue with Google"
     >
       <mat-icon class="google-icon">g_mobiledata</mat-icon>
       Continue with Google
