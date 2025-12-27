@@ -576,10 +576,11 @@ export class SupabaseService {
    * Handle database errors and detect deleted/invalid users
    * Returns true if error was handled (user logged out), false otherwise
    */
-  private async handleDatabaseError(error: any): Promise<boolean> {
+  private async handleDatabaseError(error: unknown): Promise<boolean> {
     // Check for common "user deleted" error patterns
-    const errorMessage = error?.message?.toLowerCase() || '';
-    const errorCode = error?.code;
+    const errorMessage =
+      (error as { message?: string })?.message?.toLowerCase() || '';
+    const errorCode = (error as { code?: string })?.code;
 
     // JWT expired or invalid user errors
     const isInvalidUser =

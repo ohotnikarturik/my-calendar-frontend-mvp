@@ -3,8 +3,8 @@ import { Home } from './pages/home/home';
 import { About } from './pages/about/about';
 import { Calendar } from './pages/calendar/calendar';
 import { Upcoming } from './pages/upcoming/upcoming';
-import { Contacts } from './pages/contacts/contacts';
-import { Occasions } from './pages/occasions/occasions';
+// import { Contacts } from './pages/contacts/contacts';
+// import { Occasions } from './pages/occasions/occasions';
 import { Settings } from './pages/settings/settings';
 import { Login } from './pages/auth/login/login';
 import { Signup } from './pages/auth/signup/signup';
@@ -33,8 +33,8 @@ export const routes: Routes = [
   { path: 'about', component: About, canActivate: [authGuard] },
   { path: 'home', component: Home, canActivate: [authGuard] },
   { path: 'upcoming', component: Upcoming, canActivate: [authGuard] },
-  { path: 'contacts', component: Contacts, canActivate: [authGuard] },
-  { path: 'occasions', component: Occasions, canActivate: [authGuard] },
+  // { path: 'contacts', component: Contacts, canActivate: [authGuard] },
+  // { path: 'occasions', component: Occasions, canActivate: [authGuard] },
   { path: 'settings', component: Settings, canActivate: [authGuard] },
 
   // Auth routes (redirect to home if already logged in)

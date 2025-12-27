@@ -13,19 +13,23 @@
   align-items: center;
   padding: 1rem 0;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-}
+  gap: 1rem;
 
-.calendar-header h1 {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 500;
-  color: var(--mat-sys-on-surface);
-}
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+    flex: 0 1 auto;
+  }
 
-.calendar-header button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
 }
 
 .loading-state,
@@ -127,25 +131,55 @@
 }
 
 @media (max-width: 768px) {
-  .calendar-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
+  .calendar-wrapper {
+    min-height: calc(100vh - 8rem);
+    height: calc(100vh - 8rem);
   }
 
-  .calendar-header h1 {
-    font-size: 1.5rem;
+  .calendar-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+    padding: 0.75rem 0;
+
+    h1 {
+      font-size: 1.375rem;
+    }
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
   }
 
   .calendar-host {
     :global(.fc-toolbar) {
       flex-direction: column !important;
-      gap: 0.5rem !important;
+      gap: 0.75rem !important;
+      padding: 0.5rem !important;
     }
 
     :global(.fc-toolbar-chunk) {
       display: flex !important;
       justify-content: center !important;
+    }
+
+    :global(.fc-toolbar-title) {
+      font-size: 1.25rem !important;
+    }
+
+    :global(.fc-button) {
+      padding: 0.5rem 0.875rem !important;
+      font-size: 0.875rem !important;
+    }
+
+    :global(.fc-daygrid-day-number) {
+      font-size: 0.875rem !important;
+    }
+
+    :global(.fc-col-header-cell-cushion) {
+      padding: 0.5rem 0.25rem !important;
+      font-size: 0.75rem !important;
     }
   }
 }

@@ -90,14 +90,28 @@ textarea {
 @media (max-width: 600px) {
   .contact-modal {
     max-width: 100%;
+    width: 100%;
   }
 
   .modal-content {
     max-height: min(60vh, 400px);
+    padding-block: 0.75rem;
+    gap: 1.25rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
   }
 
   .modal-actions {
     flex-wrap: wrap;
+    gap: 0.5rem;
+
+    button {
+      flex: 1 1 auto;
+      min-width: 100px;
+      min-height: 44px; /* Touch-friendly */
+    }
 
     button {
       flex: 1 1 auto;

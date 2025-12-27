@@ -1,4 +1,4 @@
-import { Component, computed, inject, effect } from '@angular/core';
+import { Component, computed, inject, effect, viewChild } from '@angular/core';
 import {
   RouterOutlet,
   RouterLink,
@@ -11,19 +11,25 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import type { MatSidenav } from '@angular/material/sidenav';
 import { SettingsService } from './services/settings.service';
 import { SupabaseService } from './services/supabase.service';
 import type { ThemeMode } from './types/settings.type';
+
+// Breakpoint for desktop navigation (matches @media query in app.scss)
+const DESKTOP_BREAKPOINT = 900;
 
 /**
  * App Component
  *
  * Learning note: This is the root component that handles:
- * - Navigation layout
+ * - Navigation layout with responsive sidebar
  * - Theme switching
  * - Auth state display (login/logout)
- * - Sync status indicator
  */
 @Component({
   selector: 'app-root',
@@ -37,6 +43,9 @@ import type { ThemeMode } from './types/settings.type';
     MatTooltipModule,
     MatMenuModule,
     MatBadgeModule,
+    MatSidenavModule,
+    MatListModule,
+    MatToolbarModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -47,15 +56,15 @@ export class App {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
+  // Sidenav reference for mobile menu
+  readonly drawer = viewChild<MatSidenav>('drawer');
+
   // Current theme from settings
   readonly currentTheme = computed(() => this.settingsService.settings().theme);
 
   // Auth state
   readonly isAuthenticated = this.supabase.isAuthenticated;
   readonly userEmail = this.supabase.userEmail;
-
-  // Online status
-  readonly isOnline = this.supabase.isOnline;
 
   // Icon to display based on current theme
   readonly themeIcon = computed(() => {
@@ -89,6 +98,15 @@ export class App {
       const theme = this.currentTheme();
       this.applyTheme(theme);
     });
+
+    // Close drawer when resizing to desktop
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > DESKTOP_BREAKPOINT && this.drawer()?.opened) {
+          this.drawer()?.close();
+        }
+      });
+    }
   }
 
   /**
@@ -99,6 +117,20 @@ export class App {
     const next: ThemeMode =
       current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
     this.settingsService.updateSettings({ theme: next });
+  }
+
+  /**
+   * Toggle mobile drawer
+   */
+  toggleDrawer(): void {
+    this.drawer()?.toggle();
+  }
+
+  /**
+   * Close drawer (e.g., after navigation)
+   */
+  closeDrawer(): void {
+    this.drawer()?.close();
   }
 
   /**
