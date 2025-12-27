@@ -20,13 +20,13 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { SettingsService } from '../../services/settings.service';
 import { SupabaseService } from '../../services/supabase.service';
 import { CalendarEventsService } from '../../services/calendar-events.service';
 import { ContactsService } from '../../services/contacts.service';
 import { OccasionsService } from '../../services/occasions.service';
+import { PageHeader } from '../../components/page-header/page-header';
 import {
   COMMON_TIMEZONES,
   REMINDER_DAY_OPTIONS,
@@ -47,7 +47,7 @@ import {
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    MatTooltipModule,
+    PageHeader,
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',

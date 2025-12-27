@@ -220,7 +220,6 @@
   flex: 1;
   min-height: 0; /* Allows flex child to shrink properly */
   overflow-y: auto; /* Scroll within content area if needed */
-  padding-bottom: 2rem; /* Add breathing room at the bottom of all pages */
 }
 
 /* Tablet breakpoint */

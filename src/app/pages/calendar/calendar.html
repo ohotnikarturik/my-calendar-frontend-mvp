@@ -1,15 +1,14 @@
 <div class="calendar-wrapper">
-  <div class="calendar-header slide-in-down">
-    <h1>Calendar</h1>
+  <page-header [title]="'Calendar'">
     <button mat-raised-button color="primary" (click)="createNewEvent()">
       <mat-icon>add</mat-icon>
       Create Event
     </button>
-  </div>
+  </page-header>
 
+  @if (!eventsSvc.loading() && eventsSvc.events().length > 0) {
   <div class="calendar-host fade-in"></div>
-
-  @if (eventsSvc.loading()) {
+  } @if (eventsSvc.loading()) {
   <div class="loading-overlay fade-in">
     <div class="loading-state">
       <mat-spinner diameter="48"></mat-spinner>
@@ -18,15 +17,16 @@
   </div>
   } @else if (eventsSvc.events().length === 0) {
   <div class="empty-overlay fade-in">
-    <div class="empty-state scale-in">
-      <mat-icon>event_busy</mat-icon>
-      <h2>No events yet</h2>
-      <p>Get started by creating your first event</p>
+    <empty-state
+      [icon]="'event_busy'"
+      [title]="'No events yet'"
+      [description]="'Get started by creating your first event'"
+    >
       <button mat-raised-button color="primary" (click)="createNewEvent()">
         <mat-icon>add</mat-icon>
         Create Your First Event
       </button>
-    </div>
+    </empty-state>
   </div>
   }
 </div>

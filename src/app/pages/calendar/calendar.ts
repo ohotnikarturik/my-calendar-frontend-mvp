@@ -30,6 +30,8 @@ import {
   EventModal,
   type EventModalData,
 } from '../../components/event-modal/event-modal';
+import { PageHeader } from '../../components/page-header/page-header';
+import { EmptyState } from '../../components/empty-state/empty-state';
 
 @Component({
   selector: 'calendar',
@@ -40,6 +42,8 @@ import {
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    PageHeader,
+    EmptyState,
   ],
   templateUrl: './calendar.html',
   styleUrls: ['./calendar.scss'],

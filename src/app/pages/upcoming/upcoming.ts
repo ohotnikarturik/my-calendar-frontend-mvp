@@ -16,6 +16,8 @@ import {
   EventModal,
   type EventModalData,
 } from '../../components/event-modal/event-modal';
+import { PageHeader } from '../../components/page-header/page-header';
+import { EmptyState } from '../../components/empty-state/empty-state';
 import type { CalendarEvent, EventCategory } from '../../types/event.type';
 
 @Component({
@@ -30,6 +32,8 @@ import type { CalendarEvent, EventCategory } from '../../types/event.type';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    PageHeader,
+    EmptyState,
   ],
   templateUrl: './upcoming.html',
   styleUrl: './upcoming.scss',

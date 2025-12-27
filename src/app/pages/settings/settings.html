@@ -1,16 +1,10 @@
 <div class="settings-container">
-  <div class="settings-header slide-in-down">
-    <h1>Settings</h1>
-    <button
-      mat-raised-button
-      color="warn"
-      (click)="resetToDefaults()"
-      matTooltip="Reset all settings to default values"
-    >
+  <page-header [title]="'Settings'">
+    <button mat-raised-button color="warn" (click)="resetToDefaults()">
       <mat-icon>restore</mat-icon>
       Reset to Defaults
     </button>
-  </div>
+  </page-header>
 
   <!-- General Settings -->
   <mat-card class="settings-section fade-in">

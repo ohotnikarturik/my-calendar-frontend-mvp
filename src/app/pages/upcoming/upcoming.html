@@ -1,61 +1,72 @@
 <div class="upcoming-container">
-  <div class="upcoming-header slide-in-down">
-    <h1>Upcoming Events</h1>
-    <div class="header-controls">
-      <mat-form-field appearance="outline">
-        <mat-label>Time Range</mat-label>
-        <mat-select
-          [value]="selectedRange()"
-          (selectionChange)="selectedRange.set($event.value)"
-        >
-          <mat-option [value]="7">Next 7 days</mat-option>
-          <mat-option [value]="30">Next 30 days</mat-option>
-          <mat-option [value]="90">Next 90 days</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Category</mat-label>
-        <mat-select
-          [value]="selectedCategory()"
-          (selectionChange)="selectedCategory.set($event.value)"
-        >
-          <mat-option [value]="''">All Categories</mat-option>
-          @for (cat of categoryOptions; track cat.value) {
-          <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Search</mat-label>
-        <input
-          matInput
-          [value]="searchQuery()"
-          (input)="searchQuery.set($event.target.value)"
-          placeholder="Search events..."
-        />
-        <mat-icon matSuffix>search</mat-icon>
-      </mat-form-field>
-    </div>
-  </div>
-
-  <!-- Loading state -->
-  @if (eventsSvc.loading()) {
-  <div class="loading-state fade-in">
-    <mat-spinner diameter="48"></mat-spinner>
-    <p>Loading events...</p>
-  </div>
-  } @else if (filteredEvents().length === 0) {
-  <!-- Empty state -->
-  <div class="empty-state fade-in">
-    <mat-icon>event_busy</mat-icon>
-    <p>No upcoming events found</p>
-    <p class="empty-subtitle">Try adjusting your filters or add a new event</p>
+  <page-header [title]="'Upcoming Events'">
     <button mat-raised-button color="primary" (click)="createEvent()">
       <mat-icon>add</mat-icon>
       Create Event
     </button>
+  </page-header>
+
+  @if (filteredEvents().length > 0 || eventsSvc.loading()) {
+  <div class="header-controls fade-in">
+    <mat-form-field appearance="outline">
+      <mat-label>Time Range</mat-label>
+      <mat-select
+        [value]="selectedRange()"
+        (selectionChange)="selectedRange.set($event.value)"
+      >
+        <mat-option [value]="7">Next 7 days</mat-option>
+        <mat-option [value]="30">Next 30 days</mat-option>
+        <mat-option [value]="90">Next 90 days</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Category</mat-label>
+      <mat-select
+        [value]="selectedCategory()"
+        (selectionChange)="selectedCategory.set($event.value)"
+      >
+        <mat-option [value]="''">All Categories</mat-option>
+        @for (cat of categoryOptions; track cat.value) {
+        <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Search</mat-label>
+      <input
+        matInput
+        [value]="searchQuery()"
+        (input)="searchQuery.set($event.target.value)"
+        placeholder="Search events..."
+      />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+  }
+
+  <!-- Loading state -->
+  @if (eventsSvc.loading()) {
+  <div class="loading-overlay fade-in">
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading events...</p>
+    </div>
+  </div>
+  } @else if (filteredEvents().length === 0) {
+  <!-- Empty state -->
+  <div class="empty-overlay fade-in">
+    <empty-state
+      [icon]="'event_busy'"
+      [title]="'No upcoming events'"
+      [description]="'Get started by creating your first event'"
+    >
+      <button mat-raised-button color="primary" (click)="createEvent()">
+        <mat-icon>add</mat-icon>
+        Create Your First Event
+      </button>
+    </empty-state>
   </div>
   } @else {
   <div class="events-grid stagger-list">
