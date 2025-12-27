@@ -72,14 +72,15 @@
   :global(.fc-event) {
     border-radius: 4px !important;
     border: none !important;
-    background-color: var(--mat-sys-primary) !important;
-    color: var(--mat-sys-on-primary) !important;
     cursor: pointer !important;
+    opacity: 0.95;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   :global(.fc-event:hover) {
-    background-color: var(--mat-sys-primary-container) !important;
-    color: var(--mat-sys-on-primary-container) !important;
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   :global(.fc-daygrid-day:hover) {

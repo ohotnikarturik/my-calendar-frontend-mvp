@@ -6,7 +6,7 @@
     </button>
   </page-header>
 
-  @if (filteredEvents().length > 0 || eventsSvc.loading()) {
+  @if (hasAnyUpcomingEvents() || isFiltering() || eventsSvc.loading()) {
   <div class="header-controls fade-in">
     <mat-form-field appearance="outline">
       <mat-label>Time Range</mat-label>
@@ -54,8 +54,8 @@
       <p>Loading events...</p>
     </div>
   </div>
-  } @else if (filteredEvents().length === 0) {
-  <!-- Empty state -->
+  } @else if (!hasAnyUpcomingEvents()) {
+  <!-- No events at all -->
   <div class="empty-overlay fade-in">
     <empty-state
       [icon]="'event_busy'"
@@ -65,6 +65,23 @@
       <button mat-raised-button color="primary" (click)="createEvent()">
         <mat-icon>add</mat-icon>
         Create Your First Event
+      </button>
+    </empty-state>
+  </div>
+  } @else if (hasNoResults()) {
+  <!-- No search results -->
+  <div class="empty-state-static fade-in">
+    <empty-state
+      [icon]="'search_off'"
+      [title]="'No events found'"
+      [description]="'Try adjusting your filters or search terms'"
+    >
+      <button
+        mat-raised-button
+        (click)="selectedCategory.set(''); searchQuery.set('')"
+      >
+        <mat-icon>clear</mat-icon>
+        Clear Filters
       </button>
     </empty-state>
   </div>

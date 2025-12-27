@@ -135,16 +135,16 @@ export class EventModalComponent {
   ];
 
   readonly colorOptions: { value: string; label: string; color: string }[] = [
-    { value: '', label: 'Default', color: '#1976d2' },
-    { value: '#e91e63', label: 'Pink', color: '#e91e63' },
-    { value: '#9c27b0', label: 'Purple', color: '#9c27b0' },
-    { value: '#673ab7', label: 'Deep Purple', color: '#673ab7' },
-    { value: '#3f51b5', label: 'Indigo', color: '#3f51b5' },
-    { value: '#2196f3', label: 'Blue', color: '#2196f3' },
-    { value: '#00bcd4', label: 'Cyan', color: '#00bcd4' },
-    { value: '#4caf50', label: 'Green', color: '#4caf50' },
-    { value: '#ff9800', label: 'Orange', color: '#ff9800' },
-    { value: '#f44336', label: 'Red', color: '#f44336' },
+    { value: '', label: 'Category Default', color: '#1976D2' },
+    { value: '#E91E63', label: 'Pink (Birthday)', color: '#E91E63' },
+    { value: '#9C27B0', label: 'Purple (Anniversary)', color: '#9C27B0' },
+    { value: '#FF9800', label: 'Orange (Holiday)', color: '#FF9800' },
+    { value: '#4CAF50', label: 'Green (Personal)', color: '#4CAF50' },
+    { value: '#2196F3', label: 'Blue (Work)', color: '#2196F3' },
+    { value: '#00BCD4', label: 'Cyan (Other)', color: '#00BCD4' },
+    { value: '#F44336', label: 'Red', color: '#F44336' },
+    { value: '#757575', label: 'Gray (Memorial)', color: '#757575' },
+    { value: '#795548', label: 'Brown', color: '#795548' },
   ];
 
   readonly eventForm = this.fb.group({

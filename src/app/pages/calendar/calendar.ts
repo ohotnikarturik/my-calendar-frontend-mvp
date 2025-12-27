@@ -331,15 +331,18 @@ export class Calendar implements AfterViewInit, OnDestroy {
   }
 
   private getDefaultColor(category: string): string {
+    // Consistent color palette using Material Design colors
+    // Optimized for accessibility and visual distinction
     const colorMap: Record<string, string> = {
-      birthday: '#e91e63',
-      anniversary: '#9c27b0',
-      holiday: '#ff9800',
-      personal: '#4caf50',
-      work: '#2196f3',
-      memorial: '#757575',
-      custom: '#1976d2',
+      birthday: '#E91E63', // Pink - warm and celebratory
+      anniversary: '#9C27B0', // Purple - special occasions
+      holiday: '#FF9800', // Orange - festive
+      personal: '#4CAF50', // Green - personal growth
+      work: '#2196F3', // Blue - professional
+      memorial: '#757575', // Gray - respectful
+      other: '#00BCD4', // Cyan - miscellaneous
+      custom: '#1976D2', // Default blue
     };
-    return colorMap[category] || '#1976d2';
+    return colorMap[category] || '#1976D2';
   }
 }

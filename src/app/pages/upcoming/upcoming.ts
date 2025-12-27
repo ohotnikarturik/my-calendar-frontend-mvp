@@ -141,6 +141,20 @@ export class Upcoming {
     return events;
   });
 
+  readonly hasAnyUpcomingEvents = computed(
+    () => this.upcomingEvents().length > 0
+  );
+  readonly isFiltering = computed(() => {
+    return this.selectedCategory() !== '' || this.searchQuery().trim() !== '';
+  });
+  readonly hasNoResults = computed(() => {
+    return (
+      this.hasAnyUpcomingEvents() &&
+      this.isFiltering() &&
+      this.filteredEvents().length === 0
+    );
+  });
+
   formatDate(dateStr: string | DateInput | undefined): string {
     if (!dateStr) return '';
     return this.dateUtils.formatShort(dateStr as string | Date | number);
