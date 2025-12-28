@@ -29,18 +29,18 @@ export interface Contact {
   email?: string;
   phone?: string;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
  * Helper type for creating a new contact
- * Omits auto-generated fields (id, createdAt, updatedAt)
+ * Omits auto-generated fields (id)
  *
  * Learning note: Using Omit<> utility type creates a new type
  * without specific properties, useful for form inputs
  */
-export type NewContact = Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>;
+export type NewContact = Omit<Contact, 'id'>;
 
 /**
  * Helper type for updating an existing contact

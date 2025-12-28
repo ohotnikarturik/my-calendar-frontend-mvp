@@ -141,9 +141,6 @@ export class ContactsComponent {
         await this.contactsService.add({
           firstName: contact.firstName,
           lastName: contact.lastName,
-          email: contact.email,
-          phone: contact.phone,
-          notes: contact.notes,
         });
         // Success notification shown by service
       }

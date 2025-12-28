@@ -170,22 +170,22 @@ export class Calendar implements AfterViewInit, OnDestroy {
 
     // Add regular events
     events.forEach((event) => {
-      const categoryOrType = event.category || event.eventType || 'custom';
+      const category = event.category || 'custom';
       const fcEvent = {
         ...event,
-        backgroundColor: event.color || this.getDefaultColor(categoryOrType),
-        borderColor: event.color || this.getDefaultColor(categoryOrType),
+        backgroundColor: event.color || this.getDefaultColor(category),
+        borderColor: event.color || this.getDefaultColor(category),
       };
       this.calendar?.addEvent(fcEvent);
     });
 
     // Add occasion events with distinct styling
     occasionEvents.forEach((event) => {
-      const categoryOrType = event.category || event.eventType || 'custom';
+      const category = event.category || 'custom';
       const fcEvent = {
         ...event,
-        backgroundColor: event.color || this.getDefaultColor(categoryOrType),
-        borderColor: event.color || this.getDefaultColor(categoryOrType),
+        backgroundColor: event.color || this.getDefaultColor(category),
+        borderColor: event.color || this.getDefaultColor(category),
         // Mark as non-editable since occasions are managed separately
         editable: false,
       };

@@ -147,8 +147,7 @@ export class Upcoming {
       events = events.filter(
         (e) =>
           e.title?.toLowerCase().includes(query) ||
-          e.description?.toLowerCase().includes(query) ||
-          e.notes?.toLowerCase().includes(query)
+          e.description?.toLowerCase().includes(query)
       );
     }
 
@@ -182,6 +181,11 @@ export class Upcoming {
   getCategoryLabel(category: EventCategory): string {
     const option = this.categoryOptions.find((opt) => opt.value === category);
     return option?.label || category;
+  }
+
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery.set(target?.value || '');
   }
 
   editEvent(event: CalendarEvent): void {

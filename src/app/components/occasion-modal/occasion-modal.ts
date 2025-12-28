@@ -75,8 +75,7 @@ interface OccasionFormValue {
   year: number | null;
   repeatAnnually: boolean;
   reminderEnabled: boolean;
-  reminderDaysBefore: number[];
-  notes: string;
+  reminderDaysBefore: number; // Single value
 }
 
 /**
@@ -122,11 +121,12 @@ export class OccasionModalComponent implements OnInit {
   readonly contacts = this.contactsService.sortedContacts;
 
   readonly reminderDayOptions: ReminderDayOption[] = [
-    { value: 30, label: '30 days' },
-    { value: 14, label: '14 days' },
-    { value: 7, label: '7 days' },
-    { value: 3, label: '3 days' },
-    { value: 1, label: '1 day' },
+    { value: 30, label: '30 days before' },
+    { value: 14, label: '14 days before' },
+    { value: 7, label: '7 days before' },
+    { value: 3, label: '3 days before' },
+    { value: 1, label: '1 day before' },
+    { value: 0, label: 'On the day' },
   ];
 
   // Compute initial values
@@ -154,9 +154,8 @@ export class OccasionModalComponent implements OnInit {
     repeatAnnually: [this.modalData?.occasion?.repeatAnnually ?? true],
     reminderEnabled: [this.modalData?.occasion?.reminderEnabled ?? true],
     reminderDaysBefore: [
-      this.modalData?.occasion?.reminderDaysBefore ?? [7, 1],
+      this.modalData?.occasion?.reminderDaysBefore ?? 7,
     ],
-    notes: [this.modalData?.occasion?.notes ?? ''],
   });
 
   private readonly initialFormState =
@@ -231,9 +230,7 @@ export class OccasionModalComponent implements OnInit {
       current.year !== initial.year ||
       current.repeatAnnually !== initial.repeatAnnually ||
       current.reminderEnabled !== initial.reminderEnabled ||
-      JSON.stringify([...current.reminderDaysBefore].sort()) !==
-        JSON.stringify([...initial.reminderDaysBefore].sort()) ||
-      current.notes.trim() !== initial.notes.trim();
+      current.reminderDaysBefore !== initial.reminderDaysBefore;
 
     return isValid && hasChanges;
   });
@@ -311,28 +308,6 @@ export class OccasionModalComponent implements OnInit {
   }
 
   /**
-   * Toggle a reminder day selection
-   */
-  toggleReminderDay(day: number): void {
-    const current = this.occasionForm.get('reminderDaysBefore')?.value ?? [];
-    const index = current.indexOf(day);
-    if (index >= 0) {
-      this.occasionForm.patchValue({
-        reminderDaysBefore: current.filter((d) => d !== day),
-      });
-    } else {
-      this.occasionForm.patchValue({
-        reminderDaysBefore: [...current, day].sort((a, b) => b - a),
-      });
-    }
-  }
-
-  isReminderDaySelected(day: number): boolean {
-    const current = this.occasionForm.get('reminderDaysBefore')?.value ?? [];
-    return current.includes(day);
-  }
-
-  /**
    * Handle form submission
    */
   onSave(): void {
@@ -344,7 +319,6 @@ export class OccasionModalComponent implements OnInit {
     }
 
     const formValue = this.occasionForm.getRawValue() as OccasionFormValue;
-    const now = new Date().toISOString();
 
     // Build occasion object
     const occasion: Occasion = {
@@ -359,9 +333,6 @@ export class OccasionModalComponent implements OnInit {
       reminderDaysBefore: formValue.reminderEnabled
         ? formValue.reminderDaysBefore
         : undefined,
-      notes: formValue.notes.trim() || undefined,
-      createdAt: this.modalData?.occasion?.createdAt ?? now,
-      updatedAt: now,
     };
 
     this.dialogRef.close({ action: 'save', occasion } as OccasionModalResult);

@@ -67,9 +67,6 @@ export interface ContactModalResult {
 interface ContactFormValue {
   firstName: string;
   lastName: string;
-  email: string;
-  phone: string;
-  notes: string;
 }
 
 @Component({
@@ -100,9 +97,6 @@ export class ContactModalComponent {
 
   // Maximum lengths for form fields
   readonly nameMaxLength = 50;
-  readonly emailMaxLength = 100;
-  readonly phoneMaxLength = 20;
-  readonly notesMaxLength = 500;
 
   // Reactive form definition with validation
   // Learning note: NonNullableFormBuilder ensures form controls
@@ -115,18 +109,6 @@ export class ContactModalComponent {
     lastName: [
       this.modalData?.contact?.lastName ?? '',
       [Validators.required, Validators.maxLength(this.nameMaxLength)],
-    ],
-    email: [
-      this.modalData?.contact?.email ?? '',
-      [Validators.email, Validators.maxLength(this.emailMaxLength)],
-    ],
-    phone: [
-      this.modalData?.contact?.phone ?? '',
-      [Validators.maxLength(this.phoneMaxLength)],
-    ],
-    notes: [
-      this.modalData?.contact?.notes ?? '',
-      [Validators.maxLength(this.notesMaxLength)],
     ],
   });
 
@@ -208,10 +190,7 @@ export class ContactModalComponent {
 
     const hasChanges =
       current.firstName.trim() !== initial.firstName.trim() ||
-      current.lastName.trim() !== initial.lastName.trim() ||
-      current.email.trim() !== initial.email.trim() ||
-      current.phone.trim() !== initial.phone.trim() ||
-      current.notes.trim() !== initial.notes.trim();
+      current.lastName.trim() !== initial.lastName.trim();
 
     return isValid && hasChanges;
   });
@@ -221,7 +200,7 @@ export class ContactModalComponent {
    * Shows error when control is invalid and either dirty, touched, or form submitted
    */
   shouldShowError(
-    control: 'firstName' | 'lastName' | 'email' | 'phone' | 'notes'
+    control: 'firstName' | 'lastName'
   ): boolean {
     const ctrl = this.getControl(control);
     return ctrl.invalid && (ctrl.dirty || ctrl.touched || this.hasSubmitted());
@@ -231,7 +210,7 @@ export class ContactModalComponent {
    * Check if a form control has a specific error
    */
   hasError(
-    control: 'firstName' | 'lastName' | 'email' | 'phone' | 'notes',
+    control: 'firstName' | 'lastName',
     errorCode: string
   ): boolean {
     return this.getControl(control).hasError(errorCode);
@@ -250,18 +229,12 @@ export class ContactModalComponent {
     }
 
     const formValue = this.contactForm.getRawValue() as ContactFormValue;
-    const now = new Date().toISOString();
 
-    // Build contact object, preserving existing data for edits
+    // Build contact object
     const contact: Contact = {
       id: this.modalData?.contact?.id ?? crypto.randomUUID(),
       firstName: formValue.firstName.trim(),
       lastName: formValue.lastName.trim(),
-      email: formValue.email.trim() || undefined,
-      phone: formValue.phone.trim() || undefined,
-      notes: formValue.notes.trim() || undefined,
-      createdAt: this.modalData?.contact?.createdAt ?? now,
-      updatedAt: now,
     };
 
     this.dialogRef.close({ action: 'save', contact } as ContactModalResult);
@@ -309,7 +282,7 @@ export class ContactModalComponent {
    * Get a form control by name for validation checks
    */
   private getControl(
-    control: 'firstName' | 'lastName' | 'email' | 'phone' | 'notes'
+    control: 'firstName' | 'lastName'
   ): AbstractControl {
     return this.contactForm.controls[control];
   }

@@ -30,7 +30,7 @@ export class RemindersService {
     const reminders: Reminder[] = [];
 
     for (const event of events) {
-      if (!event.reminderEnabled || !event.reminderDaysBefore?.length) {
+      if (!event.reminderEnabled || typeof event.reminderDaysBefore !== 'number') {
         continue;
       }
 
@@ -105,23 +105,22 @@ export class RemindersService {
     reminders: Reminder[]
   ): void {
     const daysUntil = this.dateUtils.daysBetween(today, eventDate);
+    const reminderDay = event.reminderDaysBefore ?? 7; // Default to 7 days
 
-    for (const reminderDay of event.reminderDaysBefore || []) {
-      const reminderDate = new Date(eventDate);
-      reminderDate.setDate(reminderDate.getDate() - reminderDay);
+    const reminderDate = new Date(eventDate);
+    reminderDate.setDate(reminderDate.getDate() - reminderDay);
 
-      if (reminderDate <= today && eventDate >= today) {
-        const reminder: Reminder = {
-          eventId: event.id,
-          eventTitle: event.title || 'Untitled Event',
-          // Use DateUtilsService for consistent date formatting
-          eventDate: this.dateUtils.toDateString(eventDate),
-          daysUntil: daysUntil,
-          reminderDay: reminderDay,
-        };
+    if (reminderDate <= today && eventDate >= today) {
+      const reminder: Reminder = {
+        eventId: event.id,
+        eventTitle: event.title || 'Untitled Event',
+        // Use DateUtilsService for consistent date formatting
+        eventDate: this.dateUtils.toDateString(eventDate),
+        daysUntil: daysUntil,
+        reminderDay: reminderDay,
+      };
 
-        reminders.push(reminder);
-      }
+      reminders.push(reminder);
     }
   }
 

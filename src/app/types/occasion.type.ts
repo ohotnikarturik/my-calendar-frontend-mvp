@@ -48,13 +48,12 @@ export interface Occasion {
   title: string;
   type: OccasionType;
   date: string; // ISO date string (YYYY-MM-DD)
-  year?: number; // Optional year for year-less birthdays (e.g., only know month/day)
+  year?: number; // Optional year for age calculation
   repeatAnnually: boolean;
-  reminderDaysBefore?: number[];
+  reminderDaysBefore?: number; // Single value, default 7 days
   reminderEnabled: boolean;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**

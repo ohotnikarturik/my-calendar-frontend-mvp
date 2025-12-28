@@ -103,35 +103,18 @@
         </mat-slide-toggle>
 
         @if (occasionForm.get('reminderEnabled')?.value) {
-        <div class="reminder-days">
-          <span class="reminder-label">Remind me:</span>
-          <div class="reminder-chips">
+        <mat-form-field appearance="outline" class="full-width reminder-days-field">
+          <mat-label>Remind me</mat-label>
+          <mat-select
+            formControlName="reminderDaysBefore"
+          >
             @for (option of reminderDayOptions; track option.value) {
-            <button
-              mat-raised-button
-              type="button"
-              [class.selected]="isReminderDaySelected(option.value)"
-              (click)="toggleReminderDay(option.value)"
-              class="reminder-chip-button"
-            >
-              {{ option.label }}
-            </button>
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
             }
-          </div>
-        </div>
+          </mat-select>
+        </mat-form-field>
         }
       </div>
-
-      <!-- Notes -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notes</mat-label>
-        <textarea
-          matInput
-          formControlName="notes"
-          rows="2"
-          placeholder="Gift ideas, celebration plans, etc."
-        ></textarea>
-      </mat-form-field>
     </div>
 
     <!-- Dialog Actions -->

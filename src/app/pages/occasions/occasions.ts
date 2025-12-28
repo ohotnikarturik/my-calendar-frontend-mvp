@@ -179,7 +179,6 @@ export class OccasionsComponent {
           repeatAnnually: occasion.repeatAnnually,
           reminderEnabled: occasion.reminderEnabled,
           reminderDaysBefore: occasion.reminderDaysBefore,
-          notes: occasion.notes,
         });
         // Success notification shown by service
       }

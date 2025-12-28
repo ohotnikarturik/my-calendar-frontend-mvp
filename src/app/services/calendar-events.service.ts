@@ -71,17 +71,11 @@ export class CalendarEventsService {
    * Uses optimistic updates - UI updates immediately, reverts on error
    */
   async add(event: CalendarEvent): Promise<void> {
-    const eventWithTimestamps = {
-      ...event,
-      createdAt: event.createdAt ?? new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     // Optimistic update - update UI immediately
-    this._events.update((list) => [...list, eventWithTimestamps]);
+    this._events.update((list) => [...list, event]);
 
     try {
-      const success = await this.supabase.upsertEvents([eventWithTimestamps]);
+      const success = await this.supabase.upsertEvents([event]);
       if (!success) {
         throw new Error('Failed to save event to Supabase');
       }
@@ -103,12 +97,7 @@ export class CalendarEventsService {
     const currentEvent = this._events().find((e) => e.id === id);
     if (!currentEvent) return;
 
-    const patchWithTimestamp = {
-      ...patch,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const updatedEvent = { ...currentEvent, ...patchWithTimestamp };
+    const updatedEvent = { ...currentEvent, ...patch };
 
     // Optimistic update
     this._events.update((list) =>

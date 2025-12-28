@@ -33,7 +33,6 @@
         (selectionChange)="selectedCategory.set($event.value)"
         aria-label="Filter by category"
       >
-        <mat-option [value]="''">All Categories</mat-option>
         @for (cat of categoryOptions; track cat.value) {
         <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
         }
@@ -45,7 +44,7 @@
       <input
         matInput
         [value]="searchQuery()"
-        (input)="searchQuery.set($event.target.value)"
+        (input)="onSearchInput($event)"
         placeholder="Search events..."
         aria-label="Search events by title or description"
       />

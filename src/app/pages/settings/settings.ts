@@ -95,13 +95,16 @@ export class SettingsComponent {
   }
 
   protected isReminderDaySelected(days: number): boolean {
-    return this.settingsService.settings().defaultReminderDays.includes(days);
+    return (
+      this.settingsService.settings().defaultReminderDays?.includes(days) ??
+      false
+    );
   }
 
   protected toggleReminderDay(days: number): void {
-    const current = this.settingsService.settings().defaultReminderDays;
+    const current = this.settingsService.settings().defaultReminderDays ?? [];
     const updated = current.includes(days)
-      ? current.filter((d) => d !== days)
+      ? current.filter((d: number) => d !== days)
       : [...current, days];
     this.settingsService.updateSettings({ defaultReminderDays: updated });
     this.showSnackbar('Default reminders updated');

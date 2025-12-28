@@ -222,11 +222,18 @@
       <mat-divider></mat-divider>
 
       <!-- Clear All Data -->
-      <div class="setting-row vertical">
+      <div class="setting-row vertical danger-zone">
         <div class="setting-info">
-          <h3>Clear All Data</h3>
-          <p>Permanently delete all events, contacts, and occasions</p>
-          <p class="warning-text">⚠️ This action cannot be undone</p>
+          <h3><mat-icon>warning</mat-icon> Danger Zone</h3>
+          <p>Permanently delete all your calendar data</p>
+          <div class="warning-box">
+            <mat-icon>error_outline</mat-icon>
+            <div>
+              <strong>Warning:</strong> This will delete all events, contacts,
+              and occasions from both your device and Supabase cloud storage.
+              This action cannot be undone.
+            </div>
+          </div>
         </div>
         <button
           mat-raised-button
@@ -235,12 +242,13 @@
           [disabled]="isClearing()"
           aria-label="Permanently delete all data"
         >
-          @if (isClearing()) {
-          <mat-spinner diameter="20"></mat-spinner>
-          <span>Clearing...</span>
-          } @else {
-          <span>Clear All Data</span>
-          }
+          <div class="clear-icon">
+            @if (isClearing()) {
+            <mat-spinner diameter="20"></mat-spinner>
+            Clearing... } @else {
+            <mat-icon>delete_forever</mat-icon>
+            Clear All Data }
+          </div>
         </button>
       </div>
     </mat-card-content>

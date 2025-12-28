@@ -304,11 +304,9 @@ export class OccasionsService {
           start: this.toDateOnlyIso(eventDate),
           allDay: true,
           repeatAnnually: occasion.repeatAnnually,
-          eventType: this.mapOccasionTypeToEventType(occasion.type),
           category: this.mapOccasionTypeToCategory(occasion.type),
           reminderEnabled: occasion.reminderEnabled,
           reminderDaysBefore: occasion.reminderDaysBefore,
-          notes: occasion.notes,
           // Add custom properties for occasion identification
           extendedProps: {
             occasionId: occasion.id,
@@ -345,15 +343,6 @@ export class OccasionsService {
    */
   private toDateOnlyIso(date: Date): string {
     return this.dateUtils.toDateString(date);
-  }
-
-  /**
-   * Map occasion type to calendar event type
-   */
-  private mapOccasionTypeToEventType(
-    type: OccasionType
-  ): 'birthday' | 'anniversary' | 'memorial' | 'custom' {
-    return type;
   }
 
   /**

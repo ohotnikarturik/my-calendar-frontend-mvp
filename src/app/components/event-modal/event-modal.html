@@ -65,23 +65,6 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Event type</mat-label>
-        <mat-select
-          formControlName="eventType"
-          aria-label="Event type"
-          aria-required="true"
-        >
-          @for (option of eventTypeOptions; track option.value) {
-          <mat-option [value]="option.value">{{ option.label }}</mat-option>
-          }
-        </mat-select>
-        @if (shouldShowError('eventType') && hasError('eventType', 'required'))
-        {
-        <mat-error>Event type is required</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Category</mat-label>
         <mat-select formControlName="category" aria-label="Event category">
           @for (option of categoryOptions; track option.value) {
@@ -123,38 +106,19 @@
         </mat-slide-toggle>
 
         @if (eventForm.get('reminderEnabled')?.value) {
-        <div class="reminder-days">
-          <span class="reminder-label">Remind me:</span>
-          <div class="reminder-chips">
+        <mat-form-field appearance="outline" class="full-width reminder-days-field">
+          <mat-label>Remind me</mat-label>
+          <mat-select
+            formControlName="reminderDaysBefore"
+            aria-label="Days before event to send reminder"
+          >
             @for (option of reminderDayOptions; track option.value) {
-            <button
-              mat-raised-button
-              type="button"
-              [class.selected]="isReminderDaySelected(option.value)"
-              (click)="toggleReminderDay(option.value)"
-              class="reminder-chip-button"
-              [attr.aria-label]="'Remind ' + option.label + ' before event'"
-              [attr.aria-checked]="isReminderDaySelected(option.value)"
-              role="checkbox"
-            >
-              {{ option.label }}
-            </button>
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
             }
-          </div>
-        </div>
+          </mat-select>
+        </mat-form-field>
         }
       </div>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Notes</mat-label>
-        <textarea
-          matInput
-          formControlName="notes"
-          rows="2"
-          placeholder="Additional notes (optional)"
-          aria-label="Additional notes"
-        ></textarea>
-      </mat-form-field>
     </div>
 
     <div mat-dialog-actions class="modal-actions">

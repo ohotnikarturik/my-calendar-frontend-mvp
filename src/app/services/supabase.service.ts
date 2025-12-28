@@ -621,6 +621,8 @@ export class SupabaseService {
         : String(event.end)
       : undefined;
 
+    const now = new Date().toISOString();
+
     return {
       id: event.id,
       user_id: userId,
@@ -630,14 +632,14 @@ export class SupabaseService {
       end: endStr,
       all_day: event.allDay ?? true,
       repeat_annually: event.repeatAnnually ?? false,
-      event_type: event.eventType,
       category: event.category,
       color: event.color,
-      notes: event.notes,
-      reminder_days_before: event.reminderDaysBefore,
+      reminder_days_before: event.reminderDaysBefore
+        ? [event.reminderDaysBefore]
+        : undefined,
       reminder_enabled: event.reminderEnabled ?? false,
-      created_at: event.createdAt ?? new Date().toISOString(),
-      updated_at: event.updatedAt ?? new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     };
   }
 
@@ -653,14 +655,10 @@ export class SupabaseService {
       end: event.end,
       allDay: event.all_day,
       repeatAnnually: event.repeat_annually,
-      eventType: event.event_type as CalendarEvent['eventType'],
       category: event.category as CalendarEvent['category'],
       color: event.color,
-      notes: event.notes,
-      reminderDaysBefore: event.reminder_days_before,
+      reminderDaysBefore: event.reminder_days_before?.[0],
       reminderEnabled: event.reminder_enabled,
-      createdAt: event.created_at,
-      updatedAt: event.updated_at,
     };
   }
 
@@ -668,6 +666,7 @@ export class SupabaseService {
    * Convert local Contact to Supabase format
    */
   private toSupabaseContact(contact: Contact, userId: string): SupabaseContact {
+    const now = new Date().toISOString();
     return {
       id: contact.id,
       user_id: userId,
@@ -676,8 +675,8 @@ export class SupabaseService {
       email: contact.email,
       phone: contact.phone,
       notes: contact.notes,
-      created_at: contact.createdAt,
-      updated_at: contact.updatedAt,
+      created_at: contact.createdAt ?? now,
+      updated_at: contact.updatedAt ?? now,
     };
   }
 
@@ -704,6 +703,7 @@ export class SupabaseService {
     occasion: Occasion,
     userId: string
   ): SupabaseOccasion {
+    const now = new Date().toISOString();
     return {
       id: occasion.id,
       user_id: userId,
@@ -713,11 +713,12 @@ export class SupabaseService {
       date: occasion.date,
       year: occasion.year,
       repeat_annually: occasion.repeatAnnually,
-      reminder_days_before: occasion.reminderDaysBefore,
+      reminder_days_before: occasion.reminderDaysBefore
+        ? [occasion.reminderDaysBefore]
+        : undefined,
       reminder_enabled: occasion.reminderEnabled,
-      notes: occasion.notes,
-      created_at: occasion.createdAt,
-      updated_at: occasion.updatedAt,
+      created_at: occasion.createdAt ?? now,
+      updated_at: occasion.updatedAt ?? now,
     };
   }
 
@@ -733,9 +734,8 @@ export class SupabaseService {
       date: occasion.date,
       year: occasion.year,
       repeatAnnually: occasion.repeat_annually,
-      reminderDaysBefore: occasion.reminder_days_before,
+      reminderDaysBefore: occasion.reminder_days_before?.[0],
       reminderEnabled: occasion.reminder_enabled,
-      notes: occasion.notes,
       createdAt: occasion.created_at,
       updatedAt: occasion.updated_at,
     };
@@ -756,7 +756,7 @@ export class SupabaseService {
 
     try {
       const { data, error } = await this.supabase
-        .from('events')
+        .from('calendar_events')
         .select('*')
         .order('start', { ascending: true });
 
@@ -791,7 +791,7 @@ export class SupabaseService {
       const supabaseEvents = events.map((e) => this.toSupabaseEvent(e, userId));
 
       const { error } = await this.supabase
-        .from('events')
+        .from('calendar_events')
         .upsert(supabaseEvents, { onConflict: 'id' });
 
       if (error) {
@@ -819,7 +819,7 @@ export class SupabaseService {
 
     try {
       const { error } = await this.supabase
-        .from('events')
+        .from('calendar_events')
         .delete()
         .eq('id', eventId);
 
@@ -836,198 +836,57 @@ export class SupabaseService {
   }
 
   // ==================== CONTACTS SYNC ====================
+  // TODO: Implement when contacts table is created
 
   /**
    * Fetch all contacts for the current user from Supabase
    */
   async fetchContacts(): Promise<Contact[]> {
-    if (!this.supabase || !this.isAuthenticated()) {
-      console.warn(
-        'Cannot fetch contacts: not authenticated or Supabase not configured'
-      );
-      return [];
-    }
-
-    try {
-      const { data, error } = await this.supabase
-        .from('contacts')
-        .select('*')
-        .order('last_name', { ascending: true });
-
-      if (error) {
-        console.error('Failed to fetch contacts:', error);
-        // Check if user was deleted
-        await this.handleDatabaseError(error);
-        return [];
-      }
-
-      return (data as SupabaseContact[]).map((c) =>
-        this.fromSupabaseContact(c)
-      );
-    } catch (error) {
-      console.error('Error fetching contacts:', error);
-      await this.handleDatabaseError(error);
-      return [];
-    }
+    // Table not yet created
+    console.warn('Contacts table not yet implemented in Supabase');
+    return [];
   }
 
   /**
    * Upsert contacts to Supabase
    */
-  async upsertContacts(contacts: Contact[]): Promise<boolean> {
-    const userId = this.userId();
-    if (!this.supabase || !userId) {
-      console.warn(
-        'Cannot upsert contacts: not authenticated or Supabase not configured'
-      );
-      return false;
-    }
-
-    try {
-      const supabaseContacts = contacts.map((c) =>
-        this.toSupabaseContact(c, userId)
-      );
-
-      const { error } = await this.supabase
-        .from('contacts')
-        .upsert(supabaseContacts, { onConflict: 'id' });
-
-      if (error) {
-        console.error('Failed to upsert contacts:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error upserting contacts:', error);
-      return false;
-    }
+  async upsertContacts(_contacts: Contact[]): Promise<boolean> {
+    console.warn('Contacts table not yet implemented in Supabase');
+    return false;
   }
 
   /**
    * Delete a contact from Supabase
    */
-  async deleteContact(contactId: string): Promise<boolean> {
-    if (!this.supabase || !this.isAuthenticated()) {
-      console.warn(
-        'Cannot delete contact: not authenticated or Supabase not configured'
-      );
-      return false;
-    }
-
-    try {
-      const { error } = await this.supabase
-        .from('contacts')
-        .delete()
-        .eq('id', contactId);
-
-      if (error) {
-        console.error('Failed to delete contact:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error deleting contact:', error);
-      return false;
-    }
+  async deleteContact(_contactId: string): Promise<boolean> {
+    console.warn('Contacts table not yet implemented in Supabase');
+    return false;
   }
 
   // ==================== OCCASIONS SYNC ====================
+  // TODO: Implement when occasions table is created
 
   /**
    * Fetch all occasions for the current user from Supabase
    */
   async fetchOccasions(): Promise<Occasion[]> {
-    if (!this.supabase || !this.isAuthenticated()) {
-      console.warn(
-        'Cannot fetch occasions: not authenticated or Supabase not configured'
-      );
-      return [];
-    }
-
-    try {
-      const { data, error } = await this.supabase
-        .from('occasions')
-        .select('*')
-        .order('date', { ascending: true });
-
-      if (error) {
-        console.error('Failed to fetch occasions:', error);
-        // Check if user was deleted
-        await this.handleDatabaseError(error);
-        return [];
-      }
-
-      return (data as SupabaseOccasion[]).map((o) =>
-        this.fromSupabaseOccasion(o)
-      );
-    } catch (error) {
-      console.error('Error fetching occasions:', error);
-      await this.handleDatabaseError(error);
-      return [];
-    }
+    console.warn('Occasions table not yet implemented in Supabase');
+    return [];
   }
 
   /**
    * Upsert occasions to Supabase
    */
-  async upsertOccasions(occasions: Occasion[]): Promise<boolean> {
-    const userId = this.userId();
-    if (!this.supabase || !userId) {
-      console.warn(
-        'Cannot upsert occasions: not authenticated or Supabase not configured'
-      );
-      return false;
-    }
-
-    try {
-      const supabaseOccasions = occasions.map((o) =>
-        this.toSupabaseOccasion(o, userId)
-      );
-
-      const { error } = await this.supabase
-        .from('occasions')
-        .upsert(supabaseOccasions, { onConflict: 'id' });
-
-      if (error) {
-        console.error('Failed to upsert occasions:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error upserting occasions:', error);
-      return false;
-    }
+  async upsertOccasions(_occasions: Occasion[]): Promise<boolean> {
+    console.warn('Occasions table not yet implemented in Supabase');
+    return false;
   }
 
   /**
    * Delete an occasion from Supabase
    */
-  async deleteOccasion(occasionId: string): Promise<boolean> {
-    if (!this.supabase || !this.isAuthenticated()) {
-      console.warn(
-        'Cannot delete occasion: not authenticated or Supabase not configured'
-      );
-      return false;
-    }
-
-    try {
-      const { error } = await this.supabase
-        .from('occasions')
-        .delete()
-        .eq('id', occasionId);
-
-      if (error) {
-        console.error('Failed to delete occasion:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error deleting occasion:', error);
-      return false;
-    }
+  async deleteOccasion(_occasionId: string): Promise<boolean> {
+    console.warn('Occasions table not yet implemented in Supabase');
+    return false;
   }
 }

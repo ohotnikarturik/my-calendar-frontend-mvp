@@ -31,7 +31,6 @@ import { startWith, map } from 'rxjs';
 
 import type {
   CalendarEvent,
-  EventType,
   EventCategory,
 } from '../../types/event.type';
 import { DateUtilsService } from '../../services/date-utils.service';
@@ -48,17 +47,10 @@ interface EventFormValue {
   description: string;
   date: Date;
   repeatAnnually: boolean;
-  eventType: EventType;
   reminderEnabled: boolean;
-  reminderDaysBefore: number[];
+  reminderDaysBefore: number; // Single value
   category: EventCategory;
   color: string;
-  notes: string;
-}
-
-interface EventTypeOption {
-  value: EventType;
-  label: string;
 }
 
 interface EventCategoryOption {
@@ -102,20 +94,12 @@ export class EventModalComponent {
 
   private readonly initialDate = this.computeInitialDate();
   private readonly initialRepeatAnnually = this.computeInitialRepeatAnnually();
-  private readonly initialEventType = this.computeInitialEventType();
   private readonly initialReminderEnabled =
     this.computeInitialReminderEnabled();
   private readonly initialReminderDaysBefore =
     this.computeInitialReminderDaysBefore();
   private readonly initialCategory = this.computeInitialCategory();
   private readonly initialColor = this.computeInitialColor();
-
-  readonly eventTypeOptions: EventTypeOption[] = [
-    { value: 'birthday', label: 'Birthday' },
-    { value: 'anniversary', label: 'Anniversary' },
-    { value: 'memorial', label: 'Memorial' },
-    { value: 'custom', label: 'Custom' },
-  ];
 
   readonly categoryOptions: EventCategoryOption[] = [
     { value: 'birthday', label: 'Birthday' },
@@ -127,11 +111,12 @@ export class EventModalComponent {
   ];
 
   readonly reminderDayOptions: ReminderDayOption[] = [
-    { value: 30, label: '30 days' },
-    { value: 14, label: '14 days' },
-    { value: 7, label: '7 days' },
-    { value: 3, label: '3 days' },
-    { value: 1, label: '1 day' },
+    { value: 30, label: '30 days before' },
+    { value: 14, label: '14 days before' },
+    { value: 7, label: '7 days before' },
+    { value: 3, label: '3 days before' },
+    { value: 1, label: '1 day before' },
+    { value: 0, label: 'On the day' },
   ];
 
   readonly colorOptions: { value: string; label: string; color: string }[] = [
@@ -155,12 +140,10 @@ export class EventModalComponent {
     description: [this.modalData?.event?.description ?? ''],
     date: [this.initialDate, [Validators.required]],
     repeatAnnually: [this.initialRepeatAnnually],
-    eventType: [this.initialEventType, [Validators.required]],
     reminderEnabled: [this.initialReminderEnabled],
     reminderDaysBefore: [this.initialReminderDaysBefore],
     category: [this.initialCategory],
     color: [this.initialColor],
-    notes: [this.modalData?.event?.notes ?? ''],
   });
 
   private readonly initialFormState =
@@ -228,24 +211,21 @@ export class EventModalComponent {
       current.description.trim() !== initial.description.trim() ||
       current.date.getTime() !== initial.date.getTime() ||
       current.repeatAnnually !== initial.repeatAnnually ||
-      current.eventType !== initial.eventType ||
       current.reminderEnabled !== initial.reminderEnabled ||
-      JSON.stringify([...current.reminderDaysBefore].sort()) !==
-        JSON.stringify([...initial.reminderDaysBefore].sort()) ||
+      current.reminderDaysBefore !== initial.reminderDaysBefore ||
       current.category !== initial.category ||
-      current.color !== initial.color ||
-      current.notes.trim() !== initial.notes.trim();
+      current.color !== initial.color;
 
     return isValid && hasChanges;
   });
 
-  shouldShowError(control: 'title' | 'date' | 'eventType'): boolean {
+  shouldShowError(control: 'title' | 'date'): boolean {
     const ctrl = this.getControl(control);
     return ctrl.invalid && (ctrl.dirty || ctrl.touched || this.hasSubmitted());
   }
 
   hasError(
-    control: 'title' | 'date' | 'eventType',
+    control: 'title' | 'date',
     errorCode: string
   ): boolean {
     return this.getControl(control).hasError(errorCode);
@@ -270,16 +250,12 @@ export class EventModalComponent {
       // Use DateUtilsService for consistent date formatting (YYYY-MM-DD)
       start: this.dateUtils.toDateString(formValue.date),
       repeatAnnually: formValue.repeatAnnually,
-      eventType: formValue.eventType,
       reminderEnabled: formValue.reminderEnabled,
       reminderDaysBefore: formValue.reminderEnabled
         ? formValue.reminderDaysBefore
         : undefined,
       category: formValue.category,
       color: formValue.color || undefined,
-      notes: formValue.notes.trim() || undefined,
-      createdAt: this.modalData?.event?.createdAt ?? new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     this.dialogRef.close({ action: 'save', event });
@@ -314,7 +290,7 @@ export class EventModalComponent {
     this.dialogRef.close();
   }
 
-  private getControl(control: 'title' | 'date' | 'eventType'): AbstractControl {
+  private getControl(control: 'title' | 'date'): AbstractControl {
     return this.eventForm.controls[control];
   }
 
@@ -340,16 +316,12 @@ export class EventModalComponent {
     return true;
   }
 
-  private computeInitialEventType(): EventType {
-    return this.modalData?.event?.eventType ?? 'custom';
-  }
-
   private computeInitialReminderEnabled(): boolean {
     return this.modalData?.event?.reminderEnabled ?? false;
   }
 
-  private computeInitialReminderDaysBefore(): number[] {
-    return this.modalData?.event?.reminderDaysBefore ?? [];
+  private computeInitialReminderDaysBefore(): number {
+    return this.modalData?.event?.reminderDaysBefore ?? 7; // Default 7 days
   }
 
   private computeInitialCategory(): EventCategory {
@@ -358,25 +330,6 @@ export class EventModalComponent {
 
   private computeInitialColor(): string {
     return this.modalData?.event?.color ?? '';
-  }
-
-  toggleReminderDay(day: number): void {
-    const current = this.eventForm.get('reminderDaysBefore')?.value ?? [];
-    const index = current.indexOf(day);
-    if (index >= 0) {
-      this.eventForm.patchValue({
-        reminderDaysBefore: current.filter((d) => d !== day),
-      });
-    } else {
-      this.eventForm.patchValue({
-        reminderDaysBefore: [...current, day].sort((a, b) => b - a),
-      });
-    }
-  }
-
-  isReminderDaySelected(day: number): boolean {
-    const current = this.eventForm.get('reminderDaysBefore')?.value ?? [];
-    return current.includes(day);
   }
 }
 
