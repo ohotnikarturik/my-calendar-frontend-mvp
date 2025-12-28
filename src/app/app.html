@@ -16,7 +16,7 @@
         </button>
       </div>
 
-      @if (isAuthenticated()) {
+      @if (supabase.isInitialized() && isAuthenticated()) {
       <a
         mat-list-item
         routerLink="/home"
@@ -105,7 +105,7 @@
         <mat-icon matListItemIcon>logout</mat-icon>
         <span matListItemTitle>Sign Out</span>
       </a>
-      } @else {
+      } @else if (supabase.isInitialized()) {
       <!-- Login option when not authenticated -->
       <a
         mat-list-item
@@ -142,7 +142,7 @@
 
           <!-- Right side: Desktop navigation -->
           <div class="nav-links desktop-nav">
-            @if (isAuthenticated()) {
+            @if (supabase.isInitialized() && isAuthenticated()) {
             <a routerLink="/home" routerLinkActive="active">Home</a>
             <a
               routerLink="/"
@@ -169,7 +169,7 @@
             </button>
 
             <!-- Auth button -->
-            @if (isAuthenticated()) {
+            @if (supabase.isInitialized() && isAuthenticated()) {
             <!-- User menu when logged in -->
             <button
               mat-icon-button
@@ -194,7 +194,7 @@
                 <span>Sign Out</span>
               </button>
             </mat-menu>
-            } @else {
+            } @else if (supabase.isInitialized()) {
             <!-- Login button when not logged in -->
             <a
               mat-stroked-button
