@@ -52,7 +52,40 @@
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
   </div>
-  }
+
+  <!-- Bulk action toolbar -->
+  @if (hasSelectedEvents()) {
+  <mat-toolbar class="bulk-actions-toolbar slide-in-down">
+    <mat-checkbox
+      [checked]="allVisibleSelected()"
+      [indeterminate]="hasSelectedEvents() && !allVisibleSelected()"
+      (change)="toggleSelectAll()"
+      aria-label="Select all visible events"
+    ></mat-checkbox>
+    <span class="selection-count">{{ selectedCount() }} selected</span>
+    <span class="spacer"></span>
+    <button mat-button (click)="clearSelection()" aria-label="Clear selection">
+      <mat-icon>close</mat-icon>
+      Clear
+    </button>
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="deleteSelected()"
+      [disabled]="isDeleting()"
+      aria-label="Delete selected events"
+    >
+      <div class="delete-icon">
+        @if (isDeleting()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        Deleting... } @else {
+
+        <mat-icon>delete</mat-icon>
+        Delete }
+      </div>
+    </button>
+  </mat-toolbar>
+  } }
 
   <!-- Loading state -->
   @if (eventsSvc.loading()) {
@@ -105,6 +138,7 @@
     <mat-card
       class="event-card hover-lift"
       (click)="editEvent(event)"
+      [class.selected]="isSelected(event.id)"
       [attr.aria-label]="
         'Edit event: ' + event.title + ' on ' + formatDate(event.start)
       "
@@ -113,6 +147,13 @@
       (keydown.enter)="editEvent(event)"
       (keydown.space)="editEvent(event)"
     >
+      <div class="card-checkbox">
+        <mat-checkbox
+          [checked]="isSelected(event.id)"
+          (click)="toggleSelection(event.id, $event)"
+          [attr.aria-label]="'Select ' + event.title"
+        ></mat-checkbox>
+      </div>
       <mat-card-header>
         <div
           class="event-color"

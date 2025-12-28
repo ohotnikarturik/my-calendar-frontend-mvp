@@ -71,11 +71,26 @@
 
 .event-card {
   cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &.selected {
+    border: 2px solid var(--mat-sys-primary);
+    background-color: var(--mat-sys-primary-container);
+  }
+}
+
+.card-checkbox {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
 }
 
 .event-card mat-card-header {
   position: relative;
   padding-left: 3rem;
+  padding-right: 3rem;
 }
 
 .event-color {
@@ -85,6 +100,40 @@
   bottom: 0;
   width: 4px;
   border-radius: 4px 0 0 4px;
+}
+
+.bulk-actions-toolbar {
+  margin: 1rem 0;
+  background-color: var(--mat-sys-surface-container-high);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .spacer {
+    flex: 1;
+  }
+
+  .selection-count {
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .delete-icon {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  mat-spinner {
+    display: inline-block;
+  }
 }
 
 .event-description {

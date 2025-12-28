@@ -8,6 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog } from '@angular/material/dialog';
 import type { DateInput } from '@fullcalendar/core';
 import { CalendarEventsService } from '../../services/calendar-events.service';
@@ -32,6 +34,8 @@ import type { CalendarEvent, EventCategory } from '../../types/event.type';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatCheckboxModule,
+    MatToolbarModule,
     PageHeader,
     EmptyState,
   ],
@@ -46,6 +50,8 @@ export class Upcoming {
   readonly selectedRange = signal<number>(30);
   readonly selectedCategory = signal<string>('');
   readonly searchQuery = signal<string>('');
+  readonly selectedEventIds = signal<Set<string>>(new Set());
+  readonly isDeleting = signal(false);
 
   readonly categoryOptions: { value: EventCategory | ''; label: string }[] = [
     { value: '', label: 'All Categories' },
@@ -56,6 +62,14 @@ export class Upcoming {
     { value: 'work', label: 'Work' },
     { value: 'other', label: 'Other' },
   ];
+
+  readonly hasSelectedEvents = computed(() => this.selectedEventIds().size > 0);
+  readonly selectedCount = computed(() => this.selectedEventIds().size);
+  readonly allVisibleSelected = computed(() => {
+    const filtered = this.filteredEvents();
+    if (filtered.length === 0) return false;
+    return filtered.every((event) => this.selectedEventIds().has(event.id));
+  });
 
   readonly upcomingEvents = computed(() => {
     const events = this.eventsSvc.events();
@@ -201,5 +215,97 @@ export class Upcoming {
         await this.eventsSvc.add(result.event);
       }
     });
+  }
+
+  /**
+   * Toggle selection for a single event
+   */
+  toggleSelection(eventId: string, event: MouseEvent): void {
+    event.stopPropagation(); // Prevent card click
+    this.selectedEventIds.update((ids) => {
+      const newIds = new Set(ids);
+      if (newIds.has(eventId)) {
+        newIds.delete(eventId);
+      } else {
+        newIds.add(eventId);
+      }
+      return newIds;
+    });
+  }
+
+  /**
+   * Check if an event is selected
+   */
+  isSelected(eventId: string): boolean {
+    return this.selectedEventIds().has(eventId);
+  }
+
+  /**
+   * Toggle select/deselect all visible events
+   */
+  toggleSelectAll(): void {
+    const filtered = this.filteredEvents();
+    const allSelected = this.allVisibleSelected();
+
+    this.selectedEventIds.update(() => {
+      if (allSelected) {
+        // Deselect all
+        return new Set();
+      } else {
+        // Select all visible events
+        return new Set(filtered.map((e) => e.id));
+      }
+    });
+  }
+
+  /**
+   * Clear selection
+   */
+  clearSelection(): void {
+    this.selectedEventIds.set(new Set());
+  }
+
+  /**
+   * Delete selected events
+   */
+  async deleteSelected(): Promise<void> {
+    const selectedIds = Array.from(this.selectedEventIds());
+    if (selectedIds.length === 0) return;
+
+    // Import ConfirmDialog dynamically
+    const { ConfirmDialog } = await import(
+      '../../components/confirm-dialog/confirm-dialog'
+    );
+
+    const dialogRef = this.dialog.open(ConfirmDialog, {
+      data: {
+        title: 'Delete Multiple Events',
+        message: `Are you sure you want to delete ${selectedIds.length} event${
+          selectedIds.length > 1 ? 's' : ''
+        }? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        isDangerous: true,
+      },
+    });
+
+    const confirmed = await dialogRef.afterClosed().toPromise();
+    if (!confirmed) return;
+
+    this.isDeleting.set(true);
+
+    try {
+      // Delete events one by one (service handles optimistic updates)
+      await Promise.all(
+        selectedIds.map((id) => this.eventsSvc.remove(id).catch(() => null))
+      );
+
+      // Clear selection after successful deletion
+      this.clearSelection();
+    } catch (error) {
+      console.error('Failed to delete events:', error);
+    } finally {
+      this.isDeleting.set(false);
+    }
   }
 }
