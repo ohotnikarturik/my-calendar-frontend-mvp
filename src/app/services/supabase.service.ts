@@ -45,7 +45,7 @@ export interface SupabaseEvent {
   category?: string;
   color?: string;
   notes?: string;
-  reminder_days_before?: number[];
+  reminder_days_before?: number;
   reminder_enabled: boolean;
   created_at: string;
   updated_at: string;
@@ -72,7 +72,7 @@ export interface SupabaseOccasion {
   date: string;
   year?: number;
   repeat_annually: boolean;
-  reminder_days_before?: number[];
+  reminder_days_before?: number;
   reminder_enabled: boolean;
   notes?: string;
   created_at: string;
@@ -634,9 +634,7 @@ export class SupabaseService {
       repeat_annually: event.repeatAnnually ?? false,
       category: event.category,
       color: event.color,
-      reminder_days_before: event.reminderDaysBefore
-        ? [event.reminderDaysBefore]
-        : undefined,
+      reminder_days_before: event.reminderDaysBefore,
       reminder_enabled: event.reminderEnabled ?? false,
       created_at: now,
       updated_at: now,
@@ -657,7 +655,7 @@ export class SupabaseService {
       repeatAnnually: event.repeat_annually,
       category: event.category as CalendarEvent['category'],
       color: event.color,
-      reminderDaysBefore: event.reminder_days_before?.[0],
+      reminderDaysBefore: event.reminder_days_before,
       reminderEnabled: event.reminder_enabled,
     };
   }
@@ -713,9 +711,7 @@ export class SupabaseService {
       date: occasion.date,
       year: occasion.year,
       repeat_annually: occasion.repeatAnnually,
-      reminder_days_before: occasion.reminderDaysBefore
-        ? [occasion.reminderDaysBefore]
-        : undefined,
+      reminder_days_before: occasion.reminderDaysBefore,
       reminder_enabled: occasion.reminderEnabled,
       created_at: occasion.createdAt ?? now,
       updated_at: occasion.updatedAt ?? now,
@@ -734,7 +730,7 @@ export class SupabaseService {
       date: occasion.date,
       year: occasion.year,
       repeatAnnually: occasion.repeat_annually,
-      reminderDaysBefore: occasion.reminder_days_before?.[0],
+      reminderDaysBefore: occasion.reminder_days_before,
       reminderEnabled: occasion.reminder_enabled,
       createdAt: occasion.created_at,
       updatedAt: occasion.updated_at,
