@@ -26,6 +26,7 @@ import { SupabaseService } from '../../services/supabase.service';
 import { CalendarEventsService } from '../../services/calendar-events.service';
 import { ContactsService } from '../../services/contacts.service';
 import { OccasionsService } from '../../services/occasions.service';
+import { NotificationPreferencesService } from '../../services/notification-preferences.service';
 import { PageHeader } from '../../components/page-header/page-header';
 import {
   COMMON_TIMEZONES,
@@ -33,6 +34,11 @@ import {
   type ThemeMode,
   type ExportFormat,
 } from '../../types/settings.type';
+import {
+  REMINDER_DAY_OPTIONS as EMAIL_REMINDER_DAY_OPTIONS,
+  REMINDER_TIME_OPTIONS as EMAIL_REMINDER_TIME_OPTIONS,
+  COMMON_TIMEZONES as EMAIL_TIMEZONES,
+} from '../../types/notification-preferences.type';
 
 @Component({
   selector: 'settings',
@@ -59,6 +65,7 @@ export class SettingsComponent {
   protected readonly eventsService = inject(CalendarEventsService);
   protected readonly contactsService = inject(ContactsService);
   protected readonly occasionsService = inject(OccasionsService);
+  protected readonly notificationPrefs = inject(NotificationPreferencesService);
   private readonly snackBar = inject(MatSnackBar);
 
   // Component state with signals
@@ -70,6 +77,11 @@ export class SettingsComponent {
   // Timezone and reminder options (from constants)
   protected readonly timezones = COMMON_TIMEZONES;
   protected readonly reminderOptions = REMINDER_DAY_OPTIONS;
+
+  // Email reminder options
+  protected readonly emailReminderDayOptions = EMAIL_REMINDER_DAY_OPTIONS;
+  protected readonly emailReminderTimeOptions = EMAIL_REMINDER_TIME_OPTIONS;
+  protected readonly emailTimezones = EMAIL_TIMEZONES;
 
   // Settings update methods
   protected updateTimezone(timezone: string): void {
@@ -228,6 +240,64 @@ export class SettingsComponent {
       this.showSnackbar('Failed to clear data. Please try again.');
     } finally {
       this.isClearing.set(false);
+    }
+  }
+
+  // Email reminder methods
+  protected async toggleEmailReminders(enabled: boolean): Promise<void> {
+    try {
+      await this.notificationPrefs.toggleEmailReminders(enabled);
+    } catch (error) {
+      console.error('Failed to toggle email reminders:', error);
+    }
+  }
+
+  protected isEmailReminderDaySelected(day: number): boolean {
+    return (
+      this.notificationPrefs.preferences()?.reminder_days?.includes(day) ??
+      false
+    );
+  }
+
+  protected async toggleEmailReminderDay(
+    day: number,
+    checked: boolean
+  ): Promise<void> {
+    const prefs = this.notificationPrefs.preferences();
+    if (!prefs) return;
+
+    const newDays = checked
+      ? [...(prefs.reminder_days || []), day].sort((a, b) => a - b)
+      : (prefs.reminder_days || []).filter((d) => d !== day);
+
+    try {
+      await this.notificationPrefs.updateReminderDays(newDays);
+    } catch (error) {
+      console.error('Failed to update reminder days:', error);
+    }
+  }
+
+  protected async updateEmailReminderTime(time: string): Promise<void> {
+    try {
+      await this.notificationPrefs.updateReminderTime(time);
+    } catch (error) {
+      console.error('Failed to update reminder time:', error);
+    }
+  }
+
+  protected async updateEmailTimezone(timezone: string): Promise<void> {
+    try {
+      await this.notificationPrefs.updateTimezone(timezone);
+    } catch (error) {
+      console.error('Failed to update timezone:', error);
+    }
+  }
+
+  protected async sendTestEmail(): Promise<void> {
+    try {
+      await this.notificationPrefs.sendTestEmail();
+    } catch (error) {
+      console.error('Failed to send test email:', error);
     }
   }
 

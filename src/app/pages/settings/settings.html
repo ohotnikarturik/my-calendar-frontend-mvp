@@ -120,6 +120,135 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- Email Reminders -->
+  <mat-card class="settings-section">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>email</mat-icon>
+        Email Reminders
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Enable/Disable Toggle -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Enable Email Reminders</h3>
+          <p>Get email notifications for upcoming events</p>
+        </div>
+        <mat-checkbox
+          [checked]="
+            notificationPrefs.preferences()?.email_reminders_enabled ?? false
+          "
+          (change)="toggleEmailReminders($event.checked)"
+          aria-label="Enable email reminders"
+        >
+        </mat-checkbox>
+      </div>
+
+      @if (notificationPrefs.preferences()?.email_reminders_enabled) {
+      <mat-divider></mat-divider>
+
+      <!-- Reminder Days Selection -->
+      <div class="setting-row vertical">
+        <div class="setting-info">
+          <h3>Remind Me</h3>
+          <p>Select when you want to be reminded about upcoming events</p>
+        </div>
+        <div class="reminder-options">
+          @for (option of emailReminderDayOptions; track option.value) {
+          <mat-checkbox
+            [checked]="isEmailReminderDaySelected(option.value)"
+            (change)="toggleEmailReminderDay(option.value, $event.checked)"
+            [attr.aria-label]="
+              'Email reminder ' + option.label + ' before events'
+            "
+          >
+            {{ option.label }}
+          </mat-checkbox>
+          }
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Reminder Time Selection -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Reminder Time</h3>
+          <p>What time of day should we send reminders?</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Select Time</mat-label>
+          <mat-select
+            [value]="
+              notificationPrefs.preferences()?.reminder_time ?? '09:00:00'
+            "
+            (selectionChange)="updateEmailReminderTime($event.value)"
+            aria-label="Select email reminder time"
+          >
+            @for (time of emailReminderTimeOptions; track time.value) {
+            <mat-option [value]="time.value">
+              {{ time.label }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Timezone Selection -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>Email Reminder Timezone</h3>
+          <p>Timezone for email reminder scheduling</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>Select Timezone</mat-label>
+          <mat-select
+            [value]="notificationPrefs.preferences()?.timezone ?? 'UTC'"
+            (selectionChange)="updateEmailTimezone($event.value)"
+            aria-label="Select email reminder timezone"
+          >
+            @for (tz of emailTimezones; track tz.value) {
+            <mat-option [value]="tz.value">
+              {{ tz.label }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Test Email Button -->
+      <div class="setting-row vertical">
+        <div class="setting-info">
+          <h3>Test Email Notifications</h3>
+          <p>Send a test email to verify your notifications are working</p>
+        </div>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="sendTestEmail()"
+          [disabled]="notificationPrefs.loading()"
+          aria-label="Send test email notification"
+        >
+          @if (notificationPrefs.loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          <span>Sending...</span>
+          } @else {
+          <ng-container>
+            <mat-icon>send</mat-icon>
+            <span>Send Test Email</span>
+          </ng-container>
+          }
+        </button>
+      </div>
+      }
+    </mat-card-content>
+  </mat-card>
+
   <!-- Data Management -->
   <mat-card class="settings-section">
     <mat-card-header>

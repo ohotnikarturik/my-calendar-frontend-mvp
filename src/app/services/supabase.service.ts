@@ -98,6 +98,7 @@ export class SupabaseService {
   // Supabase client instance (null if not configured)
   // Learning note: We allow null to handle cases where Supabase isn't configured yet
   private readonly supabase: SupabaseClient | null = null;
+  private readonly _client!: SupabaseClient;
   private readonly _isConfigured = signal(false);
 
   // Auth state signals
@@ -148,6 +149,17 @@ export class SupabaseService {
   readonly userEmail = computed(() => this._currentUser()?.email ?? null);
   readonly userId = computed(() => this._currentUser()?.id ?? null);
 
+  /**
+   * Public access to Supabase client for direct database operations
+   * Used by specialized services like NotificationPreferencesService
+   */
+  get client(): SupabaseClient {
+    if (!this._client) {
+      throw new Error('Supabase client not initialized');
+    }
+    return this._client;
+  }
+
   constructor() {
     // Check if Supabase is properly configured
     // Learning note: This allows the app to work without Supabase credentials
@@ -169,6 +181,9 @@ export class SupabaseService {
           },
         }
       );
+
+      // Store client reference for direct access
+      (this._client as SupabaseClient) = this.supabase;
 
       // Initialize auth state and listen for changes
       this.initializeAuth();
@@ -346,15 +361,6 @@ export class SupabaseService {
       this._isOnline.set(false);
       console.log('App is offline - sync paused');
     });
-  }
-
-  /**
-   * Get the Supabase client for direct access
-   * Returns null if not configured
-   * Learning note: Use this sparingly - prefer the methods below for common operations
-   */
-  get client(): SupabaseClient | null {
-    return this.supabase;
   }
 
   // ==================== AUTHENTICATION METHODS ====================
