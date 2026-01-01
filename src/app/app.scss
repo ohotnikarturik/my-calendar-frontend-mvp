@@ -155,7 +155,33 @@
   color: var(--mat-sys-on-primary-container);
 }
 
-/* Theme toggle button in nav */
+/* Language and theme toggle buttons in nav */
+.language-toggle {
+  color: var(--mat-sys-on-primary) !important;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  min-width: 80px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--mat-sys-on-primary) !important;
+  }
+
+  span {
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-primary) !important;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+}
+
 .theme-toggle {
   color: var(--mat-sys-on-primary);
   margin-left: 0.5rem;
@@ -213,6 +239,16 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
+  }
+}
+
+/* Language menu active item */
+::ng-deep .mat-mdc-menu-item.active {
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+
+  .mat-icon {
+    color: var(--mat-sys-on-primary-container);
   }
 }
 

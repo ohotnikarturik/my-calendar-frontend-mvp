@@ -44,6 +44,8 @@ import { OCCASION_TYPE_OPTIONS } from '../../types/occasion.type';
 import type { Contact } from '../../types/contact.type';
 import { ContactsService } from '../../services/contacts.service';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 /**
  * Data passed to the occasion modal
@@ -100,6 +102,7 @@ interface ReminderDayOption {
     MatNativeDateModule,
     MatSlideToggleModule,
     MatCheckboxModule,
+    TranslatePipe,
   ],
   templateUrl: './occasion-modal.html',
   styleUrl: './occasion-modal.scss',
@@ -113,6 +116,7 @@ export class OccasionModalComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly contactsService = inject(ContactsService);
   private readonly dialog = inject(MatDialog);
+  private readonly translationService = inject(TranslationService);
 
   private readonly hasSubmitted = signal(false);
 
@@ -121,12 +125,30 @@ export class OccasionModalComponent implements OnInit {
   readonly contacts = this.contactsService.sortedContacts;
 
   readonly reminderDayOptions: ReminderDayOption[] = [
-    { value: 30, label: '30 days before' },
-    { value: 14, label: '14 days before' },
-    { value: 7, label: '7 days before' },
-    { value: 3, label: '3 days before' },
-    { value: 1, label: '1 day before' },
-    { value: 0, label: 'On the day' },
+    {
+      value: 30,
+      label: this.translationService.translate('reminderOptions.30DaysBefore'),
+    },
+    {
+      value: 14,
+      label: this.translationService.translate('reminderOptions.14DaysBefore'),
+    },
+    {
+      value: 7,
+      label: this.translationService.translate('reminderOptions.7DaysBefore'),
+    },
+    {
+      value: 3,
+      label: this.translationService.translate('reminderOptions.3DaysBefore'),
+    },
+    {
+      value: 1,
+      label: this.translationService.translate('reminderOptions.1DayBefore'),
+    },
+    {
+      value: 0,
+      label: this.translationService.translate('reminderOptions.onTheDay'),
+    },
   ];
 
   // Compute initial values
@@ -153,9 +175,7 @@ export class OccasionModalComponent implements OnInit {
     year: [this.initialYear as number | null],
     repeatAnnually: [this.modalData?.occasion?.repeatAnnually ?? true],
     reminderEnabled: [this.modalData?.occasion?.reminderEnabled ?? true],
-    reminderDaysBefore: [
-      this.modalData?.occasion?.reminderDaysBefore ?? 7,
-    ],
+    reminderDaysBefore: [this.modalData?.occasion?.reminderDaysBefore ?? 7],
   });
 
   private readonly initialFormState =
@@ -190,11 +210,15 @@ export class OccasionModalComponent implements OnInit {
   );
 
   readonly dialogTitle = computed(() =>
-    this.isEdit() ? 'Edit Occasion' : 'Add New Occasion'
+    this.isEdit()
+      ? this.translationService.translate('occasionModal.editTitle')
+      : this.translationService.translate('occasionModal.createTitle')
   );
 
   readonly primaryActionLabel = computed(() =>
-    this.isEdit() ? 'Update' : 'Create'
+    this.isEdit()
+      ? this.translationService.translate('buttons.update')
+      : this.translationService.translate('buttons.create')
   );
 
   readonly canDelete = computed(

@@ -1,32 +1,42 @@
 <div class="occasions-container">
   <!-- Header -->
   <div class="occasions-header">
-    <h1>Occasions</h1>
+    <h1>{{ "occasions.title" | translate }}</h1>
     <div class="header-controls">
       <!-- Search -->
       <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Search</mat-label>
+        <mat-label>{{ "common.search" | translate }}</mat-label>
         <input
           matInput
           [value]="searchQuery()"
           (input)="onSearchInput($event)"
-          placeholder="Search occasions..."
+          [placeholder]="'occasions.searchPlaceholder' | translate"
         />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 
       <!-- Type Filter -->
       <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Type</mat-label>
+        <mat-label>{{ "occasions.type" | translate }}</mat-label>
         <mat-select
           [value]="filterType()"
           (selectionChange)="filterType.set($event.value)"
         >
-          <mat-option value="">All Types</mat-option>
-          <mat-option value="birthday">Birthdays</mat-option>
-          <mat-option value="anniversary">Anniversaries</mat-option>
-          <mat-option value="memorial">Memorials</mat-option>
-          <mat-option value="custom">Custom</mat-option>
+          <mat-option value="">{{
+            "occasions.allTypes" | translate
+          }}</mat-option>
+          <mat-option value="birthday">{{
+            "occasions.birthdays" | translate
+          }}</mat-option>
+          <mat-option value="anniversary">{{
+            "occasions.anniversaries" | translate
+          }}</mat-option>
+          <mat-option value="memorial">{{
+            "occasions.memorials" | translate
+          }}</mat-option>
+          <mat-option value="custom">{{
+            "occasions.custom" | translate
+          }}</mat-option>
         </mat-select>
       </mat-form-field>
 
@@ -38,12 +48,12 @@
         [disabled]="contactsService.contacts().length === 0"
         [matTooltip]="
           contactsService.contacts().length === 0
-            ? 'Add a contact first'
-            : 'Add a new occasion'
+            ? ('occasions.addContactFirst' | translate)
+            : ('occasions.addNewOccasion' | translate)
         "
       >
         <mat-icon>celebration</mat-icon>
-        Add Occasion
+        {{ "buttons.addOccasion" | translate }}
       </button>
     </div>
   </div>
@@ -52,56 +62,56 @@
   @if (contactsService.contacts().length === 0 && !occasionsService.loading()) {
   <div class="empty-state">
     <mat-icon>person_add</mat-icon>
-    <p>You need to add contacts first</p>
+    <p>{{ "occasions.needContacts" | translate }}</p>
     <p class="empty-subtitle">
-      Occasions are linked to contacts. Add a contact to get started.
+      {{ "occasions.needContactsDesc" | translate }}
     </p>
     <a mat-raised-button color="primary" href="/contacts">
       <mat-icon>person_add</mat-icon>
-      Go to Contacts
+      {{ "buttons.goToContacts" | translate }}
     </a>
   </div>
   } @else if (occasionsService.loading()) {
   <!-- Loading state -->
   <div class="loading-state">
     <mat-spinner diameter="48"></mat-spinner>
-    <p>Loading occasions...</p>
+    <p>{{ "common.loadingOccasions" | translate }}</p>
   </div>
   } @else if (filteredOccasions().length === 0) {
   <!-- Empty state -->
   <div class="empty-state">
     @if (searchQuery() || filterType()) {
     <mat-icon>search_off</mat-icon>
-    <p>No occasions match your filters</p>
-    <p class="empty-subtitle">Try adjusting your search or filter criteria</p>
+    <p>{{ "occasions.noResults" | translate }}</p>
+    <p class="empty-subtitle">{{ "occasions.noResultsDesc" | translate }}</p>
     <button mat-button (click)="clearFilters()">
       <mat-icon>clear</mat-icon>
-      Clear Filters
+      {{ "buttons.clearFilters" | translate }}
     </button>
     } @else {
     <mat-icon>celebration</mat-icon>
-    <p>No occasions yet</p>
+    <p>{{ "occasions.noOccasions" | translate }}</p>
     <p class="empty-subtitle">
-      Add birthdays, anniversaries, and other important dates
+      {{ "occasions.noOccasionsDesc" | translate }}
     </p>
     <button mat-raised-button color="primary" (click)="openOccasionModal()">
       <mat-icon>add</mat-icon>
-      Add Your First Occasion
+      {{ "buttons.addFirstOccasion" | translate }}
     </button>
     }
   </div>
   } @else {
   <!-- Occasions count -->
   <div class="occasions-count">
-    <span
-      >{{ filteredOccasions().length }} occasion{{
-        filteredOccasions().length === 1 ? "" : "s"
-      }}</span
-    >
+    <span>{{
+      "occasions.occasionCount"
+        | translate : { count: filteredOccasions().length }
+    }}</span>
     @if (searchQuery() || filterType()) {
     <span class="filter-info">
       @if (filterType()) { ({{ getTypeLabel(filterType()) }}) } @if
-      (searchQuery()) { matching "{{ searchQuery() }}" }
+      (searchQuery()) {
+      {{ "occasions.matching" | translate : { query: searchQuery() } }} }
     </span>
     }
   </div>
@@ -133,9 +143,12 @@
         <div class="occasion-date">
           <mat-icon>event</mat-icon>
           <span>{{ formatDate(occasion.date) }}</span>
-          @if (occasion.year) {
+          @if (occasion.year && calculateYears(occasion) !== null) {
           <mat-chip class="age-chip">
-            {{ calculateYears(occasion) }} years
+            {{
+              "occasions.yearsCount"
+                | translate : { years: calculateYears(occasion)! }
+            }}
           </mat-chip>
           }
         </div>
@@ -149,11 +162,11 @@
         <!-- Tags -->
         <div class="occasion-tags">
           @if (occasion.repeatAnnually) {
-          <mat-chip>Recurring</mat-chip>
+          <mat-chip>{{ "occasions.recurring" | translate }}</mat-chip>
           } @if (occasion.reminderEnabled) {
           <mat-chip>
             <mat-icon>notifications</mat-icon>
-            Reminders
+            {{ "occasions.reminders" | translate }}
           </mat-chip>
           }
         </div>

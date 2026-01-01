@@ -1,13 +1,13 @@
 <div class="calendar-wrapper">
-  <page-header [title]="'Calendar'">
+  <page-header [title]="'calendar.title' | translate">
     <button
       mat-raised-button
       color="primary"
       (click)="createNewEvent()"
-      aria-label="Create new event"
+      [attr.aria-label]="'aria.createNewEvent' | translate"
     >
       <mat-icon>add</mat-icon>
-      Create Event
+      {{ "buttons.createEvent" | translate }}
     </button>
   </page-header>
 
@@ -17,24 +17,24 @@
   <div class="loading-overlay fade-in">
     <div class="loading-state">
       <mat-spinner diameter="48"></mat-spinner>
-      <p>Loading events...</p>
+      <p>{{ "common.loadingEvents" | translate }}</p>
     </div>
   </div>
   } @else if (eventsSvc.events().length === 0) {
   <div class="empty-overlay fade-in">
     <empty-state
       [icon]="'event_busy'"
-      [title]="'No events yet'"
-      [description]="'Get started by creating your first event'"
+      [title]="'calendar.noEvents' | translate"
+      [description]="'calendar.noEventsDesc' | translate"
     >
       <button
         mat-raised-button
         color="primary"
         (click)="createNewEvent()"
-        aria-label="Create your first event"
+        [attr.aria-label]="'aria.createFirstEvent' | translate"
       >
         <mat-icon>add</mat-icon>
-        Create Your First Event
+        {{ "buttons.createFirstEvent" | translate }}
       </button>
     </empty-state>
   </div>

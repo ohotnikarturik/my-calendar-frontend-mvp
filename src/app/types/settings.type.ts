@@ -10,6 +10,8 @@
  * when adding new settings in the future.
  */
 
+import { Language } from './language.type';
+
 /**
  * Available theme options
  * - light: Light mode (white background)
@@ -61,6 +63,7 @@ export const REMINDER_DAY_OPTIONS = [
  * Application settings configuration
  *
  * @property theme - UI theme preference
+ * @property language - UI language preference (en, ru, ua, fi)
  * @property timezone - User's timezone for event display
  * @property calendarStartOfWeek - Week start day (0 = Sunday, 1 = Monday)
  * @property exportFormat - Preferred export format
@@ -68,6 +71,7 @@ export const REMINDER_DAY_OPTIONS = [
  */
 export interface AppSettings {
   theme: ThemeMode;
+  language?: Language;
   timezone?: string;
   calendarStartOfWeek?: 0 | 1;
   exportFormat?: ExportFormat;
@@ -83,6 +87,7 @@ export interface AppSettings {
  */
 export const DEFAULT_SETTINGS: AppSettings = {
   theme: 'auto',
+  language: 'en',
   timezone: 'UTC',
   calendarStartOfWeek: 0,
   exportFormat: 'csv',

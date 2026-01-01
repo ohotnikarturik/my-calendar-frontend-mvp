@@ -9,6 +9,7 @@ import {
   type Reminder,
 } from '../../services/reminders.service';
 import { DateUtilsService } from '../../services/date-utils.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'reminders-list',
@@ -18,6 +19,7 @@ import { DateUtilsService } from '../../services/date-utils.service';
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
+    TranslatePipe,
   ],
   templateUrl: './reminders-list.html',
   styleUrl: './reminders-list.scss',

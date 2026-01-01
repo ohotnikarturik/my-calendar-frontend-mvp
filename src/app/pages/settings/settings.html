@@ -1,13 +1,13 @@
 <div class="settings-container">
-  <page-header [title]="'Settings'">
+  <page-header [title]="'settings.title' | translate">
     <button
       mat-raised-button
       color="warn"
       (click)="resetToDefaults()"
-      aria-label="Reset all settings to defaults"
+      [attr.aria-label]="'settings.resetConfirm' | translate"
     >
       <mat-icon>restore</mat-icon>
-      Reset to Defaults
+      {{ "buttons.resetToDefaults" | translate }}
     </button>
   </page-header>
 
@@ -16,22 +16,22 @@
     <mat-card-header>
       <mat-card-title>
         <mat-icon>settings</mat-icon>
-        General Settings
+        {{ "settings.generalSettings" | translate }}
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <!-- Timezone -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Timezone</h3>
-          <p>Your local timezone for date calculations</p>
+          <h3>{{ "settings.timezone" | translate }}</h3>
+          <p>{{ "settings.timezoneDesc" | translate }}</p>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Select timezone</mat-label>
+          <mat-label>{{ "settings.selectTimezone" | translate }}</mat-label>
           <mat-select
             [value]="settingsService.settings().timezone"
             (selectionChange)="updateTimezone($event.value)"
-            aria-label="Select your timezone"
+            [attr.aria-label]="'aria.selectTimezone' | translate"
           >
             @for (tz of timezones; track tz.value) {
             <mat-option [value]="tz.value">
@@ -44,22 +44,48 @@
 
       <mat-divider></mat-divider>
 
+      <!-- Language -->
+      <div class="setting-row">
+        <div class="setting-info">
+          <h3>{{ "settings.language" | translate }}</h3>
+          <p>{{ "settings.languageDesc" | translate }}</p>
+        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ "settings.selectLanguage" | translate }}</mat-label>
+          <mat-select
+            [value]="translationService.currentLanguage()"
+            (selectionChange)="updateLanguage($event.value)"
+            [attr.aria-label]="'aria.selectLanguage' | translate"
+          >
+            @for (lang of supportedLanguages; track lang.code) {
+            <mat-option [value]="lang.code">
+              {{ lang.nativeName }}
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider></mat-divider>
+
       <!-- Theme -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Theme</h3>
-          <p>Choose your preferred color scheme</p>
+          <h3>{{ "settings.theme" | translate }}</h3>
+          <p>{{ "settings.themeDesc" | translate }}</p>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Theme mode</mat-label>
+          <mat-label>{{ "settings.themeMode" | translate }}</mat-label>
           <mat-select
             [value]="settingsService.settings().theme"
             (selectionChange)="updateTheme($event.value)"
-            aria-label="Select theme mode"
+            [attr.aria-label]="'aria.selectTheme' | translate"
           >
-            <mat-option value="light">Light</mat-option>
-            <mat-option value="dark">Dark</mat-option>
-            <mat-option value="auto">Auto (System)</mat-option>
+            <mat-option value="light">{{
+              "theme.light" | translate
+            }}</mat-option>
+            <mat-option value="dark">{{ "theme.dark" | translate }}</mat-option>
+            <mat-option value="auto">{{ "theme.auto" | translate }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -69,18 +95,22 @@
       <!-- Calendar Start of Week -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Week Starts On</h3>
-          <p>First day of the week in calendar view</p>
+          <h3>{{ "settings.weekStartsOn" | translate }}</h3>
+          <p>{{ "settings.weekStartsOnDesc" | translate }}</p>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Start of week</mat-label>
+          <mat-label>{{ "settings.startOfWeek" | translate }}</mat-label>
           <mat-select
             [value]="settingsService.settings().calendarStartOfWeek"
             (selectionChange)="updateStartOfWeek($event.value)"
-            aria-label="Select first day of the week"
+            [attr.aria-label]="'aria.selectStartOfWeek' | translate"
           >
-            <mat-option [value]="0">Sunday</mat-option>
-            <mat-option [value]="1">Monday</mat-option>
+            <mat-option [value]="0">{{
+              "settings.sunday" | translate
+            }}</mat-option>
+            <mat-option [value]="1">{{
+              "settings.monday" | translate
+            }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -92,15 +122,15 @@
     <mat-card-header>
       <mat-card-title>
         <mat-icon>notifications</mat-icon>
-        Default Reminder Settings
+        {{ "settings.defaultReminderSettings" | translate }}
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="setting-row vertical">
         <div class="setting-info">
-          <h3>Default Reminder Days</h3>
+          <h3>{{ "settings.defaultReminderDays" | translate }}</h3>
           <p>
-            When creating new events, these reminder days will be pre-selected
+            {{ "settings.defaultReminderDaysDesc" | translate }}
           </p>
         </div>
         <div class="reminder-options">
@@ -125,22 +155,22 @@
     <mat-card-header>
       <mat-card-title>
         <mat-icon>email</mat-icon>
-        Email Reminders
+        {{ "settings.emailReminders" | translate }}
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <!-- Enable/Disable Toggle -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Enable Email Reminders</h3>
-          <p>Get email notifications for upcoming events</p>
+          <h3>{{ "settings.enableEmailReminders" | translate }}</h3>
+          <p>{{ "settings.enableEmailRemindersDesc" | translate }}</p>
         </div>
         <mat-checkbox
           [checked]="
             notificationPrefs.preferences()?.email_reminders_enabled ?? false
           "
           (change)="toggleEmailReminders($event.checked)"
-          aria-label="Enable email reminders"
+          [attr.aria-label]="'aria.enableEmailReminders' | translate"
         >
         </mat-checkbox>
       </div>
@@ -151,8 +181,8 @@
       <!-- Reminder Days Selection -->
       <div class="setting-row vertical">
         <div class="setting-info">
-          <h3>Remind Me</h3>
-          <p>Select when you want to be reminded about upcoming events</p>
+          <h3>{{ "settings.reminderTime" | translate }}</h3>
+          <p>{{ "settings.reminderTimeDesc" | translate }}</p>
         </div>
         <div class="reminder-options">
           @for (option of emailReminderDayOptions; track option.value) {
@@ -174,17 +204,17 @@
       <!-- Reminder Time Selection -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Reminder Time</h3>
-          <p>What time of day should we send reminders?</p>
+          <h3>{{ "settings.reminderTime" | translate }}</h3>
+          <p>{{ "settings.reminderTimeDesc" | translate }}</p>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Select Time</mat-label>
+          <mat-label>{{ "settings.selectTime" | translate }}</mat-label>
           <mat-select
             [value]="
               notificationPrefs.preferences()?.reminder_time ?? '09:00:00'
             "
             (selectionChange)="updateEmailReminderTime($event.value)"
-            aria-label="Select email reminder time"
+            [attr.aria-label]="'aria.selectEmailReminderTime' | translate"
           >
             @for (time of emailReminderTimeOptions; track time.value) {
             <mat-option [value]="time.value">
@@ -200,15 +230,15 @@
       <!-- Timezone Selection -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Email Reminder Timezone</h3>
-          <p>Timezone for email reminder scheduling</p>
+          <h3>{{ "settings.emailReminderTimezone" | translate }}</h3>
+          <p>{{ "settings.emailReminderTimezoneDesc" | translate }}</p>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Select Timezone</mat-label>
+          <mat-label>{{ "settings.selectTimezone" | translate }}</mat-label>
           <mat-select
             [value]="notificationPrefs.preferences()?.timezone ?? 'UTC'"
             (selectionChange)="updateEmailTimezone($event.value)"
-            aria-label="Select email reminder timezone"
+            [attr.aria-label]="'aria.selectEmailReminderTimezone' | translate"
           >
             @for (tz of emailTimezones; track tz.value) {
             <mat-option [value]="tz.value">
@@ -224,23 +254,23 @@
       <!-- Test Email Button -->
       <div class="setting-row vertical">
         <div class="setting-info">
-          <h3>Test Email Notifications</h3>
-          <p>Send a test email to verify your notifications are working</p>
+          <h3>{{ "settings.testEmailNotifications" | translate }}</h3>
+          <p>{{ "settings.testEmailDesc" | translate }}</p>
         </div>
         <button
           mat-raised-button
           color="primary"
           (click)="sendTestEmail()"
           [disabled]="notificationPrefs.loading()"
-          aria-label="Send test email notification"
+          [attr.aria-label]="'buttons.sendTestEmail' | translate"
         >
           @if (notificationPrefs.loading()) {
           <mat-spinner diameter="20"></mat-spinner>
-          <span>Sending...</span>
+          <span>{{ "common.sending" | translate }}</span>
           } @else {
           <ng-container>
             <mat-icon>send</mat-icon>
-            <span>Send Test Email</span>
+            <span>{{ "buttons.sendTestEmail" | translate }}</span>
           </ng-container>
           }
         </button>
@@ -254,25 +284,27 @@
     <mat-card-header>
       <mat-card-title>
         <mat-icon>cloud</mat-icon>
-        Data Management
+        {{ "settings.dataManagement" | translate }}
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <!-- Export Format -->
       <div class="setting-row">
         <div class="setting-info">
-          <h3>Export Format</h3>
-          <p>Preferred format for data exports</p>
+          <h3>{{ "settings.exportFormat" | translate }}</h3>
+          <p>{{ "settings.exportFormatDesc" | translate }}</p>
         </div>
         <mat-form-field appearance="outline">
-          <mat-label>Format</mat-label>
+          <mat-label>{{ "settings.format" | translate }}</mat-label>
           <mat-select
             [value]="settingsService.settings().exportFormat"
             (selectionChange)="updateExportFormat($event.value)"
-            aria-label="Select export file format"
+            [attr.aria-label]="'aria.selectExportFormat' | translate"
           >
             <mat-option value="json">JSON</mat-option>
-            <mat-option value="csv" disabled>CSV (Coming soon)</mat-option>
+            <mat-option value="csv" disabled>{{
+              "settings.csvComingSoon" | translate
+            }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -282,21 +314,21 @@
       <!-- Export Data -->
       <div class="setting-row vertical">
         <div class="setting-info">
-          <h3>Export Data</h3>
-          <p>Download all your events, contacts, and occasions as a backup</p>
+          <h3>{{ "settings.exportData" | translate }}</h3>
+          <p>{{ "settings.exportDataDesc" | translate }}</p>
         </div>
         <button
           mat-raised-button
           color="primary"
           (click)="exportData()"
           [disabled]="isExporting()"
-          aria-label="Export all data to file"
+          [attr.aria-label]="'aria.exportData' | translate"
         >
           @if (isExporting()) {
           <mat-spinner diameter="20"></mat-spinner>
-          <span>Exporting...</span>
+          <span>{{ "common.exporting" | translate }}</span>
           } @else {
-          <span>Export All Data</span>
+          <span>{{ "buttons.exportAllData" | translate }}</span>
           }
         </button>
       </div>
@@ -306,9 +338,9 @@
       <!-- Import Data -->
       <div class="setting-row vertical">
         <div class="setting-info">
-          <h3>Import Data</h3>
-          <p>Restore your data from a previously exported file</p>
-          <p class="warning-text">⚠️ This will replace all existing data</p>
+          <h3>{{ "settings.importData" | translate }}</h3>
+          <p>{{ "settings.importDataDesc" | translate }}</p>
+          <p class="warning-text">{{ "settings.importWarning" | translate }}</p>
         </div>
         <div class="import-actions">
           <input
@@ -317,16 +349,16 @@
             accept=".json"
             (change)="onFileSelected($event)"
             style="display: none"
-            aria-label="Select JSON file to import"
+            [attr.aria-label]="'aria.importFile' | translate"
           />
           <button
             mat-raised-button
             (click)="fileInput.click()"
             [disabled]="isImporting()"
-            aria-label="Select file to import"
+            [attr.aria-label]="'aria.selectFileToImport' | translate"
           >
             <mat-icon>upload</mat-icon>
-            Select File
+            {{ "buttons.selectFile" | translate }}
           </button>
           @if (selectedFile()) {
           <span class="file-name">{{ selectedFile()?.name }}</span>
@@ -335,13 +367,13 @@
             color="accent"
             (click)="importData()"
             [disabled]="isImporting()"
-            aria-label="Import data from selected file"
+            [attr.aria-label]="'aria.importFromFile' | translate"
           >
             @if (isImporting()) {
             <mat-spinner diameter="20"></mat-spinner>
-            <span>Importing...</span>
+            <span>{{ "common.importing" | translate }}</span>
             } @else {
-            <span>Import</span>
+            <span>{{ "buttons.import" | translate }}</span>
             }
           </button>
           }
@@ -353,14 +385,15 @@
       <!-- Clear All Data -->
       <div class="setting-row vertical danger-zone">
         <div class="setting-info">
-          <h3><mat-icon>warning</mat-icon> Danger Zone</h3>
-          <p>Permanently delete all your calendar data</p>
+          <h3>
+            <mat-icon>warning</mat-icon> {{ "settings.dangerZone" | translate }}
+          </h3>
+          <p>{{ "settings.clearAllDataDesc" | translate }}</p>
           <div class="warning-box">
             <mat-icon>error_outline</mat-icon>
             <div>
-              <strong>Warning:</strong> This will delete all events, contacts,
-              and occasions from both your device and Supabase cloud storage.
-              This action cannot be undone.
+              <strong>{{ "settings.clearWarning" | translate }}</strong>
+              {{ "settings.clearWarningDesc" | translate }}
             </div>
           </div>
         </div>
@@ -369,14 +402,14 @@
           color="warn"
           (click)="clearAllData()"
           [disabled]="isClearing()"
-          aria-label="Permanently delete all data"
+          [attr.aria-label]="'aria.clearAllData' | translate"
         >
           <div class="clear-icon">
             @if (isClearing()) {
             <mat-spinner diameter="20"></mat-spinner>
-            Clearing... } @else {
+            {{ "common.clearing" | translate }} } @else {
             <mat-icon>delete_forever</mat-icon>
-            Clear All Data }
+            {{ "settings.clearAllData" | translate }} }
           </div>
         </button>
       </div>
@@ -388,30 +421,34 @@
     <mat-card-header>
       <mat-card-title>
         <mat-icon>info</mat-icon>
-        Storage Information
+        {{ "settings.storageInformation" | translate }}
       </mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <div class="info-grid">
         <div class="info-item">
-          <span class="info-label">Events:</span>
+          <span class="info-label">{{ "settings.events" | translate }}:</span>
           <span class="info-value">{{ eventsService.events().length }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">Contacts:</span>
+          <span class="info-label">{{ "settings.contacts" | translate }}:</span>
           <span class="info-value">{{
             contactsService.contacts().length
           }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">Occasions:</span>
+          <span class="info-label"
+            >{{ "settings.occasions" | translate }}:</span
+          >
           <span class="info-value">{{
             occasionsService.occasions().length
           }}</span>
         </div>
         <div class="info-item">
-          <span class="info-label">Storage:</span>
-          <span class="info-value">Supabase Cloud</span>
+          <span class="info-label">{{ "settings.storage" | translate }}:</span>
+          <span class="info-value">{{
+            "settings.supabaseCloud" | translate
+          }}</span>
         </div>
       </div>
     </mat-card-content>

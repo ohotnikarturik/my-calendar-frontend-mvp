@@ -27,6 +27,8 @@ import { CalendarEventsService } from '../../services/calendar-events.service';
 import { ContactsService } from '../../services/contacts.service';
 import { OccasionsService } from '../../services/occasions.service';
 import { NotificationPreferencesService } from '../../services/notification-preferences.service';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import { PageHeader } from '../../components/page-header/page-header';
 import {
   COMMON_TIMEZONES,
@@ -34,6 +36,7 @@ import {
   type ThemeMode,
   type ExportFormat,
 } from '../../types/settings.type';
+import { SUPPORTED_LANGUAGES, type Language } from '../../types/language.type';
 import {
   REMINDER_DAY_OPTIONS as EMAIL_REMINDER_DAY_OPTIONS,
   REMINDER_TIME_OPTIONS as EMAIL_REMINDER_TIME_OPTIONS,
@@ -54,6 +57,7 @@ import {
     MatProgressSpinnerModule,
     MatDividerModule,
     PageHeader,
+    TranslatePipe,
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
@@ -61,6 +65,7 @@ import {
 export class SettingsComponent {
   // Inject services using inject() function (modern Angular pattern)
   protected readonly settingsService = inject(SettingsService);
+  protected readonly translationService = inject(TranslationService);
   protected readonly supabase = inject(SupabaseService);
   protected readonly eventsService = inject(CalendarEventsService);
   protected readonly contactsService = inject(ContactsService);
@@ -77,6 +82,7 @@ export class SettingsComponent {
   // Timezone and reminder options (from constants)
   protected readonly timezones = COMMON_TIMEZONES;
   protected readonly reminderOptions = REMINDER_DAY_OPTIONS;
+  protected readonly supportedLanguages = SUPPORTED_LANGUAGES;
 
   // Email reminder options
   protected readonly emailReminderDayOptions = EMAIL_REMINDER_DAY_OPTIONS;
@@ -87,6 +93,11 @@ export class SettingsComponent {
   protected updateTimezone(timezone: string): void {
     this.settingsService.updateSettings({ timezone });
     this.showSnackbar('Timezone updated');
+  }
+
+  protected updateLanguage(language: Language): void {
+    this.translationService.setLanguage(language);
+    this.showSnackbar('Language updated');
   }
 
   protected updateTheme(theme: ThemeMode): void {

@@ -32,6 +32,7 @@ import {
 } from '../../components/event-modal/event-modal';
 import { PageHeader } from '../../components/page-header/page-header';
 import { EmptyState } from '../../components/empty-state/empty-state';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'calendar',
@@ -44,6 +45,7 @@ import { EmptyState } from '../../components/empty-state/empty-state';
     MatProgressSpinnerModule,
     PageHeader,
     EmptyState,
+    TranslatePipe,
   ],
   templateUrl: './calendar.html',
   styleUrls: ['./calendar.scss'],

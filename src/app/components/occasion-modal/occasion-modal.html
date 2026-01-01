@@ -5,7 +5,7 @@
     <div mat-dialog-content class="modal-content">
       <!-- Contact Selector -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Contact</mat-label>
+        <mat-label>{{ "common.contact" | translate }}</mat-label>
         <mat-select formControlName="contactId" required>
           @for (contact of contacts(); track contact.id) {
           <mat-option [value]="contact.id">
@@ -15,15 +15,15 @@
         </mat-select>
         @if (shouldShowError('contactId') && hasError('contactId', 'required'))
         {
-        <mat-error>Please select a contact</mat-error>
+        <mat-error>{{ "validation.contactRequired" | translate }}</mat-error>
         } @if (contacts().length === 0) {
-        <mat-hint>No contacts available. Add a contact first.</mat-hint>
+        <mat-hint>{{ "occasionModal.noContacts" | translate }}</mat-hint>
         }
       </mat-form-field>
 
       <!-- Occasion Type -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Occasion Type</mat-label>
+        <mat-label>{{ "occasionModal.occasionType" | translate }}</mat-label>
         <mat-select formControlName="type" required>
           @for (option of occasionTypeOptions; track option.value) {
           <mat-option [value]="option.value">
@@ -35,22 +35,22 @@
 
       <!-- Title -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Title</mat-label>
+        <mat-label>{{ "occasionModal.title" | translate }}</mat-label>
         <input
           matInput
           formControlName="title"
-          placeholder="e.g., John's Birthday"
+          [placeholder]="'occasionModal.titlePlaceholder' | translate"
           maxlength="120"
           required
         />
         @if (shouldShowError('title') && hasError('title', 'required')) {
-        <mat-error>Title is required</mat-error>
+        <mat-error>{{ "validation.titleRequired" | translate }}</mat-error>
         }
       </mat-form-field>
 
       <!-- Date -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Date</mat-label>
+        <mat-label>{{ "occasionModal.date" | translate }}</mat-label>
         <input
           matInput
           [matDatepicker]="datePicker"
@@ -63,27 +63,27 @@
         ></mat-datepicker-toggle>
         <mat-datepicker #datePicker></mat-datepicker>
         @if (shouldShowError('date') && hasError('date', 'required')) {
-        <mat-error>Date is required</mat-error>
+        <mat-error>{{ "validation.dateRequired" | translate }}</mat-error>
         }
       </mat-form-field>
 
       <!-- Year toggle and input -->
       <div class="year-section">
         <mat-slide-toggle formControlName="hasYear">
-          Include birth/start year
+          {{ "occasionModal.includeYear" | translate }}
         </mat-slide-toggle>
         <mat-hint class="year-hint">
-          Enable to track age or years. Leave off for year-less dates.
+          {{ "occasionModal.includeYearHint" | translate }}
         </mat-hint>
 
         @if (showYearField()) {
         <mat-form-field appearance="outline" class="year-field">
-          <mat-label>Year</mat-label>
+          <mat-label>{{ "occasionModal.year" | translate }}</mat-label>
           <input
             matInput
             type="number"
             formControlName="year"
-            placeholder="1990"
+            [placeholder]="'occasionModal.yearPlaceholder' | translate"
             min="1900"
             [max]="2100"
           />
@@ -93,21 +93,22 @@
 
       <!-- Repeat Annually -->
       <mat-slide-toggle formControlName="repeatAnnually">
-        Repeat every year
+        {{ "occasionModal.repeatAnnually" | translate }}
       </mat-slide-toggle>
 
       <!-- Reminder Section -->
       <div class="reminder-section">
         <mat-slide-toggle formControlName="reminderEnabled">
-          Enable reminders
+          {{ "occasionModal.enableReminders" | translate }}
         </mat-slide-toggle>
 
         @if (occasionForm.get('reminderEnabled')?.value) {
-        <mat-form-field appearance="outline" class="full-width reminder-days-field">
-          <mat-label>Remind me</mat-label>
-          <mat-select
-            formControlName="reminderDaysBefore"
-          >
+        <mat-form-field
+          appearance="outline"
+          class="full-width reminder-days-field"
+        >
+          <mat-label>{{ "occasionModal.remindMe" | translate }}</mat-label>
+          <mat-select formControlName="reminderDaysBefore">
             @for (option of reminderDayOptions; track option.value) {
             <mat-option [value]="option.value">{{ option.label }}</mat-option>
             }
@@ -119,10 +120,12 @@
 
     <!-- Dialog Actions -->
     <div mat-dialog-actions class="modal-actions">
-      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-button type="button" (click)="onCancel()">
+        {{ "buttons.cancel" | translate }}
+      </button>
       @if (canDelete()) {
       <button mat-button color="warn" type="button" (click)="onDelete()">
-        Delete
+        {{ "buttons.delete" | translate }}
       </button>
       }
       <button

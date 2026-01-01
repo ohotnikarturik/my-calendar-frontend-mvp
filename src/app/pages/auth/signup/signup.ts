@@ -32,6 +32,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SupabaseService } from '../../../services/supabase.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 /**
  * Custom validator for password confirmation
@@ -71,6 +72,7 @@ function passwordMatchValidator(
     MatProgressSpinnerModule,
     MatDividerModule,
     MatCheckboxModule,
+    TranslatePipe,
   ],
 })
 export class Signup {

@@ -13,6 +13,7 @@ import {
   MAT_DIALOG_DATA,
 } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface ConfirmDialogData {
   title: string;
@@ -27,7 +28,7 @@ export interface ConfirmDialogData {
   templateUrl: './confirm-dialog.html',
   styleUrl: './confirm-dialog.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, TranslatePipe],
 })
 export class ConfirmDialog {
   readonly dialogRef = inject(MatDialogRef<ConfirmDialog>);

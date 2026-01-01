@@ -1,8 +1,8 @@
 <div class="about-container">
   <div class="about-header slide-in-down">
-    <h1>About My Calendar</h1>
+    <h1>{{ "about.title" | translate }}</h1>
     <p class="about-subtitle">
-      A modern, signal-based Angular calendar application
+      {{ "about.subtitle" | translate }}
     </p>
   </div>
 
@@ -10,18 +10,16 @@
     <mat-card class="info-card hover-lift">
       <mat-card-header>
         <mat-icon mat-card-avatar>info</mat-icon>
-        <mat-card-title>Project Overview</mat-card-title>
+        <mat-card-title>{{
+          "about.projectOverview" | translate
+        }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <p>
-          My Calendar is a modern web application built with Angular 20 and
-          Angular Material. It demonstrates the latest Angular features
-          including signals, reactive forms, and standalone components.
+          {{ "about.projectDesc1" | translate }}
         </p>
         <p>
-          The application provides a full-featured calendar interface powered by
-          FullCalendar, with the ability to create, edit, delete, and manage
-          events through an intuitive user interface.
+          {{ "about.projectDesc2" | translate }}
         </p>
       </mat-card-content>
     </mat-card>
@@ -29,19 +27,25 @@
     <mat-card class="tech-card hover-lift">
       <mat-card-header>
         <mat-icon mat-card-avatar>code</mat-icon>
-        <mat-card-title>Technologies Used</mat-card-title>
+        <mat-card-title>{{
+          "about.technologiesUsed" | translate
+        }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <div class="tech-chips">
           <mat-chip-set>
-            <mat-chip>Angular 20</mat-chip>
-            <mat-chip>Angular Material</mat-chip>
-            <mat-chip>TypeScript</mat-chip>
-            <mat-chip>FullCalendar</mat-chip>
-            <mat-chip>Angular Signals</mat-chip>
-            <mat-chip>Reactive Forms</mat-chip>
-            <mat-chip>Standalone Components</mat-chip>
-            <mat-chip>SCSS</mat-chip>
+            <mat-chip>{{ "technologies.angular20" | translate }}</mat-chip>
+            <mat-chip>{{
+              "technologies.angularMaterial" | translate
+            }}</mat-chip>
+            <mat-chip>{{ "technologies.typescript" | translate }}</mat-chip>
+            <mat-chip>{{ "technologies.fullcalendar" | translate }}</mat-chip>
+            <mat-chip>{{ "technologies.angularSignals" | translate }}</mat-chip>
+            <mat-chip>{{ "technologies.reactiveForms" | translate }}</mat-chip>
+            <mat-chip>{{
+              "technologies.standaloneComponents" | translate
+            }}</mat-chip>
+            <mat-chip>{{ "technologies.scss" | translate }}</mat-chip>
           </mat-chip-set>
         </div>
       </mat-card-content>
@@ -50,31 +54,41 @@
     <mat-card class="features-card hover-lift">
       <mat-card-header>
         <mat-icon mat-card-avatar>star</mat-icon>
-        <mat-card-title>Key Features</mat-card-title>
+        <mat-card-title>{{ "about.keyFeatures" | translate }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <ul class="features-list">
           <li>
-            <mat-icon>check_circle</mat-icon> Signal-based reactive state
-            management
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.signalBasedState" | translate }}
           </li>
           <li>
-            <mat-icon>check_circle</mat-icon> Modern Angular standalone
-            components
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.modernComponents" | translate }}
           </li>
           <li>
-            <mat-icon>check_circle</mat-icon> Reactive forms with validation
-          </li>
-          <li><mat-icon>check_circle</mat-icon> Material Design 3 theming</li>
-          <li>
-            <mat-icon>check_circle</mat-icon> Responsive design for all devices
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.reactiveForms" | translate }}
           </li>
           <li>
-            <mat-icon>check_circle</mat-icon> Drag and drop event management
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.material3Theming" | translate }}
           </li>
-          <li><mat-icon>check_circle</mat-icon> Multiple calendar views</li>
           <li>
-            <mat-icon>check_circle</mat-icon> Event creation and editing modals
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.responsiveDesign" | translate }}
+          </li>
+          <li>
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.dragDropEvents" | translate }}
+          </li>
+          <li>
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.multipleCalendarViews" | translate }}
+          </li>
+          <li>
+            <mat-icon>check_circle</mat-icon>
+            {{ "aboutFeatures.eventModals" | translate }}
           </li>
         </ul>
       </mat-card-content>
@@ -83,16 +97,23 @@
     <mat-card class="version-card">
       <mat-card-header>
         <mat-icon mat-card-avatar>update</mat-icon>
-        <mat-card-title>Version Information</mat-card-title>
+        <mat-card-title>{{
+          "about.versionInformation" | translate
+        }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <div class="version-info">
-          <div class="version-item"><strong>Version:</strong> 1.0.0 MVP</div>
           <div class="version-item">
-            <strong>Build:</strong> Angular CLI 20.1.3
+            <strong>{{ "about.version" | translate }}</strong>
+            {{ "about.versionNumber" | translate }}
           </div>
           <div class="version-item">
-            <strong>Last Updated:</strong> {{ currentDate }}
+            <strong>{{ "about.build" | translate }}</strong>
+            {{ "about.buildVersion" | translate }}
+          </div>
+          <div class="version-item">
+            <strong>{{ "about.lastUpdated" | translate }}</strong>
+            {{ currentDate }}
           </div>
         </div>
       </mat-card-content>
@@ -101,37 +122,36 @@
     <mat-card class="storage-card">
       <mat-card-header>
         <mat-icon mat-card-avatar>storage</mat-icon>
-        <mat-card-title>Data Storage & Privacy</mat-card-title>
+        <mat-card-title>{{
+          "about.dataStoragePrivacy" | translate
+        }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <p>
-          Your calendar data (events, contacts, occasions) is stored securely in
-          the cloud using Supabase. Your data is protected by authentication and
-          accessible from any device when you log in.
+          {{ "about.dataStorageDesc" | translate }}
         </p>
         <div class="storage-info">
           <div class="storage-item">
             <mat-icon>cloud</mat-icon>
             <div>
-              <strong>Cloud Storage</strong>
-              <p>Secure PostgreSQL database with user authentication.</p>
+              <strong>{{ "about.cloudStorage" | translate }}</strong>
+              <p>{{ "about.cloudStorageDesc" | translate }}</p>
             </div>
           </div>
           <div class="storage-item">
             <mat-icon>devices</mat-icon>
             <div>
-              <strong>Multi-Device Access</strong>
+              <strong>{{ "about.multiDeviceAccess" | translate }}</strong>
               <p>
-                Access your calendar from any device - desktop, tablet, or
-                mobile.
+                {{ "about.multiDeviceAccessDesc" | translate }}
               </p>
             </div>
           </div>
           <div class="storage-item">
             <mat-icon>security</mat-icon>
             <div>
-              <strong>Your Data, Your Control</strong>
-              <p>We don't track or share your personal calendar information.</p>
+              <strong>{{ "about.yourDataControl" | translate }}</strong>
+              <p>{{ "about.yourDataControlDesc" | translate }}</p>
             </div>
           </div>
         </div>

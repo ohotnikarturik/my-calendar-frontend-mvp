@@ -31,6 +31,7 @@ import {
   type OccasionModalResult,
 } from '../../components/occasion-modal/occasion-modal';
 import type { Occasion, OccasionType } from '../../types/occasion.type';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'occasions',
@@ -46,6 +47,7 @@ import type { Occasion, OccasionType } from '../../types/occasion.type';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './occasions.html',
   styleUrl: './occasions.scss',

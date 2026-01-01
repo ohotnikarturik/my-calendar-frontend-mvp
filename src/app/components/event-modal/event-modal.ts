@@ -29,12 +29,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
 
-import type {
-  CalendarEvent,
-  EventCategory,
-} from '../../types/event.type';
+import type { CalendarEvent, EventCategory } from '../../types/event.type';
 import { DateUtilsService } from '../../services/date-utils.service';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 export interface EventModalData {
   event?: CalendarEvent;
@@ -77,6 +76,7 @@ interface ReminderDayOption {
     MatSlideToggleModule,
     MatSelectModule,
     MatCheckboxModule,
+    TranslatePipe,
   ],
   templateUrl: './event-modal.html',
   styleUrl: './event-modal.scss',
@@ -88,6 +88,7 @@ export class EventModalComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly dateUtils = inject(DateUtilsService);
   private readonly dialog = inject(MatDialog);
+  private readonly translationService = inject(TranslationService);
   private readonly hasSubmitted = signal(false);
 
   readonly titleMaxLength = 120;
@@ -102,34 +103,110 @@ export class EventModalComponent {
   private readonly initialColor = this.computeInitialColor();
 
   readonly categoryOptions: EventCategoryOption[] = [
-    { value: 'birthday', label: 'Birthday' },
-    { value: 'anniversary', label: 'Anniversary' },
-    { value: 'holiday', label: 'Holiday' },
-    { value: 'personal', label: 'Personal' },
-    { value: 'work', label: 'Work' },
-    { value: 'other', label: 'Other' },
+    {
+      value: 'birthday',
+      label: this.translationService.translate('eventCategories.birthday'),
+    },
+    {
+      value: 'anniversary',
+      label: this.translationService.translate('eventCategories.anniversary'),
+    },
+    {
+      value: 'holiday',
+      label: this.translationService.translate('eventCategories.holiday'),
+    },
+    {
+      value: 'personal',
+      label: this.translationService.translate('eventCategories.personal'),
+    },
+    {
+      value: 'work',
+      label: this.translationService.translate('eventCategories.work'),
+    },
+    {
+      value: 'other',
+      label: this.translationService.translate('eventCategories.other'),
+    },
   ];
 
   readonly reminderDayOptions: ReminderDayOption[] = [
-    { value: 30, label: '30 days before' },
-    { value: 14, label: '14 days before' },
-    { value: 7, label: '7 days before' },
-    { value: 3, label: '3 days before' },
-    { value: 1, label: '1 day before' },
-    { value: 0, label: 'On the day' },
+    {
+      value: 30,
+      label: this.translationService.translate('reminderOptions.30DaysBefore'),
+    },
+    {
+      value: 14,
+      label: this.translationService.translate('reminderOptions.14DaysBefore'),
+    },
+    {
+      value: 7,
+      label: this.translationService.translate('reminderOptions.7DaysBefore'),
+    },
+    {
+      value: 3,
+      label: this.translationService.translate('reminderOptions.3DaysBefore'),
+    },
+    {
+      value: 1,
+      label: this.translationService.translate('reminderOptions.1DayBefore'),
+    },
+    {
+      value: 0,
+      label: this.translationService.translate('reminderOptions.onTheDay'),
+    },
   ];
 
   readonly colorOptions: { value: string; label: string; color: string }[] = [
-    { value: '', label: 'Category Default', color: '#1976D2' },
-    { value: '#E91E63', label: 'Pink (Birthday)', color: '#E91E63' },
-    { value: '#9C27B0', label: 'Purple (Anniversary)', color: '#9C27B0' },
-    { value: '#FF9800', label: 'Orange (Holiday)', color: '#FF9800' },
-    { value: '#4CAF50', label: 'Green (Personal)', color: '#4CAF50' },
-    { value: '#2196F3', label: 'Blue (Work)', color: '#2196F3' },
-    { value: '#00BCD4', label: 'Cyan (Other)', color: '#00BCD4' },
-    { value: '#F44336', label: 'Red', color: '#F44336' },
-    { value: '#757575', label: 'Gray (Memorial)', color: '#757575' },
-    { value: '#795548', label: 'Brown', color: '#795548' },
+    {
+      value: '',
+      label: this.translationService.translate('eventColors.categoryDefault'),
+      color: '#1976D2',
+    },
+    {
+      value: '#E91E63',
+      label: this.translationService.translate('eventColors.pink'),
+      color: '#E91E63',
+    },
+    {
+      value: '#9C27B0',
+      label: this.translationService.translate('eventColors.purple'),
+      color: '#9C27B0',
+    },
+    {
+      value: '#FF9800',
+      label: this.translationService.translate('eventColors.orange'),
+      color: '#FF9800',
+    },
+    {
+      value: '#4CAF50',
+      label: this.translationService.translate('eventColors.green'),
+      color: '#4CAF50',
+    },
+    {
+      value: '#2196F3',
+      label: this.translationService.translate('eventColors.blue'),
+      color: '#2196F3',
+    },
+    {
+      value: '#00BCD4',
+      label: this.translationService.translate('eventColors.cyan'),
+      color: '#00BCD4',
+    },
+    {
+      value: '#F44336',
+      label: this.translationService.translate('eventColors.red'),
+      color: '#F44336',
+    },
+    {
+      value: '#757575',
+      label: this.translationService.translate('eventColors.gray'),
+      color: '#757575',
+    },
+    {
+      value: '#795548',
+      label: this.translationService.translate('eventColors.brown'),
+      color: '#795548',
+    },
   ];
 
   readonly eventForm = this.fb.group({
@@ -176,10 +253,14 @@ export class EventModalComponent {
     Boolean(this.modalData?.isEdit ?? this.modalData?.event)
   );
   readonly dialogTitle = computed(() =>
-    this.isEdit() ? 'Edit Event' : 'Create New Event'
+    this.isEdit()
+      ? this.translationService.translate('eventModal.editTitle')
+      : this.translationService.translate('eventModal.createTitle')
   );
   readonly primaryActionLabel = computed(() =>
-    this.isEdit() ? 'Update' : 'Create'
+    this.isEdit()
+      ? this.translationService.translate('buttons.update')
+      : this.translationService.translate('buttons.create')
   );
   readonly canDelete = computed(
     () => this.isEdit() && Boolean(this.modalData?.event?.id)
@@ -224,10 +305,7 @@ export class EventModalComponent {
     return ctrl.invalid && (ctrl.dirty || ctrl.touched || this.hasSubmitted());
   }
 
-  hasError(
-    control: 'title' | 'date',
-    errorCode: string
-  ): boolean {
+  hasError(control: 'title' | 'date', errorCode: string): boolean {
     return this.getControl(control).hasError(errorCode);
   }
 

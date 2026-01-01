@@ -33,6 +33,7 @@ import { CalendarEventsService } from '../../../services/calendar-events.service
 import { ContactsService } from '../../../services/contacts.service';
 import { OccasionsService } from '../../../services/occasions.service';
 import { NotificationService } from '../../../services/notification.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
@@ -49,6 +50,7 @@ import { NotificationService } from '../../../services/notification.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatDividerModule,
+    TranslatePipe,
   ],
 })
 export class Login {

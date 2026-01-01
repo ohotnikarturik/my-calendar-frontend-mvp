@@ -5,68 +5,71 @@
     class="event-form"
     [formGroup]="eventForm"
     (ngSubmit)="onSave()"
-    aria-label="Event form"
+    [attr.aria-label]="'eventModal.editTitle' | translate"
   >
     <div mat-dialog-content class="modal-content">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Event title</mat-label>
+        <mat-label>{{ "eventModal.eventTitle" | translate }}</mat-label>
         <input
           matInput
           formControlName="title"
           [attr.maxlength]="titleMaxLength"
-          placeholder="Board meeting"
+          [placeholder]="'eventModal.eventTitlePlaceholder' | translate"
           autocomplete="off"
           required
-          aria-label="Event title"
+          [attr.aria-label]="'eventModal.eventTitle' | translate"
           aria-required="true"
         />
         <mat-hint align="end">{{ titleUsage() }}</mat-hint>
         @if (shouldShowError('title') && hasError('title', 'required')) {
-        <mat-error>Title is required</mat-error>
+        <mat-error>{{ "validation.titleRequired" | translate }}</mat-error>
         } @if (shouldShowError('title') && hasError('title', 'maxlength')) {
-        <mat-error
-          >Keep the title under {{ titleMaxLength }} characters</mat-error
-        >
+        <mat-error>{{
+          "validation.titleMaxLength" | translate : { max: titleMaxLength }
+        }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Description</mat-label>
+        <mat-label>{{ "eventModal.description" | translate }}</mat-label>
         <textarea
           matInput
           formControlName="description"
           rows="3"
-          placeholder="Add notes for this event"
-          aria-label="Event description"
+          [placeholder]="'eventModal.descriptionPlaceholder' | translate"
+          [attr.aria-label]="'eventModal.description' | translate"
         ></textarea>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Event date</mat-label>
+        <mat-label>{{ "eventModal.eventDate" | translate }}</mat-label>
         <input
           matInput
           [matDatepicker]="datePicker"
           formControlName="date"
-          aria-label="Event date"
+          [attr.aria-label]="'eventModal.eventDate' | translate"
           aria-required="true"
         />
         <mat-datepicker-toggle
           matIconSuffix
           [for]="datePicker"
-          aria-label="Open calendar to select date"
+          [attr.aria-label]="'eventModal.openCalendar' | translate"
         ></mat-datepicker-toggle>
         <mat-datepicker
           #datePicker
           panelClass="custom-calendar"
         ></mat-datepicker>
         @if (shouldShowError('date') && hasError('date', 'required')) {
-        <mat-error>Date is required</mat-error>
+        <mat-error>{{ "validation.dateRequired" | translate }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Category</mat-label>
-        <mat-select formControlName="category" aria-label="Event category">
+        <mat-label>{{ "eventModal.category" | translate }}</mat-label>
+        <mat-select
+          formControlName="category"
+          [attr.aria-label]="'eventModal.category' | translate"
+        >
           @for (option of categoryOptions; track option.value) {
           <mat-option [value]="option.value">{{ option.label }}</mat-option>
           }
@@ -74,8 +77,11 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Color</mat-label>
-        <mat-select formControlName="color" aria-label="Event color">
+        <mat-label>{{ "eventModal.color" | translate }}</mat-label>
+        <mat-select
+          formControlName="color"
+          [attr.aria-label]="'eventModal.color' | translate"
+        >
           @for (option of colorOptions; track option.value) {
           <mat-option [value]="option.value">
             <span class="color-option">
@@ -92,25 +98,28 @@
 
       <mat-slide-toggle
         formControlName="repeatAnnually"
-        aria-label="Repeat event annually"
+        [attr.aria-label]="'eventModal.repeatAnnually' | translate"
       >
-        Repeat every year
+        {{ "eventModal.repeatAnnually" | translate }}
       </mat-slide-toggle>
 
       <div class="reminder-section">
         <mat-slide-toggle
           formControlName="reminderEnabled"
-          aria-label="Enable event reminders"
+          [attr.aria-label]="'eventModal.enableReminders' | translate"
         >
-          Enable reminders
+          {{ "eventModal.enableReminders" | translate }}
         </mat-slide-toggle>
 
         @if (eventForm.get('reminderEnabled')?.value) {
-        <mat-form-field appearance="outline" class="full-width reminder-days-field">
-          <mat-label>Remind me</mat-label>
+        <mat-form-field
+          appearance="outline"
+          class="full-width reminder-days-field"
+        >
+          <mat-label>{{ "eventModal.remindMe" | translate }}</mat-label>
           <mat-select
             formControlName="reminderDaysBefore"
-            aria-label="Days before event to send reminder"
+            [attr.aria-label]="'eventModal.remindMe' | translate"
           >
             @for (option of reminderDayOptions; track option.value) {
             <mat-option [value]="option.value">{{ option.label }}</mat-option>
@@ -126,9 +135,9 @@
         mat-button
         type="button"
         (click)="onCancel()"
-        aria-label="Cancel and close dialog"
+        [attr.aria-label]="'aria.cancelDialog' | translate"
       >
-        Cancel
+        {{ "buttons.cancel" | translate }}
       </button>
       @if (canDelete()) {
       <button
@@ -136,9 +145,9 @@
         color="warn"
         type="button"
         (click)="onDelete()"
-        aria-label="Delete this event"
+        [attr.aria-label]="'aria.deleteEvent' | translate"
       >
-        Delete
+        {{ "buttons.delete" | translate }}
       </button>
       }
       <button
@@ -146,7 +155,7 @@
         color="primary"
         type="submit"
         [disabled]="!canSubmit()"
-        [attr.aria-label]="primaryActionLabel() + ' event'"
+        [attr.aria-label]="primaryActionLabel()"
       >
         {{ primaryActionLabel() }}
       </button>

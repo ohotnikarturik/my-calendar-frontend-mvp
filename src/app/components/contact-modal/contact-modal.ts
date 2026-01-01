@@ -38,6 +38,7 @@ import { startWith, map } from 'rxjs';
 
 import type { Contact } from '../../types/contact.type';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 /**
  * Data passed to the contact modal
@@ -78,6 +79,7 @@ interface ContactFormValue {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    TranslatePipe,
   ],
   templateUrl: './contact-modal.html',
   styleUrl: './contact-modal.scss',
@@ -199,9 +201,7 @@ export class ContactModalComponent {
    * Check if a form control should show its error
    * Shows error when control is invalid and either dirty, touched, or form submitted
    */
-  shouldShowError(
-    control: 'firstName' | 'lastName'
-  ): boolean {
+  shouldShowError(control: 'firstName' | 'lastName'): boolean {
     const ctrl = this.getControl(control);
     return ctrl.invalid && (ctrl.dirty || ctrl.touched || this.hasSubmitted());
   }
@@ -209,10 +209,7 @@ export class ContactModalComponent {
   /**
    * Check if a form control has a specific error
    */
-  hasError(
-    control: 'firstName' | 'lastName',
-    errorCode: string
-  ): boolean {
+  hasError(control: 'firstName' | 'lastName', errorCode: string): boolean {
     return this.getControl(control).hasError(errorCode);
   }
 
@@ -281,9 +278,7 @@ export class ContactModalComponent {
   /**
    * Get a form control by name for validation checks
    */
-  private getControl(
-    control: 'firstName' | 'lastName'
-  ): AbstractControl {
+  private getControl(control: 'firstName' | 'lastName'): AbstractControl {
     return this.contactForm.controls[control];
   }
 }

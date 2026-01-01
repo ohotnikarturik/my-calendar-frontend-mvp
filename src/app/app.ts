@@ -18,7 +18,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import type { MatSidenav } from '@angular/material/sidenav';
 import { SettingsService } from './services/settings.service';
 import { SupabaseService } from './services/supabase.service';
+import { TranslationService } from './services/translation.service';
 import type { ThemeMode } from './types/settings.type';
+import { SUPPORTED_LANGUAGES, type Language } from './types/language.type';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 // Breakpoint for desktop navigation (matches @media query in app.scss)
 const DESKTOP_BREAKPOINT = 900;
@@ -46,12 +49,14 @@ const DESKTOP_BREAKPOINT = 900;
     MatSidenavModule,
     MatListModule,
     MatToolbarModule,
+    TranslatePipe,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
   private readonly settingsService = inject(SettingsService);
+  private readonly translationService = inject(TranslationService);
   readonly supabase = inject(SupabaseService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
@@ -61,6 +66,19 @@ export class App {
 
   // Current theme from settings
   readonly currentTheme = computed(() => this.settingsService.settings().theme);
+
+  // Language support
+  readonly supportedLanguages = SUPPORTED_LANGUAGES;
+  readonly currentLanguage = this.translationService.currentLanguage;
+  readonly currentLanguageName = computed(() => {
+    const lang = this.currentLanguage();
+    return (
+      SUPPORTED_LANGUAGES.find((l) => l.code === lang)?.nativeName ?? 'English'
+    );
+  });
+  readonly currentLanguageCode = computed(() =>
+    this.currentLanguage().toUpperCase()
+  );
 
   // Auth state
   readonly isAuthenticated = this.supabase.isAuthenticated;
@@ -117,6 +135,13 @@ export class App {
     const next: ThemeMode =
       current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
     this.settingsService.updateSettings({ theme: next });
+  }
+
+  /**
+   * Change language
+   */
+  changeLanguage(language: Language): void {
+    this.translationService.setLanguage(language);
   }
 
   /**

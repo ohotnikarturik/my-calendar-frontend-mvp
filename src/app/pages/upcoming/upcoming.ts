@@ -20,6 +20,7 @@ import {
 } from '../../components/event-modal/event-modal';
 import { PageHeader } from '../../components/page-header/page-header';
 import { EmptyState } from '../../components/empty-state/empty-state';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 import type { CalendarEvent, EventCategory } from '../../types/event.type';
 
 @Component({
@@ -38,6 +39,7 @@ import type { CalendarEvent, EventCategory } from '../../types/event.type';
     MatToolbarModule,
     PageHeader,
     EmptyState,
+    TranslatePipe,
   ],
   templateUrl: './upcoming.html',
   styleUrl: './upcoming.scss',

@@ -852,6 +852,7 @@ export class SupabaseService {
   /**
    * Upsert contacts to Supabase
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async upsertContacts(_contacts: Contact[]): Promise<boolean> {
     console.warn('Contacts table not yet implemented in Supabase');
     return false;
@@ -860,6 +861,7 @@ export class SupabaseService {
   /**
    * Delete a contact from Supabase
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async deleteContact(_contactId: string): Promise<boolean> {
     console.warn('Contacts table not yet implemented in Supabase');
     return false;
@@ -879,6 +881,7 @@ export class SupabaseService {
   /**
    * Upsert occasions to Supabase
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async upsertOccasions(_occasions: Occasion[]): Promise<boolean> {
     console.warn('Occasions table not yet implemented in Supabase');
     return false;
@@ -887,6 +890,7 @@ export class SupabaseService {
   /**
    * Delete an occasion from Supabase
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async deleteOccasion(_occasionId: string): Promise<boolean> {
     console.warn('Occasions table not yet implemented in Supabase');
     return false;

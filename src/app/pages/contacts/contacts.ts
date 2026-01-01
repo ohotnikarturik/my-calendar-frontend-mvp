@@ -30,6 +30,7 @@ import {
   type ContactModalResult,
 } from '../../components/contact-modal/contact-modal';
 import type { Contact } from '../../types/contact.type';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'contacts',
@@ -43,6 +44,7 @@ import type { Contact } from '../../types/contact.type';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './contacts.html',
   styleUrl: './contacts.scss',

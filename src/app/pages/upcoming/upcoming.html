@@ -1,37 +1,43 @@
 <div class="upcoming-container">
-  <page-header [title]="'Upcoming Events'">
+  <page-header [title]="'upcoming.title' | translate">
     <button
       mat-raised-button
       color="primary"
       (click)="createEvent()"
-      aria-label="Create new event"
+      [attr.aria-label]="'aria.createNewEvent' | translate"
     >
       <mat-icon>add</mat-icon>
-      Create Event
+      {{ "buttons.createEvent" | translate }}
     </button>
   </page-header>
 
   @if (hasAnyUpcomingEvents() || isFiltering() || eventsSvc.loading()) {
   <div class="header-controls fade-in">
     <mat-form-field appearance="outline">
-      <mat-label>Time Range</mat-label>
+      <mat-label>{{ "upcoming.timeRange" | translate }}</mat-label>
       <mat-select
         [value]="selectedRange()"
         (selectionChange)="selectedRange.set($event.value)"
-        aria-label="Filter by time range"
+        [attr.aria-label]="'aria.filterByTimeRange' | translate"
       >
-        <mat-option [value]="7">Next 7 days</mat-option>
-        <mat-option [value]="30">Next 30 days</mat-option>
-        <mat-option [value]="90">Next 90 days</mat-option>
+        <mat-option [value]="7">{{
+          "upcoming.next7Days" | translate
+        }}</mat-option>
+        <mat-option [value]="30">{{
+          "upcoming.next30Days" | translate
+        }}</mat-option>
+        <mat-option [value]="90">{{
+          "upcoming.next90Days" | translate
+        }}</mat-option>
       </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Category</mat-label>
+      <mat-label>{{ "upcoming.category" | translate }}</mat-label>
       <mat-select
         [value]="selectedCategory()"
         (selectionChange)="selectedCategory.set($event.value)"
-        aria-label="Filter by category"
+        [attr.aria-label]="'aria.filterByCategory' | translate"
       >
         @for (cat of categoryOptions; track cat.value) {
         <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
@@ -40,13 +46,13 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Search</mat-label>
+      <mat-label>{{ "common.search" | translate }}</mat-label>
       <input
         matInput
         [value]="searchQuery()"
         (input)="onSearchInput($event)"
-        placeholder="Search events..."
-        aria-label="Search events by title or description"
+        [placeholder]="'upcoming.searchPlaceholder' | translate"
+        [attr.aria-label]="'aria.searchEvents' | translate"
       />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
@@ -59,28 +65,34 @@
       [checked]="allVisibleSelected()"
       [indeterminate]="hasSelectedEvents() && !allVisibleSelected()"
       (change)="toggleSelectAll()"
-      aria-label="Select all visible events"
+      [attr.aria-label]="'aria.selectAllVisible' | translate"
     ></mat-checkbox>
-    <span class="selection-count">{{ selectedCount() }} selected</span>
+    <span class="selection-count">{{
+      "upcoming.selectedCount" | translate : { count: selectedCount() }
+    }}</span>
     <span class="spacer"></span>
-    <button mat-button (click)="clearSelection()" aria-label="Clear selection">
+    <button
+      mat-button
+      (click)="clearSelection()"
+      [attr.aria-label]="'aria.clearSelection' | translate"
+    >
       <mat-icon>close</mat-icon>
-      Clear
+      {{ "buttons.clear" | translate }}
     </button>
     <button
       mat-raised-button
       color="warn"
       (click)="deleteSelected()"
       [disabled]="isDeleting()"
-      aria-label="Delete selected events"
+      [attr.aria-label]="'aria.deleteSelected' | translate"
     >
       <div class="delete-icon">
         @if (isDeleting()) {
         <mat-spinner diameter="20"></mat-spinner>
-        Deleting... } @else {
+        {{ "common.deleting" | translate }} } @else {
 
         <mat-icon>delete</mat-icon>
-        Delete }
+        {{ "buttons.delete" | translate }} }
       </div>
     </button>
   </mat-toolbar>
@@ -91,7 +103,7 @@
   <div class="loading-overlay fade-in">
     <div class="loading-state">
       <mat-spinner diameter="48"></mat-spinner>
-      <p>Loading events...</p>
+      <p>{{ "common.loadingEvents" | translate }}</p>
     </div>
   </div>
   } @else if (!hasAnyUpcomingEvents()) {
@@ -99,17 +111,17 @@
   <div class="empty-overlay fade-in">
     <empty-state
       [icon]="'event_busy'"
-      [title]="'No upcoming events'"
-      [description]="'Get started by creating your first event'"
+      [title]="'upcoming.noEvents' | translate"
+      [description]="'upcoming.noEventsDesc' | translate"
     >
       <button
         mat-raised-button
         color="primary"
         (click)="createEvent()"
-        aria-label="Create your first event"
+        [attr.aria-label]="'aria.createFirstEvent' | translate"
       >
         <mat-icon>add</mat-icon>
-        Create Your First Event
+        {{ "buttons.createFirstEvent" | translate }}
       </button>
     </empty-state>
   </div>
@@ -118,16 +130,16 @@
   <div class="empty-state-static fade-in">
     <empty-state
       [icon]="'search_off'"
-      [title]="'No events found'"
-      [description]="'Try adjusting your filters or search terms'"
+      [title]="'upcoming.noResults' | translate"
+      [description]="'upcoming.noResultsDesc' | translate"
     >
       <button
         mat-raised-button
         (click)="selectedCategory.set(''); searchQuery.set('')"
-        aria-label="Clear all filters"
+        [attr.aria-label]="'aria.clearFilters' | translate"
       >
         <mat-icon>clear</mat-icon>
-        Clear Filters
+        {{ "buttons.clearFilters" | translate }}
       </button>
     </empty-state>
   </div>
@@ -162,7 +174,7 @@
         <mat-card-subtitle>
           {{ formatDate(event.start) }}
           @if (event.repeatAnnually) {
-          <mat-chip>Recurring</mat-chip>
+          <mat-chip>{{ "upcoming.recurring" | translate }}</mat-chip>
           }
         </mat-card-subtitle>
       </mat-card-header>

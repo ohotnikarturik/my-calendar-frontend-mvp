@@ -10,8 +10,12 @@
   >
     <mat-nav-list>
       <div class="sidenav-header">
-        <h2>My Calendar</h2>
-        <button mat-icon-button (click)="closeDrawer()" aria-label="Close menu">
+        <h2>{{ "nav.appTitle" | translate }}</h2>
+        <button
+          mat-icon-button
+          (click)="closeDrawer()"
+          [attr.aria-label]="'nav.closeMenu' | translate"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </div>
@@ -24,7 +28,7 @@
         (click)="closeDrawer()"
       >
         <mat-icon matListItemIcon>home</mat-icon>
-        <span matListItemTitle>Home</span>
+        <span matListItemTitle>{{ "nav.home" | translate }}</span>
       </a>
       <a
         mat-list-item
@@ -34,7 +38,7 @@
         (click)="closeDrawer()"
       >
         <mat-icon matListItemIcon>calendar_month</mat-icon>
-        <span matListItemTitle>Calendar</span>
+        <span matListItemTitle>{{ "nav.calendar" | translate }}</span>
       </a>
       <a
         mat-list-item
@@ -43,7 +47,7 @@
         (click)="closeDrawer()"
       >
         <mat-icon matListItemIcon>event</mat-icon>
-        <span matListItemTitle>Upcoming</span>
+        <span matListItemTitle>{{ "nav.upcoming" | translate }}</span>
       </a>
       <!-- <a mat-list-item routerLink="/contacts" routerLinkActive="active" (click)="closeDrawer()">
         <mat-icon matListItemIcon>contacts</mat-icon>
@@ -60,7 +64,7 @@
         (click)="closeDrawer()"
       >
         <mat-icon matListItemIcon>settings</mat-icon>
-        <span matListItemTitle>Settings</span>
+        <span matListItemTitle>{{ "nav.settings" | translate }}</span>
       </a>
       <a
         mat-list-item
@@ -69,10 +73,35 @@
         (click)="closeDrawer()"
       >
         <mat-icon matListItemIcon>info</mat-icon>
-        <span matListItemTitle>About</span>
+        <span matListItemTitle>{{ "nav.about" | translate }}</span>
       </a>
 
       <mat-divider></mat-divider>
+
+      <!-- Language toggle in sidebar -->
+      <a
+        mat-list-item
+        [matMenuTriggerFor]="mobileLangMenu"
+        tabindex="0"
+        [attr.aria-label]="'aria.selectLanguage' | translate"
+      >
+        <mat-icon matListItemIcon>language</mat-icon>
+        <span matListItemTitle>{{ currentLanguageName() }}</span>
+      </a>
+      <mat-menu #mobileLangMenu="matMenu">
+        @for (lang of supportedLanguages; track lang.code) {
+        <button
+          mat-menu-item
+          (click)="changeLanguage(lang.code)"
+          [class.active]="currentLanguage() === lang.code"
+        >
+          @if (currentLanguage() === lang.code) {
+          <mat-icon>check</mat-icon>
+          }
+          <span>{{ lang.nativeName }}</span>
+        </button>
+        }
+      </mat-menu>
 
       <!-- Theme toggle in sidebar -->
       <a
@@ -100,10 +129,10 @@
         (keydown.enter)="onLogout(); closeDrawer()"
         (keydown.space)="onLogout(); closeDrawer()"
         tabindex="0"
-        aria-label="Sign out of your account"
+        [attr.aria-label]="'aria.signOutAccount' | translate"
       >
         <mat-icon matListItemIcon>logout</mat-icon>
-        <span matListItemTitle>Sign Out</span>
+        <span matListItemTitle>{{ "nav.signOut" | translate }}</span>
       </a>
       } @else if (supabase.isInitialized()) {
       <!-- Login option when not authenticated -->
@@ -111,10 +140,10 @@
         mat-list-item
         routerLink="/auth/login"
         (click)="closeDrawer()"
-        aria-label="Sign in to your account"
+        [attr.aria-label]="'aria.signInAccount' | translate"
       >
         <mat-icon matListItemIcon>login</mat-icon>
-        <span matListItemTitle>Sign In</span>
+        <span matListItemTitle>{{ "nav.signIn" | translate }}</span>
       </a>
       }
     </mat-nav-list>
@@ -131,31 +160,65 @@
               mat-icon-button
               class="hamburger-button"
               (click)="toggleDrawer()"
-              aria-label="Open navigation menu"
+              [attr.aria-label]="'nav.openMenu' | translate"
             >
               <mat-icon>menu</mat-icon>
             </button>
             <a routerLink="/" class="app-title-link">
-              <h1 class="app-title">My Calendar</h1>
+              <h1 class="app-title">{{ "nav.appTitle" | translate }}</h1>
             </a>
           </div>
 
           <!-- Right side: Desktop navigation -->
           <div class="nav-links desktop-nav">
             @if (supabase.isInitialized() && isAuthenticated()) {
-            <a routerLink="/home" routerLinkActive="active">Home</a>
+            <a routerLink="/home" routerLinkActive="active">{{
+              "nav.home" | translate
+            }}</a>
             <a
               routerLink="/"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }"
-              >Calendar</a
+              >{{ "nav.calendar" | translate }}</a
             >
-            <a routerLink="/upcoming" routerLinkActive="active">Upcoming</a>
+            <a routerLink="/upcoming" routerLinkActive="active">{{
+              "nav.upcoming" | translate
+            }}</a>
             <!-- <a routerLink="/contacts" routerLinkActive="active">Contacts</a> -->
             <!-- <a routerLink="/occasions" routerLinkActive="active">Occasions</a> -->
-            <a routerLink="/settings" routerLinkActive="active">Settings</a>
-            <a routerLink="/about" routerLinkActive="active">About</a>
+            <a routerLink="/settings" routerLinkActive="active">{{
+              "nav.settings" | translate
+            }}</a>
+            <a routerLink="/about" routerLinkActive="active">{{
+              "nav.about" | translate
+            }}</a>
             }
+
+            <!-- Language switcher -->
+            <button
+              mat-button
+              class="language-toggle"
+              [matMenuTriggerFor]="languageMenu"
+              [matTooltip]="'Language: ' + currentLanguageName()"
+              [attr.aria-label]="'aria.selectLanguage' | translate"
+            >
+              <mat-icon>language</mat-icon>
+              <span>{{ currentLanguageCode() }}</span>
+            </button>
+            <mat-menu #languageMenu="matMenu">
+              @for (lang of supportedLanguages; track lang.code) {
+              <button
+                mat-menu-item
+                (click)="changeLanguage(lang.code)"
+                [class.active]="currentLanguage() === lang.code"
+              >
+                @if (currentLanguage() === lang.code) {
+                <mat-icon>check</mat-icon>
+                }
+                <span>{{ lang.nativeName }}</span>
+              </button>
+              }
+            </mat-menu>
 
             <!-- Theme toggle button -->
             <button
@@ -176,7 +239,7 @@
               [matMenuTriggerFor]="userMenu"
               class="user-menu-button"
               [matTooltip]="userEmail() ?? 'Account'"
-              aria-label="Open user menu"
+              [attr.aria-label]="'aria.openUserMenu' | translate"
             >
               <mat-icon>account_circle</mat-icon>
             </button>
@@ -188,10 +251,10 @@
               <button
                 mat-menu-item
                 (click)="onLogout()"
-                aria-label="Sign out of your account"
+                [attr.aria-label]="'aria.signOutAccount' | translate"
               >
                 <mat-icon>logout</mat-icon>
-                <span>Sign Out</span>
+                <span>{{ "nav.signOut" | translate }}</span>
               </button>
             </mat-menu>
             } @else if (supabase.isInitialized()) {
@@ -200,9 +263,9 @@
               mat-stroked-button
               routerLink="/auth/login"
               class="login-button"
-              aria-label="Sign in to your account"
+              [attr.aria-label]="'aria.signInAccount' | translate"
             >
-              Sign In
+              {{ "nav.signIn" | translate }}
             </a>
             }
           </div>

@@ -5,60 +5,64 @@
     <div mat-dialog-content class="modal-content">
       <!-- Name Preview -->
       <div class="name-preview">
-        <span class="preview-label">Contact:</span>
+        <span class="preview-label">{{
+          "contacts.contactPreview" | translate
+        }}</span>
         <span class="preview-name">{{ fullNamePreview() }}</span>
       </div>
 
       <!-- First Name Field -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>First Name</mat-label>
+        <mat-label>{{ "contacts.firstName" | translate }}</mat-label>
         <input
           matInput
           formControlName="firstName"
           [attr.maxlength]="nameMaxLength"
-          placeholder="John"
+          [placeholder]="'contacts.firstNamePlaceholder' | translate"
           autocomplete="given-name"
           required
         />
         @if (shouldShowError('firstName') && hasError('firstName', 'required'))
         {
-        <mat-error>First name is required</mat-error>
+        <mat-error>{{ "validation.firstNameRequired" | translate }}</mat-error>
         } @if (shouldShowError('firstName') && hasError('firstName',
         'maxlength')) {
-        <mat-error
-          >Keep the name under {{ nameMaxLength }} characters</mat-error
-        >
+        <mat-error>{{
+          "validation.nameMaxLength" | translate : { max: nameMaxLength }
+        }}</mat-error>
         }
       </mat-form-field>
 
       <!-- Last Name Field -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Last Name</mat-label>
+        <mat-label>{{ "contacts.lastName" | translate }}</mat-label>
         <input
           matInput
           formControlName="lastName"
           [attr.maxlength]="nameMaxLength"
-          placeholder="Doe"
+          [placeholder]="'contacts.lastNamePlaceholder' | translate"
           autocomplete="family-name"
           required
         />
         @if (shouldShowError('lastName') && hasError('lastName', 'required')) {
-        <mat-error>Last name is required</mat-error>
+        <mat-error>{{ "validation.lastNameRequired" | translate }}</mat-error>
         } @if (shouldShowError('lastName') && hasError('lastName', 'maxlength'))
         {
-        <mat-error
-          >Keep the name under {{ nameMaxLength }} characters</mat-error
-        >
+        <mat-error>{{
+          "validation.nameMaxLength" | translate : { max: nameMaxLength }
+        }}</mat-error>
         }
       </mat-form-field>
     </div>
 
     <!-- Dialog Actions -->
     <div mat-dialog-actions class="modal-actions">
-      <button mat-button type="button" (click)="onCancel()">Cancel</button>
+      <button mat-button type="button" (click)="onCancel()">
+        {{ "buttons.cancel" | translate }}
+      </button>
       @if (canDelete()) {
       <button mat-button color="warn" type="button" (click)="onDelete()">
-        Delete
+        {{ "buttons.delete" | translate }}
       </button>
       }
       <button

@@ -10,15 +10,21 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" aria-label="Cancel action">
-    {{ data.cancelText || "Cancel" }}
+  <button
+    mat-button
+    (click)="onCancel()"
+    [attr.aria-label]="'aria.cancelDialog' | translate"
+  >
+    {{ data.cancelText || ("confirmDialog.defaultCancel" | translate) }}
   </button>
   <button
     mat-raised-button
     [color]="data.isDangerous ? 'warn' : 'primary'"
     (click)="onConfirm()"
-    [attr.aria-label]="data.confirmText || 'Confirm'"
+    [attr.aria-label]="
+      data.confirmText || ('confirmDialog.defaultConfirm' | translate)
+    "
   >
-    {{ data.confirmText || "Confirm" }}
+    {{ data.confirmText || ("confirmDialog.defaultConfirm" | translate) }}
   </button>
 </mat-dialog-actions>

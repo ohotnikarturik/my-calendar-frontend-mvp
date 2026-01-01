@@ -1,16 +1,16 @@
 <div class="contacts-container">
   <!-- Header with title and controls -->
   <div class="contacts-header">
-    <h1>Contacts</h1>
+    <h1>{{ "contacts.title" | translate }}</h1>
     <div class="header-controls">
       <!-- Search input -->
       <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Search contacts</mat-label>
+        <mat-label>{{ "contacts.searchContacts" | translate }}</mat-label>
         <input
           matInput
           [value]="searchQuery()"
           (input)="onSearchInput($event)"
-          placeholder="Search by name..."
+          [placeholder]="'contacts.searchPlaceholder' | translate"
         />
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
@@ -20,10 +20,10 @@
         mat-raised-button
         color="primary"
         (click)="openContactModal()"
-        matTooltip="Add a new contact"
+        [matTooltip]="'contacts.addNewContact' | translate"
       >
         <mat-icon>person_add</mat-icon>
-        Add Contact
+        {{ "buttons.addContact" | translate }}
       </button>
     </div>
   </div>
@@ -32,7 +32,7 @@
   @if (contactsService.loading()) {
   <div class="loading-state">
     <mat-spinner diameter="48"></mat-spinner>
-    <p>Loading contacts...</p>
+    <p>{{ "common.loadingContacts" | translate }}</p>
   </div>
   } @else if (filteredContacts().length === 0) {
   <!-- Empty state -->
@@ -40,33 +40,35 @@
     @if (searchQuery()) {
     <!-- No search results -->
     <mat-icon>search_off</mat-icon>
-    <p>No contacts found matching "{{ searchQuery() }}"</p>
-    <p class="empty-subtitle">Try a different search term</p>
+    <p>{{ "contacts.noResults" | translate : { query: searchQuery() } }}</p>
+    <p class="empty-subtitle">
+      {{ "contacts.tryDifferentSearch" | translate }}
+    </p>
     <button mat-button (click)="searchQuery.set('')">
       <mat-icon>clear</mat-icon>
-      Clear Search
+      {{ "buttons.clearSearch" | translate }}
     </button>
     } @else {
     <!-- No contacts at all -->
     <mat-icon>person_add</mat-icon>
-    <p>No contacts yet</p>
-    <p class="empty-subtitle">Add your first contact to get started</p>
+    <p>{{ "contacts.noContacts" | translate }}</p>
+    <p class="empty-subtitle">{{ "contacts.noContactsDesc" | translate }}</p>
     <button mat-raised-button color="primary" (click)="openContactModal()">
       <mat-icon>add</mat-icon>
-      Add Your First Contact
+      {{ "buttons.addFirstContact" | translate }}
     </button>
     }
   </div>
   } @else {
   <!-- Contact count -->
   <div class="contacts-count">
-    <span
-      >{{ filteredContacts().length }} contact{{
-        filteredContacts().length === 1 ? "" : "s"
-      }}</span
-    >
+    <span>{{
+      "contacts.contactCount" | translate : { count: filteredContacts().length }
+    }}</span>
     @if (searchQuery()) {
-    <span class="search-info">matching "{{ searchQuery() }}"</span>
+    <span class="search-info">{{
+      "contacts.matching" | translate : { query: searchQuery() }
+    }}</span>
     }
   </div>
 

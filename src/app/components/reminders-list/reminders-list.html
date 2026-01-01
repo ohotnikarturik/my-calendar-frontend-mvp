@@ -2,7 +2,7 @@
   @if (reminders().length === 0) {
   <div class="empty-state fade-in">
     <mat-icon>notifications_off</mat-icon>
-    <p>No upcoming reminders</p>
+    <p>{{ "reminders.noUpcomingReminders" | translate }}</p>
   </div>
   } @else {
   <div class="reminders-list stagger-list">
@@ -18,12 +18,19 @@
       <mat-card-content>
         <div class="reminder-info">
           <mat-chip>
-            @if (reminder.daysUntil === 0) { Today } @else if
-            (reminder.daysUntil === 1) { Tomorrow } @else { In
-            {{ reminder.daysUntil }} days }
+            @if (reminder.daysUntil === 0) { {{ "common.today" | translate }} }
+            @else if (reminder.daysUntil === 1) {
+            {{ "common.tomorrow" | translate }} } @else {
+            {{
+              "upcoming.inDays" | translate : { count: reminder.daysUntil }
+            }}
+            }
           </mat-chip>
           <span class="reminder-note">
-            Reminder set for {{ reminder.reminderDay }} day(s) before
+            {{
+              "reminders.reminderSetFor"
+                | translate : { days: reminder.reminderDay }
+            }}
           </span>
         </div>
       </mat-card-content>
@@ -31,10 +38,13 @@
         <button
           mat-button
           (click)="dismissReminder(reminder)"
-          [attr.aria-label]="'Dismiss reminder for ' + reminder.eventTitle"
+          [attr.aria-label]="
+            'reminders.dismissReminder'
+              | translate : { title: reminder.eventTitle }
+          "
         >
           <mat-icon>close</mat-icon>
-          Dismiss
+          {{ "buttons.dismiss" | translate }}
         </button>
       </mat-card-actions>
     </mat-card>
