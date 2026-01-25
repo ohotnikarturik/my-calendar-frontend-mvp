@@ -2,119 +2,171 @@
 
 _MVP personal calendar app for managing important dates with reminders_
 
-## Current Status: Phase 3.5 Complete ✅
+## Current Status: Phase 6 In Progress 🚧
 
-**App is functional** with cloud-only Supabase storage, authentication, and optimistic updates for better UX.
+**Production URL**: https://my-calendar-frontend-mvp.vercel.app
+
+The app is deployed with full authentication, CRUD operations, and internationalization. Currently implementing email reminders via Supabase Edge Functions.
 
 ---
 
-## Completed Phases
+## Phase Overview
 
-### ✅ Phase 1: Core Calendar MVP
+| Phase | Name                        | Status      |
+| ----- | --------------------------- | ----------- |
+| 1     | Core Calendar MVP           | ✅ Complete |
+| 2     | Contacts & Occasions        | ✅ Complete |
+| 3     | Supabase Integration        | ✅ Complete |
+| 4     | Polish & Accessibility      | ✅ Complete |
+| 5     | Production Deployment       | ✅ Complete |
+| 6     | Email Reminders             | 🚧 Active   |
+| 7     | Internationalization (i18n) | ✅ Complete |
+| 8     | AI Features                 | 🔮 Future   |
+
+---
+
+## ✅ Completed Phases
+
+### Phase 1: Core Calendar MVP
 
 - FullCalendar integration with month/week/day views
-- Event CRUD (create, read, update, delete)
-- Event modal with date/time pickers
-- Responsive Material Design UI
+- Event CRUD with modal dialogs
+- Date/time pickers with Material Design
+- Responsive layout
 
-### ✅ Phase 2: Contacts & Occasions
+### Phase 2: Contacts & Occasions
 
 - Contacts management (name, birthday, notes)
-- Occasions system (linked to contacts or standalone)
-- Reminder system (upcoming events view)
-- Date utilities for birthday calculations
+- Occasions system (birthdays, anniversaries)
+- Upcoming events view with reminders
+- Date utilities for age calculations
 
-### ✅ Phase 3: Supabase Integration
+### Phase 3: Supabase Integration
 
-- Email/password and Google OAuth authentication (UI complete)
-- Cloud sync with PostgreSQL backend (service complete)
-- Automatic background sync (debounced, periodic, on-reconnect)
-- Offline grace period for token expiration
-- Auth guards on all protected routes
-- Settings page with sync preferences
-- Local-first architecture (IndexedDB + Supabase sync)
-
-### ✅ Phase 3.5: Architecture Simplification
-
-- Removed IndexedDB and Dexie dependency (~1000 lines)
-- Simplified to cloud-only Supabase architecture
-- Direct CRUD operations with optimistic UI updates
-- Removed StorageService and SyncService
-- Refactored all data services to use SupabaseService directly
-- Maintained good UX with optimistic updates and error rollback
-
-**Finalization Steps (in progress):**
-
-- [ ] Run database migrations in Supabase SQL Editor
-- [ ] Configure Google OAuth in Supabase + Google Cloud Console
-- [ ] Test end-to-end auth and sync flows
-- [ ] Update production environment credentials
-
----
-
-## Remaining Work
+- Email/password authentication
+- Google OAuth authentication
+- PostgreSQL cloud database
+- Row-Level Security (RLS) policies
+- Optimistic UI updates with error rollback
+- Auth guards on protected routes
 
 ### Phase 4: Polish & Accessibility
 
-**Goal**: Production-ready UX with accessibility compliance
+- Loading spinners during async operations
+- Error notifications (Material Snackbar)
+- Global error handler service
+- ARIA labels on all interactive elements
+- Keyboard navigation support
+- Empty state components
+- Confirmation dialogs for destructive actions
+- Form validation feedback
+- Responsive hamburger menu
+- Dark mode support (light/dark/auto)
+- Smooth CSS animations and transitions
 
-Tasks:
+### Phase 5: Production Deployment
 
-- [ ] Add loading spinners during async operations
-- [ ] Implement error toast notifications (Material Snackbar)
-- [ ] Add keyboard navigation (Tab, Enter, Escape)
-- [ ] Add ARIA labels to interactive elements
-- [ ] Implement skip links for screen readers
-- [ ] Add focus indicators for keyboard users
-- [ ] Test with VoiceOver/screen readers
-- [ ] Add empty state illustrations
-- [ ] Responsive testing on mobile devices
+- Deployed to Vercel
+- Supabase production configuration
+- Google OAuth in production
+- All CRUD operations verified
+- Mobile responsive testing complete
 
-### Phase 5: PWA & Notifications
+### Phase 7: Internationalization (i18n)
 
-**Goal**: Installable app with push reminders
-
-Tasks:
-
-- [ ] Add `@angular/pwa` package
-- [ ] Configure service worker caching
-- [ ] Add install prompt UI
-- [ ] Implement push notifications (FCM)
-- [ ] Background sync for offline changes
-- [ ] App icons and splash screens
-
-### Phase 6: AI Features (Optional)
-
-**Goal**: Smart suggestions and natural language input
-
-Tasks:
-
-- [ ] Natural language event parsing ("Birthday party next Friday at 3pm")
-- [ ] Smart reminder suggestions based on event type
-- [ ] Gift/activity suggestions for occasions
+- 4 languages: English, Russian, Ukrainian, Finnish
+- Signal-based TranslationService
+- TranslatePipe for templates
+- Language selector in Settings
+- All pages and components translated
 
 ---
 
+## 🚧 Phase 6: Email Reminders (Current)
+
+**Goal**: Send email reminders for upcoming events via Supabase Edge Functions
+
+### What's Done ✅
+
+**Frontend UI** - Settings page with Email Reminders section:
+
+- Toggle to enable/disable email reminders
+- Checkboxes for reminder days (1, 3, 7, 14 days before)
+- Dropdown for preferred reminder time (8 AM - 6 PM)
+- Timezone selector
+- "Send Test Email" button with loading state
+- Full accessibility (ARIA labels)
+
+**Services Created:**
+
+- `NotificationPreferencesService` - Signal-based state management
+- `SupabaseService.client` getter for database access
+
+**Types Created:**
+
+- `NotificationPreferences` interface
+- `DEFAULT_NOTIFICATION_PREFERENCES` constant
+- `REMINDER_TIME_OPTIONS` and `REMINDER_DAY_OPTIONS` arrays
+
+### What's Left 🔴
+
+See [tasks.md](tasks.md) for detailed implementation steps.
+
+**Backend (Supabase):**
+
+1. Create `user_notification_preferences` database table
+2. Create `send-reminders` Edge Function
+3. Create `send-test-reminder-email` Edge Function
+4. Set up daily Cron job
+5. Integrate with email provider (Resend recommended)
+
+---
+
+## 🔮 Future Phases
+
+### Phase 8: AI Features (Optional)
+
+- Natural language event parsing ("Birthday party next Friday at 3pm")
+- Smart reminder suggestions based on event type
+- Gift/activity suggestions for occasions
+
+### Post-MVP: Testing
+
+- Unit tests for services
+- Component tests for modals
+- E2E tests for critical flows
+
+---
+
+## Tech Stack
+
+| Category   | Technology                                  |
+| ---------- | ------------------------------------------- |
+| Framework  | Angular 20 (standalone components, signals) |
+| UI Library | Angular Material (Material Design 3)        |
+| Calendar   | FullCalendar                                |
+| Backend    | Supabase (Auth + PostgreSQL)                |
+| Hosting    | Vercel                                      |
+| Language   | TypeScript (strict mode)                    |
+
 ## Quick Reference
 
-| Command         | Description                       |
-| --------------- | --------------------------------- |
-| `npm start`     | Start dev server (localhost:4200) |
-| `npm test`      | Run unit tests                    |
-| `npm run lint`  | Run ESLint                        |
-| `npm run build` | Production build                  |
+| Command         | Description                 |
+| --------------- | --------------------------- |
+| `npm start`     | Dev server (localhost:4200) |
+| `npm test`      | Run unit tests              |
+| `npm run lint`  | Run ESLint                  |
+| `npm run build` | Production build            |
 
-### Dev Mode Toggle
+## Project Structure
 
-In `src/app/services/supabase.service.ts`:
-
-```typescript
-private readonly DEV_MODE_BYPASS_AUTH = true;  // Set false for production
 ```
-
-### Supabase Setup Required
-
-1. Create project at supabase.com
-2. Copy URL and anon key to `src/environments/environment.ts`
-3. Run SQL migrations (see AGENTS.md)
-4. Set `DEV_MODE_BYPASS_AUTH = false`
+src/app/
+├── components/       # Reusable UI components
+├── pages/            # Route-level components
+├── services/         # Business logic & state
+├── guards/           # Route protection
+├── pipes/            # Template pipes
+├── types/            # TypeScript interfaces
+└── i18n/             # Translation files (en, ru, ua, fi)
+```

@@ -261,10 +261,10 @@
           mat-raised-button
           color="primary"
           (click)="sendTestEmail()"
-          [disabled]="notificationPrefs.loading()"
+          [disabled]="notificationPrefs.sending()"
           [attr.aria-label]="'buttons.sendTestEmail' | translate"
         >
-          @if (notificationPrefs.loading()) {
+          @if (notificationPrefs.sending()) {
           <mat-spinner diameter="20"></mat-spinner>
           <span>{{ "common.sending" | translate }}</span>
           } @else {

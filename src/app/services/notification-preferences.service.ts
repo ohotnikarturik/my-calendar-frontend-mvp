@@ -24,11 +24,13 @@ export class NotificationPreferencesService {
   // State
   private readonly _preferences = signal<NotificationPreferences | null>(null);
   private readonly _loading = signal(false);
+  private readonly _sending = signal(false);
   private readonly _initialized = signal(false);
 
   // Public readonly signals
   readonly preferences = this._preferences.asReadonly();
   readonly loading = this._loading.asReadonly();
+  readonly sending = this._sending.asReadonly();
   readonly initialized = this._initialized.asReadonly();
 
   // Computed state
@@ -260,8 +262,9 @@ export class NotificationPreferencesService {
       return;
     }
 
+    this._sending.set(true);
     try {
-      const { data, error } = await this.supabase.client.functions.invoke(
+      const { error } = await this.supabase.client.functions.invoke(
         'send-test-reminder-email',
         {
           body: { user_id: userId },
@@ -270,15 +273,13 @@ export class NotificationPreferencesService {
 
       if (error) throw error;
 
-      this.notification.success(
-        `Test email sent to ${data.email}. Check your inbox!`
-      );
+      this.notification.success('Test email sent! Check your inbox.');
     } catch (error) {
       console.error('Error sending test email:', error);
-      this.notification.error(
-        'Failed to send test email. Please check Supabase Functions configuration.'
-      );
+      this.notification.error('Failed to send test email. Please try again.');
       throw error;
+    } finally {
+      this._sending.set(false);
     }
   }
 
