@@ -26,20 +26,12 @@
           <h3>{{ "settings.timezone" | translate }}</h3>
           <p>{{ "settings.timezoneDesc" | translate }}</p>
         </div>
-        <mat-form-field appearance="outline">
-          <mat-label>{{ "settings.selectTimezone" | translate }}</mat-label>
-          <mat-select
-            [value]="settingsService.settings().timezone"
-            (selectionChange)="updateTimezone($event.value)"
-            [attr.aria-label]="'aria.selectTimezone' | translate"
-          >
-            @for (tz of timezones; track tz.value) {
-            <mat-option [value]="tz.value">
-              {{ tz.label }} ({{ tz.offset }})
-            </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <timezone-select
+          [value]="settingsService.settings().timezone ?? 'UTC'"
+          [label]="'settings.selectTimezone' | translate"
+          [ariaLabel]="'aria.selectTimezone' | translate"
+          (valueChange)="updateTimezone($event)"
+        ></timezone-select>
       </div>
 
       <mat-divider></mat-divider>
@@ -181,8 +173,8 @@
       <!-- Reminder Days Selection -->
       <div class="setting-row vertical">
         <div class="setting-info">
-          <h3>{{ "settings.reminderTime" | translate }}</h3>
-          <p>{{ "settings.reminderTimeDesc" | translate }}</p>
+          <h3>{{ "settings.reminderDays" | translate }}</h3>
+          <p>{{ "settings.reminderDaysDesc" | translate }}</p>
         </div>
         <div class="reminder-options">
           @for (option of emailReminderDayOptions; track option.value) {
@@ -233,20 +225,12 @@
           <h3>{{ "settings.emailReminderTimezone" | translate }}</h3>
           <p>{{ "settings.emailReminderTimezoneDesc" | translate }}</p>
         </div>
-        <mat-form-field appearance="outline">
-          <mat-label>{{ "settings.selectTimezone" | translate }}</mat-label>
-          <mat-select
-            [value]="notificationPrefs.preferences()?.timezone ?? 'UTC'"
-            (selectionChange)="updateEmailTimezone($event.value)"
-            [attr.aria-label]="'aria.selectEmailReminderTimezone' | translate"
-          >
-            @for (tz of emailTimezones; track tz.value) {
-            <mat-option [value]="tz.value">
-              {{ tz.label }}
-            </mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <timezone-select
+          [value]="notificationPrefs.preferences()?.timezone ?? 'UTC'"
+          [label]="'settings.selectTimezone' | translate"
+          [ariaLabel]="'aria.selectEmailReminderTimezone' | translate"
+          (valueChange)="updateEmailTimezone($event)"
+        ></timezone-select>
       </div>
 
       <mat-divider></mat-divider>

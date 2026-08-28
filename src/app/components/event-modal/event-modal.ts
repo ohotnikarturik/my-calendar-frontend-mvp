@@ -31,6 +31,7 @@ import { startWith, map } from 'rxjs';
 
 import type { CalendarEvent, EventCategory } from '../../types/event.type';
 import { DateUtilsService } from '../../services/date-utils.service';
+import { SettingsService } from '../../services/settings.service';
 import { ConfirmDialog } from '../confirm-dialog/confirm-dialog';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
@@ -87,9 +88,12 @@ export class EventModalComponent {
   private readonly modalData = inject(MAT_DIALOG_DATA) as EventModalData;
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly dateUtils = inject(DateUtilsService);
+  private readonly settingsService = inject(SettingsService);
   private readonly dialog = inject(MatDialog);
   private readonly translationService = inject(TranslationService);
   private readonly hasSubmitted = signal(false);
+  readonly isEditMode = !!this.modalData?.isEdit;
+  readonly showMoreOptions = signal(false);
 
   readonly titleMaxLength = 120;
 
@@ -395,11 +399,25 @@ export class EventModalComponent {
   }
 
   private computeInitialReminderEnabled(): boolean {
-    return this.modalData?.event?.reminderEnabled ?? false;
+    if (typeof this.modalData?.event?.reminderEnabled === 'boolean') {
+      return this.modalData.event.reminderEnabled;
+    }
+
+    const defaults = this.settingsService.settings().defaultReminderDays ?? [];
+    return defaults.length > 0;
   }
 
   private computeInitialReminderDaysBefore(): number {
-    return this.modalData?.event?.reminderDaysBefore ?? 7; // Default 7 days
+    if (typeof this.modalData?.event?.reminderDaysBefore === 'number') {
+      return this.modalData.event.reminderDaysBefore;
+    }
+
+    const defaults = this.settingsService.settings().defaultReminderDays ?? [];
+    return defaults[0] ?? 7;
+  }
+
+  toggleMoreOptions(): void {
+    this.showMoreOptions.update((value) => !value);
   }
 
   private computeInitialCategory(): EventCategory {

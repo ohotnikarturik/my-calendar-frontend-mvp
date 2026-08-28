@@ -13,55 +13,7 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 import { GlobalErrorHandler } from './services/error-handler.service';
-
-function detectLocale(): string {
-  const fallbackLocale = 'en-US';
-
-  if (typeof navigator === 'undefined') {
-    return fallbackLocale;
-  }
-
-  const intlLocale =
-    typeof Intl !== 'undefined' && typeof Intl.DateTimeFormat === 'function'
-      ? Intl.DateTimeFormat().resolvedOptions().locale
-      : undefined;
-
-  const candidates = [
-    ...(Array.isArray(navigator.languages) ? navigator.languages : []),
-    navigator.language,
-    intlLocale,
-  ].filter((value): value is string => Boolean(value));
-
-  const finnishCandidate = candidates.find((locale) => {
-    const normalized = locale.toLowerCase();
-    return (
-      normalized === 'fi' ||
-      normalized.startsWith('fi-') ||
-      normalized.endsWith('-fi')
-    );
-  });
-
-  if (finnishCandidate) {
-    return 'fi-FI';
-  }
-
-  if (
-    typeof Intl !== 'undefined' &&
-    typeof Intl.DateTimeFormat === 'function'
-  ) {
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (timeZone && timeZone.toLowerCase() === 'europe/helsinki') {
-      return 'fi-FI';
-    }
-  }
-
-  if (candidates.length > 0) {
-    const regionSpecific = candidates.find((locale) => locale.includes('-'));
-    return regionSpecific ?? candidates[0];
-  }
-
-  return fallbackLocale;
-}
+import { detectInitialBcp47Locale } from './types/language.type';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -70,7 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     {
       provide: MAT_DATE_LOCALE,
-      useFactory: () => detectLocale(),
+      useFactory: () => detectInitialBcp47Locale(),
     },
     {
       provide: ErrorHandler,

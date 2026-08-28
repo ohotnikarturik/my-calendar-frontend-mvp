@@ -2,8 +2,9 @@ import {
   Component,
   effect,
   inject,
-  AfterViewInit,
   OnDestroy,
+  viewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,17 +16,20 @@ import {
   Calendar as FullCalendar,
   type CalendarOptions,
   type DateSelectArg,
+  type DatesSetArg,
   type EventClickArg,
   type EventDropArg,
 } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
 
 import { CalendarEventsService } from '../../services/calendar-events.service';
 import { OccasionsService } from '../../services/occasions.service';
 import { RemindersService } from '../../services/reminders.service';
+import { DateUtilsService } from '../../services/date-utils.service';
+import { SettingsService } from '../../services/settings.service';
+import { TranslationService } from '../../services/translation.service';
+import type { CalendarEvent } from '../../types/event.type';
 import {
   EventModal,
   type EventModalData,
@@ -50,148 +54,239 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   templateUrl: './calendar.html',
   styleUrls: ['./calendar.scss'],
 })
-export class Calendar implements AfterViewInit, OnDestroy {
+export class Calendar implements OnDestroy {
   private calendar?: FullCalendar;
+  private initializing = false;
+
+  private readonly calendarHost = viewChild<ElementRef<HTMLElement>>('calendarHost');
   readonly eventsSvc = inject(CalendarEventsService);
   private readonly occasionsSvc = inject(OccasionsService);
   private readonly remindersSvc = inject(RemindersService);
+  private readonly dateUtils = inject(DateUtilsService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly translationService = inject(TranslationService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
+  private visibleRangeStart = new Date();
+  private visibleRangeEnd = new Date();
+
   private cleanupEffect = effect(() => {
-    // Track both events and occasions to trigger effect when either changes
+    this.eventsSvc.loading();
     this.eventsSvc.events();
     this.occasionsSvc.occasions();
-    if (!this.calendar) {
-      // If calendar not initialized yet, try to initialize it
-      setTimeout(() => {
-        if (!this.calendar) {
-          this.initializeCalendar();
-        } else {
-          this.updateCalendarEvents();
-        }
-      }, 0);
+    void this.calendarHost();
+    void this.settingsService.settings().calendarStartOfWeek;
+    void this.translationService.currentLanguage();
+
+    const host = this.calendarHost()?.nativeElement;
+
+    if (!host) {
+      this.destroyCalendarInstance();
       return;
     }
 
+    if (!this.calendar) {
+      this.initializeCalendar(host);
+      return;
+    }
+
+    this.syncCalendarOptions();
     this.updateCalendarEvents();
   });
 
   constructor() {
-    // Events will be loaded from IndexedDB automatically
-    // Show reminders after a short delay to allow events to load
     setTimeout(() => this.checkReminders(), 1000);
   }
 
   private checkReminders(): void {
     const todayReminders = this.remindersSvc.todayReminders();
-    if (todayReminders.length > 0) {
-      const unshownReminders = todayReminders.filter(
-        (r) => !this.remindersSvc.isReminderShown(r)
-      );
+    if (todayReminders.length === 0) return;
 
-      if (unshownReminders.length > 0) {
-        const count = unshownReminders.length;
-        const message =
-          count === 1
-            ? `Reminder: ${unshownReminders[0].eventTitle} is today!`
-            : `You have ${count} events today!`;
+    const unshownReminders = todayReminders.filter(
+      (r) => !this.remindersSvc.isReminderShown(r)
+    );
+    if (unshownReminders.length === 0) return;
 
-        this.snackBar.open(message, 'View', {
-          duration: 5000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-        });
+    const count = unshownReminders.length;
+    const message =
+      count === 1
+        ? this.translationService.translate('calendar.reminderTodaySingle', {
+            title: unshownReminders[0].eventTitle,
+          })
+        : this.translationService.translate('calendar.reminderTodayMultiple', {
+            count,
+          });
 
-        // Mark reminders as shown
-        unshownReminders.forEach((r) => this.remindersSvc.markReminderShown(r));
+    this.snackBar.open(
+      message,
+      this.translationService.translate('calendar.viewReminders'),
+      {
+        duration: 5000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
       }
+    );
+
+    unshownReminders.forEach((r) => this.remindersSvc.markReminderShown(r));
+  }
+
+  private initializeCalendar(host: HTMLElement): void {
+    if (this.calendar || this.initializing) return;
+
+    this.initializing = true;
+
+    try {
+      this.calendar = new FullCalendar(host, {
+        plugins: [dayGridPlugin, interactionPlugin],
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: '',
+        },
+        initialView: 'dayGridMonth',
+        locale: this.getFullCalendarLocale(),
+        firstDay: this.settingsService.settings().calendarStartOfWeek ?? 1,
+        navLinks: true,
+        editable: true,
+        selectable: true,
+        dayMaxEvents: true,
+        fixedWeekCount: false,
+        height: 'auto',
+
+        select: (info) => this.onDateSelect(info),
+        eventClick: (info) => this.onEventClick(info),
+        eventDrop: (info) => this.onEventDrop(info),
+        eventResize: (info) => this.onEventResize(info),
+        datesSet: (info) => this.onDatesSet(info),
+      } satisfies CalendarOptions);
+
+      this.calendar.render();
+      this.updateCalendarEvents();
+    } finally {
+      this.initializing = false;
     }
   }
 
-  ngAfterViewInit(): void {
-    // Use setTimeout to ensure the DOM is fully ready
-    setTimeout(() => {
-      this.initializeCalendar();
-    }, 0);
+  ngOnDestroy(): void {
+    this.cleanupEffect.destroy();
+    this.destroyCalendarInstance();
   }
 
-  private initializeCalendar(): void {
-    const host = document.querySelector('.calendar-host');
-    if (!host) {
-      // Retry if element not found yet
-      setTimeout(() => this.initializeCalendar(), 100);
-      return;
-    }
+  private destroyCalendarInstance(): void {
+    this.calendar?.destroy();
+    this.calendar = undefined;
+    this.initializing = false;
+  }
 
-    if (this.calendar) {
-      // Already initialized
-      return;
-    }
+  private getFullCalendarLocale(): string {
+    const lang = this.translationService.currentLanguage();
+    const map: Record<string, string> = {
+      en: 'en-gb',
+      ru: 'ru',
+      ua: 'uk',
+      fi: 'fi',
+    };
+    return map[lang] ?? 'en-gb';
+  }
 
-    // Initialize FullCalendar with plugins and options
-    this.calendar = new FullCalendar(host as HTMLElement, {
-      plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
-      },
-      initialView: 'dayGridMonth',
-      navLinks: true,
-      editable: true,
-      selectable: true,
-      dayMaxEvents: true,
-      events: this.eventsSvc.events(),
+  private syncCalendarOptions(): void {
+    if (!this.calendar) return;
 
-      // Event interaction handlers
-      select: (info) => this.onDateSelect(info),
-      eventClick: (info) => this.onEventClick(info),
-      eventDrop: (info) => this.onEventDrop(info),
-      eventResize: (info) => this.onEventResize(info),
-    } satisfies CalendarOptions);
+    this.calendar.setOption(
+      'firstDay',
+      this.settingsService.settings().calendarStartOfWeek ?? 1
+    );
+    this.calendar.setOption('locale', this.getFullCalendarLocale());
+  }
 
-    this.calendar.render();
-
-    // Manually trigger the effect to populate initial events
+  private onDatesSet(info: DatesSetArg): void {
+    this.visibleRangeStart = info.start;
+    this.visibleRangeEnd = info.end;
     this.updateCalendarEvents();
+  }
+
+  private getVisibleYears(): number[] {
+    const startYear = this.visibleRangeStart.getFullYear();
+    const endYear = this.visibleRangeEnd.getFullYear();
+    const years: number[] = [];
+    for (let year = startYear; year <= endYear; year++) {
+      years.push(year);
+    }
+    return years.length > 0 ? years : [this.dateUtils.currentYear()];
+  }
+
+  private mapEventForCalendar(event: CalendarEvent): CalendarEvent[] {
+    if (!event.repeatAnnually) {
+      return [event];
+    }
+
+    const years = this.getVisibleYears();
+    const mapped: CalendarEvent[] = [];
+
+    for (const year of years) {
+      const occurrence = this.dateUtils.getAnnualOccurrenceInYear(
+        event.start as string | Date,
+        year
+      );
+      if (!occurrence) continue;
+
+      mapped.push({
+        ...event,
+        id: years.length > 1 ? `${event.id}-${year}` : event.id,
+        start: this.dateUtils.toDateString(occurrence),
+        allDay: true,
+        extendedProps: {
+          ...(event.extendedProps as Record<string, unknown>),
+          originalEventId: event.id,
+        },
+      });
+    }
+
+    return mapped;
+  }
+
+  private resolveEventId(calendarEventId: string): string {
+    const event = this.eventsSvc
+      .events()
+      .find((e) => e.id === calendarEventId);
+    if (event) return calendarEventId;
+
+    const suffixMatch = calendarEventId.match(/^(.+)-(\d{4})$/);
+    if (suffixMatch) {
+      return suffixMatch[1];
+    }
+
+    return calendarEventId;
   }
 
   private updateCalendarEvents(): void {
     if (!this.calendar) return;
 
-    // Get regular calendar events
     const events = this.eventsSvc.events();
-
-    // Get occasions converted to calendar events
-    // Learning note: Occasions are converted to calendar event format
-    // so FullCalendar can display them alongside regular events
     const occasionEvents = this.occasionsSvc.toCalendarEvents();
 
     this.calendar.removeAllEvents();
 
-    // Add regular events
     events.forEach((event) => {
       const category = event.category || 'custom';
-      const fcEvent = {
-        ...event,
-        backgroundColor: event.color || this.getDefaultColor(category),
-        borderColor: event.color || this.getDefaultColor(category),
-      };
-      this.calendar?.addEvent(fcEvent);
+      this.mapEventForCalendar(event).forEach((mappedEvent) => {
+        this.calendar?.addEvent({
+          ...mappedEvent,
+          backgroundColor: event.color || this.getDefaultColor(category),
+          borderColor: event.color || this.getDefaultColor(category),
+        });
+      });
     });
 
-    // Add occasion events with distinct styling
     occasionEvents.forEach((event) => {
       const category = event.category || 'custom';
-      const fcEvent = {
+      this.calendar?.addEvent({
         ...event,
         backgroundColor: event.color || this.getDefaultColor(category),
         borderColor: event.color || this.getDefaultColor(category),
-        // Mark as non-editable since occasions are managed separately
         editable: false,
-      };
-      this.calendar?.addEvent(fcEvent);
+      });
     });
   }
 
@@ -208,10 +303,8 @@ export class Calendar implements AfterViewInit, OnDestroy {
       if (result?.action === 'save') {
         try {
           await this.eventsSvc.add(result.event);
-          // Success notification shown by service
         } catch (error) {
           console.error('Failed to create event:', error);
-          // Error notification shown by service
         }
       }
       this.calendar?.unselect();
@@ -219,15 +312,14 @@ export class Calendar implements AfterViewInit, OnDestroy {
   }
 
   onEventClick(clickInfo: EventClickArg): void {
-    const event = this.eventsSvc
-      .events()
-      .find((e) => e.id === clickInfo.event.id);
+    const eventId = this.resolveEventId(clickInfo.event.id);
+    const event = this.eventsSvc.events().find((e) => e.id === eventId);
     if (!event) return;
 
     const dialogRef = this.dialog.open(EventModal, {
       width: '500px',
       data: {
-        event: event,
+        event,
         isEdit: true,
       } as EventModalData,
     });
@@ -236,41 +328,48 @@ export class Calendar implements AfterViewInit, OnDestroy {
       if (result?.action === 'save') {
         try {
           await this.eventsSvc.update(result.event.id, result.event);
-          // Success notification shown by service
         } catch (error) {
           console.error('Failed to update event:', error);
-          // Error notification shown by service
         }
       } else if (result?.action === 'delete') {
         try {
           await this.eventsSvc.remove(result.eventId);
-          // Success notification shown by service
         } catch (error) {
           console.error('Failed to delete event:', error);
-          // Error notification shown by service
         }
       }
     });
   }
 
   onEventDrop(dropInfo: EventDropArg): void {
-    const eventId = dropInfo.event.id;
+    const eventId = this.resolveEventId(dropInfo.event.id);
+    const storedEvent = this.eventsSvc.events().find((e) => e.id === eventId);
     const newStart = dropInfo.event.start;
-    const newEnd = dropInfo.event.end;
+    if (!newStart || !storedEvent) {
+      dropInfo.revert();
+      return;
+    }
+
+    const startUpdate = storedEvent.repeatAnnually
+      ? this.dateUtils.applyMonthDayToStoredDate(
+          storedEvent.start as string | Date,
+          newStart
+        )
+      : newStart.toISOString();
+
+    if (!startUpdate) {
+      dropInfo.revert();
+      return;
+    }
 
     this.eventsSvc
       .update(eventId, {
-        start: newStart?.toISOString(),
-        end: newEnd?.toISOString(),
+        start: startUpdate,
+        end: dropInfo.event.end?.toISOString(),
         updatedAt: new Date().toISOString(),
-      })
-      .then(() => {
-        // Success notification shown by service
       })
       .catch((error) => {
         console.error('Failed to update event:', error);
-        // Error notification shown by service
-        // Revert the drag
         dropInfo.revert();
       });
   }
@@ -278,7 +377,7 @@ export class Calendar implements AfterViewInit, OnDestroy {
   onEventResize(
     resizeInfo: EventDropArg | { event: { id: string; end: Date | null } }
   ): void {
-    const eventId = resizeInfo.event.id;
+    const eventId = this.resolveEventId(resizeInfo.event.id);
     const newEnd = resizeInfo.event.end;
 
     this.eventsSvc
@@ -286,12 +385,8 @@ export class Calendar implements AfterViewInit, OnDestroy {
         end: newEnd?.toISOString(),
         updatedAt: new Date().toISOString(),
       })
-      .then(() => {
-        // Success notification shown by service
-      })
       .catch((error) => {
         console.error('Failed to resize event:', error);
-        // Error notification shown by service
       });
   }
 
@@ -307,43 +402,23 @@ export class Calendar implements AfterViewInit, OnDestroy {
       if (result?.action === 'save') {
         try {
           await this.eventsSvc.add(result.event);
-          this.showMessage('Event created successfully');
         } catch (error) {
           console.error('Failed to create event:', error);
-          this.showMessage('Failed to create event. Please try again.', true);
         }
       }
     });
   }
 
-  ngOnDestroy(): void {
-    this.cleanupEffect?.destroy();
-    this.calendar?.destroy();
-  }
-
-  /**
-   * Show a snackbar message to the user
-   * Learning note: Using a helper method for consistent snackbar styling
-   */
-  private showMessage(message: string, isError = false): void {
-    this.snackBar.open(message, 'Dismiss', {
-      duration: isError ? 5000 : 3000,
-      panelClass: isError ? ['error-snackbar'] : [],
-    });
-  }
-
   private getDefaultColor(category: string): string {
-    // Consistent color palette using Material Design colors
-    // Optimized for accessibility and visual distinction
     const colorMap: Record<string, string> = {
-      birthday: '#E91E63', // Pink - warm and celebratory
-      anniversary: '#9C27B0', // Purple - special occasions
-      holiday: '#FF9800', // Orange - festive
-      personal: '#4CAF50', // Green - personal growth
-      work: '#2196F3', // Blue - professional
-      memorial: '#757575', // Gray - respectful
-      other: '#00BCD4', // Cyan - miscellaneous
-      custom: '#1976D2', // Default blue
+      birthday: '#E91E63',
+      anniversary: '#9C27B0',
+      holiday: '#FF9800',
+      personal: '#4CAF50',
+      work: '#2196F3',
+      memorial: '#757575',
+      other: '#00BCD4',
+      custom: '#1976D2',
     };
     return colorMap[category] || '#1976D2';
   }

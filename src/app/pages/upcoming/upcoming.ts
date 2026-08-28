@@ -21,6 +21,8 @@ import {
 import { PageHeader } from '../../components/page-header/page-header';
 import { EmptyState } from '../../components/empty-state/empty-state';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
+import { RemindersListComponent } from '../../components/reminders-list/reminders-list';
 import type { CalendarEvent, EventCategory } from '../../types/event.type';
 
 @Component({
@@ -40,6 +42,7 @@ import type { CalendarEvent, EventCategory } from '../../types/event.type';
     PageHeader,
     EmptyState,
     TranslatePipe,
+    RemindersListComponent,
   ],
   templateUrl: './upcoming.html',
   styleUrl: './upcoming.scss',
@@ -48,6 +51,7 @@ export class Upcoming {
   readonly eventsSvc = inject(CalendarEventsService);
   private readonly dialog = inject(MatDialog);
   private readonly dateUtils = inject(DateUtilsService);
+  private readonly translationService = inject(TranslationService);
 
   readonly selectedRange = signal<number>(30);
   readonly selectedCategory = signal<string>('');
@@ -55,15 +59,18 @@ export class Upcoming {
   readonly selectedEventIds = signal<Set<string>>(new Set());
   readonly isDeleting = signal(false);
 
-  readonly categoryOptions: { value: EventCategory | ''; label: string }[] = [
-    { value: '', label: 'All Categories' },
-    { value: 'birthday', label: 'Birthday' },
-    { value: 'anniversary', label: 'Anniversary' },
-    { value: 'holiday', label: 'Holiday' },
-    { value: 'personal', label: 'Personal' },
-    { value: 'work', label: 'Work' },
-    { value: 'other', label: 'Other' },
-  ];
+  readonly categoryOptions = computed(() => {
+    const t = (key: string) => this.translationService.translate(key);
+    return [
+      { value: '' as const, label: t('eventCategories.all') },
+      { value: 'birthday' as const, label: t('eventCategories.birthday') },
+      { value: 'anniversary' as const, label: t('eventCategories.anniversary') },
+      { value: 'holiday' as const, label: t('eventCategories.holiday') },
+      { value: 'personal' as const, label: t('eventCategories.personal') },
+      { value: 'work' as const, label: t('eventCategories.work') },
+      { value: 'other' as const, label: t('eventCategories.other') },
+    ];
+  });
 
   readonly hasSelectedEvents = computed(() => this.selectedEventIds().size > 0);
   readonly selectedCount = computed(() => this.selectedEventIds().size);
@@ -181,7 +188,7 @@ export class Upcoming {
   }
 
   getCategoryLabel(category: EventCategory): string {
-    const option = this.categoryOptions.find((opt) => opt.value === category);
+    const option = this.categoryOptions().find((opt) => opt.value === category);
     return option?.label || category;
   }
 
@@ -285,12 +292,13 @@ export class Upcoming {
 
     const dialogRef = this.dialog.open(ConfirmDialog, {
       data: {
-        title: 'Delete Multiple Events',
-        message: `Are you sure you want to delete ${selectedIds.length} event${
-          selectedIds.length > 1 ? 's' : ''
-        }? This action cannot be undone.`,
-        confirmText: 'Delete',
-        cancelText: 'Cancel',
+        title: this.translationService.translate('upcoming.deleteMultipleTitle'),
+        message: this.translationService.translate(
+          'upcoming.deleteMultipleMessage',
+          { count: selectedIds.length }
+        ),
+        confirmText: this.translationService.translate('buttons.delete'),
+        cancelText: this.translationService.translate('buttons.cancel'),
         isDangerous: true,
       },
     });

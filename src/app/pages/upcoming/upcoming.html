@@ -11,6 +11,8 @@
     </button>
   </page-header>
 
+  <reminders-list></reminders-list>
+
   @if (hasAnyUpcomingEvents() || isFiltering() || eventsSvc.loading()) {
   <div class="header-controls fade-in">
     <mat-form-field appearance="outline">
@@ -39,7 +41,7 @@
         (selectionChange)="selectedCategory.set($event.value)"
         [attr.aria-label]="'aria.filterByCategory' | translate"
       >
-        @for (cat of categoryOptions; track cat.value) {
+        @for (cat of categoryOptions(); track cat.value) {
         <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
         }
       </mat-select>

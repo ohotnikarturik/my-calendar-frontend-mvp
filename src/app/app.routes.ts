@@ -9,6 +9,7 @@ import { Settings } from './pages/settings/settings';
 import { Login } from './pages/auth/login/login';
 import { Signup } from './pages/auth/signup/signup';
 import { AuthCallback } from './pages/auth/callback/callback';
+import { ResetPassword } from './pages/auth/reset-password/reset-password';
 import { authGuard, guestGuard } from './guards/auth.guard';
 
 /**
@@ -40,6 +41,7 @@ export const routes: Routes = [
   // Auth routes (redirect to home if already logged in)
   { path: 'auth/login', component: Login, canActivate: [guestGuard] },
   { path: 'auth/signup', component: Signup, canActivate: [guestGuard] },
+  { path: 'auth/reset-password', component: ResetPassword },
   { path: 'auth/callback', component: AuthCallback },
 
   // Fallback route (redirect to login instead of calendar)

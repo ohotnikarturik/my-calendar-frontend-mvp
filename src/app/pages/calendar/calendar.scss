@@ -52,9 +52,29 @@
   }
 
   :global(.fc-toolbar-title) {
-    font-size: 1.5rem !important;
+    font-size: 1.625rem !important;
     font-weight: 500 !important;
     color: var(--mat-sys-on-surface) !important;
+  }
+
+  :global(.fc-daygrid-day-number) {
+    font-size: 1rem !important;
+    padding: 0.5rem !important;
+  }
+
+  :global(.fc-col-header-cell-cushion) {
+    font-size: 0.9375rem !important;
+    padding: 0.75rem 0.25rem !important;
+  }
+
+  :global(.fc-event-title) {
+    font-size: 0.9375rem !important;
+    padding: 0.125rem 0.25rem !important;
+  }
+
+  :global(.fc-button) {
+    min-height: 44px !important;
+    padding: 0.5rem 1rem !important;
   }
 
   :global(.fc-button-primary) {

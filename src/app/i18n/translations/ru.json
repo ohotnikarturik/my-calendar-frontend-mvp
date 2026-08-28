@@ -62,6 +62,13 @@
     "filter": "Фильтр",
     "today": "Сегодня",
     "tomorrow": "Завтра",
+    "yesterday": "Вчера",
+    "daysAgo": "{{count}} дн. назад",
+    "inDays": "Через {{count}} дн.",
+    "inOneWeek": "Через 1 неделю",
+    "inWeeks": "Через {{count}} нед.",
+    "inOneMonth": "Через 1 месяц",
+    "inMonths": "Через {{count}} мес.",
     "contact": "Контакт",
     "required": "обязательно",
     "category": "Категория"
@@ -75,6 +82,11 @@
     "password": "Пароль",
     "confirmPassword": "Подтвердите пароль",
     "forgotPassword": "Забыли пароль?",
+    "resetPasswordTitle": "Новый пароль",
+    "resetPasswordSubtitle": "Введите новый пароль ниже",
+    "newPassword": "Новый пароль",
+    "updatePassword": "Обновить пароль",
+    "passwordUpdated": "Пароль успешно обновлён",
     "continueWithGoogle": "Продолжить через Google",
     "signUpWith": "Зарегистрироваться через Google",
     "dontHaveAccount": "Нет аккаунта?",
@@ -110,8 +122,8 @@
     "createEventsDesc": "Легко создавайте и управляйте событиями с помощью интуитивного модального окна. Устанавливайте названия, описания, даты и время.",
     "editDeleteTitle": "Редактирование и удаление",
     "editDeleteDesc": "Нажмите на любое событие, чтобы изменить его детали или удалить. Перетаскивайте события для быстрого переноса.",
-    "multipleViewsTitle": "Несколько видов",
-    "multipleViewsDesc": "Переключайтесь между месячным, недельным, дневным и списочным видами для оптимального просмотра расписания.",
+    "multipleViewsTitle": "Предстоящие события",
+    "multipleViewsDesc": "Смотрите список предстоящих дат с напоминаниями, чтобы ничего не забыть.",
     "responsiveDesignTitle": "Адаптивный дизайн",
     "responsiveDesignDesc": "Доступ к календарю с любого устройства. Наш адаптивный дизайн обеспечивает отличный опыт на десктопе, планшете и мобильном."
   },
@@ -121,7 +133,10 @@
     "createYourFirstEvent": "Создать первое событие",
     "loadingEvents": "Загрузка событий...",
     "noEvents": "Пока нет событий",
-    "noEventsDesc": "Начните с создания первого события"
+    "noEventsDesc": "Начните с создания первого события",
+    "reminderTodaySingle": "Напоминание: {{title}} сегодня!",
+    "reminderTodayMultiple": "У вас {{count}} событий сегодня!",
+    "viewReminders": "Смотреть"
   },
   "eventModal": {
     "createTitle": "Создать новое событие",
@@ -138,6 +153,8 @@
     "remindMe": "Напомнить мне",
     "deleteConfirmTitle": "Удалить событие?",
     "deleteConfirmMessage": "Это событие будет безвозвратно удалено. Это действие нельзя отменить.",
+    "showMoreOptions": "Дополнительные параметры",
+    "hideMoreOptions": "Скрыть параметры",
     "openCalendar": "Открыть календарь для выбора даты"
   },
   "eventCategories": {
@@ -309,6 +326,8 @@
     "enableEmailRemindersDesc": "Получать уведомления по email о предстоящих событиях",
     "reminderTime": "Время напоминания",
     "reminderTimeDesc": "В какое время дня отправлять напоминания?",
+    "reminderDays": "Дни напоминаний",
+    "reminderDaysDesc": "Отправлять email-напоминания за столько дней до события",
     "selectTime": "Выбрать время",
     "emailReminderTimezone": "Часовой пояс для email напоминаний",
     "emailReminderTimezoneDesc": "Часовой пояс для планирования email напоминаний",

@@ -62,6 +62,13 @@
     "filter": "Фільтр",
     "today": "Сьогодні",
     "tomorrow": "Завтра",
+    "yesterday": "Вчора",
+    "daysAgo": "{{count}} дн. тому",
+    "inDays": "Через {{count}} дн.",
+    "inOneWeek": "Через 1 тиждень",
+    "inWeeks": "Через {{count}} тиж.",
+    "inOneMonth": "Через 1 місяць",
+    "inMonths": "Через {{count}} міс.",
     "contact": "Контакт",
     "required": "обов'язково",
     "category": "Категорія"
@@ -75,6 +82,11 @@
     "password": "Пароль",
     "confirmPassword": "Підтвердіть пароль",
     "forgotPassword": "Забули пароль?",
+    "resetPasswordTitle": "Новий пароль",
+    "resetPasswordSubtitle": "Введіть новий пароль нижче",
+    "newPassword": "Новий пароль",
+    "updatePassword": "Оновити пароль",
+    "passwordUpdated": "Пароль успішно оновлено",
     "continueWithGoogle": "Продовжити через Google",
     "signUpWith": "Зареєструватися через Google",
     "dontHaveAccount": "Немає облікового запису?",
@@ -110,8 +122,8 @@
     "createEventsDesc": "Легко створюйте та керуйте подіями за допомогою інтуїтивного модального вікна. Встановлюйте назви, описи, дати та час.",
     "editDeleteTitle": "Редагування та видалення",
     "editDeleteDesc": "Натисніть на будь-яку подію, щоб змінити її деталі або видалити. Перетягуйте події для швидкого перенесення.",
-    "multipleViewsTitle": "Декілька видів",
-    "multipleViewsDesc": "Перемикайтеся між місячним, тижневим, денним і списковим видами для оптимального перегляду розкладу.",
+    "multipleViewsTitle": "Майбутні події",
+    "multipleViewsDesc": "Переглядайте список майбутніх дат із нагадуваннями, щоб нічого не пропустити.",
     "responsiveDesignTitle": "Адаптивний дизайн",
     "responsiveDesignDesc": "Доступ до календаря з будь-якого пристрою. Наш адаптивний дизайн забезпечує чудовий досвід на десктопі, планшеті та мобільному."
   },
@@ -121,7 +133,10 @@
     "createYourFirstEvent": "Створити першу подію",
     "loadingEvents": "Завантаження подій...",
     "noEvents": "Поки немає подій",
-    "noEventsDesc": "Почніть зі створення першої події"
+    "noEventsDesc": "Почніть зі створення першої події",
+    "reminderTodaySingle": "Нагадування: {{title}} сьогодні!",
+    "reminderTodayMultiple": "У вас {{count}} подій сьогодні!",
+    "viewReminders": "Переглянути"
   },
   "eventModal": {
     "createTitle": "Створити нову подію",
@@ -138,6 +153,8 @@
     "remindMe": "Нагадати мені",
     "deleteConfirmTitle": "Видалити подію?",
     "deleteConfirmMessage": "Ця подія буде безповоротно видалена. Цю дію не можна скасувати.",
+    "showMoreOptions": "Додаткові параметри",
+    "hideMoreOptions": "Сховати параметри",
     "openCalendar": "Відкрити календар для вибору дати"
   },
   "eventCategories": {
@@ -309,6 +326,8 @@
     "enableEmailRemindersDesc": "Отримувати сповіщення по email про майбутні події",
     "reminderTime": "Час нагадування",
     "reminderTimeDesc": "В який час дня надсилати нагадування?",
+    "reminderDays": "Дні нагадувань",
+    "reminderDaysDesc": "Надсилати email-нагадування за стільки днів до події",
     "selectTime": "Вибрати час",
     "emailReminderTimezone": "Часовий пояс для email нагадувань",
     "emailReminderTimezoneDesc": "Часовий пояс для планування email нагадувань",

@@ -1,472 +1,266 @@
 # Tasks - Current Sprint
 
-_Active work items for My Calendar MVP_
+_Active work: clean Supabase reminder setup and verify end-to-end_
 
 ---
 
-## 🚧 Phase 6: Email Reminders
+## Where things live (important)
 
-**Goal**: Email-based reminders for upcoming events via Supabase
+| Thing | Stored where | Git push updates it? |
+| ----- | ------------ | -------------------- |
+| Angular app | Vercel | ✅ Yes |
+| Edge Functions | Supabase Dashboard / CLI deploy | ❌ No |
+| SQL (tables, cron) | Supabase SQL Editor | ❌ No |
+| Secrets (`RESEND_API_KEY`, etc.) | Supabase Dashboard only | ❌ No |
+| UI settings (theme, language, default reminder days) | Browser `localStorage` | ❌ No (per device) |
+| Email reminder settings | Supabase `user_notification_preferences` | ❌ No (until user saves in app) |
+| Events | Supabase `calendar_events` | ❌ No |
 
-**Status**: Frontend complete, backend implementation needed
+**Your local repo** has the correct reminder code under `supabase/`. Supabase cloud still runs whatever was deployed earlier until you redeploy.
 
 ---
 
-### Step 1: Create Database Table
+## Phase A — Supabase audit & cleanup
 
-**Where**: Supabase Dashboard → SQL Editor
+Goal: remove broken/old reminder infra; **keep users, events, and auth**.
 
-Create the `user_notification_preferences` table:
+### A1. What to KEEP 🤝 paste results to assistant
+
+Run in **Supabase → SQL Editor** and share output:
 
 ```sql
--- Create table
-CREATE TABLE user_notification_preferences (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  email_reminders_enabled BOOLEAN DEFAULT false,
-  reminder_days INTEGER[] DEFAULT ARRAY[1, 7],
-  reminder_time TEXT DEFAULT '09:00',
-  timezone TEXT DEFAULT 'UTC',
-  last_reminder_sent TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE(user_id)
-);
+-- Your data (do NOT delete these)
+SELECT COUNT(*) AS events FROM calendar_events;
+SELECT COUNT(*) AS users FROM auth.users;
+SELECT * FROM user_notification_preferences LIMIT 5;
 
--- Enable RLS
-ALTER TABLE user_notification_preferences ENABLE ROW LEVEL SECURITY;
+-- What's currently scheduled
+SELECT jobid, jobname, schedule, active FROM cron.job;
 
--- RLS Policies
-CREATE POLICY "Users can view own preferences"
-  ON user_notification_preferences FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own preferences"
-  ON user_notification_preferences FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own preferences"
-  ON user_notification_preferences FOR UPDATE
-  USING (auth.uid() = user_id);
-
--- Auto-update updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER update_notification_preferences_updated_at
-  BEFORE UPDATE ON user_notification_preferences
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Installed extensions
+SELECT extname FROM pg_extension WHERE extname IN ('pg_cron', 'pg_net');
 ```
 
-**Checklist:**
+**Keep:**
+- All rows in `calendar_events`
+- All users in Auth
+- Table `user_notification_preferences` (we can reset rows, not drop the table)
 
-- [x] Run SQL in Supabase Dashboard
-- [x] Verify table created in Table Editor
-- [x] Test insert/select with test user
+### A2. What to REMOVE (safe cleanup)
 
----
+**Edge Functions** (Dashboard → Edge Functions):
+- Delete any old/broken reminder functions if duplicated
+- You will redeploy fresh from repo in Phase D
 
-### Step 2: Set Up Resend Email Provider
-
-**Why Resend?** Modern API, great DX, generous free tier (100 emails/day)
-
-1. **Create Resend Account**
-
-   - Go to https://resend.com
-   - Sign up with GitHub or email
-   - Verify email address
-
-2. **Get API Key**
-
-   - Dashboard → API Keys → Create API Key
-   - Copy the key (starts with `re_`)
-
-3. **Add to Supabase Secrets**
-   - Supabase Dashboard → Project Settings → Edge Functions
-   - Add secret: `RESEND_API_KEY` = your API key
-
-**Checklist:**
-
-- [x] Create Resend account
-- [x] Generate API key
-- [x] Add `RESEND_API_KEY` to Supabase secrets
-- [ ] (Optional) Verify custom domain for better deliverability
-
----
-
-### Step 3: Create Edge Function - send-test-reminder-email
-
-**Where**: Supabase Dashboard → Edge Functions → New Function
-
-**Purpose**: Send a test email immediately to verify setup
-
-```typescript
-// supabase/functions/send-test-reminder-email/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-
-serve(async (req) => {
-  try {
-    const { user_id } = await req.json();
-
-    if (!user_id) {
-      return new Response(JSON.stringify({ error: "user_id required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Get user email from Supabase Auth
-    const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-
-    const {
-      data: { user },
-    } = await supabase.auth.admin.getUserById(user_id);
-
-    if (!user?.email) {
-      return new Response(JSON.stringify({ error: "User email not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Send test email via Resend
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "My Calendar <reminders@yourdomain.com>",
-        to: [user.email],
-        subject: "🧪 Test Email - My Calendar Reminders",
-        html: `
-          <h1>Test Email Successful! ✅</h1>
-          <p>Your email reminder settings are working correctly.</p>
-          <p>You'll receive reminders for upcoming events based on your preferences.</p>
-          <hr>
-          <p><small>This is a test email from My Calendar.</small></p>
-        `,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("Resend error:", data);
-      return new Response(JSON.stringify({ error: "Failed to send email" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ success: true, id: data.id }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-});
-```
-
-**Checklist:**
-
-- [x] Create Edge Function in Supabase Dashboard
-- [x] Deploy function
-- [x] Test via Dashboard: Invoke with `{ "user_id": "your-user-id" }`
-- [x] Verify email received in inbox
-
----
-
-### Step 4: Create Edge Function - send-reminders
-
-**Where**: Supabase Dashboard → Edge Functions → New Function
-
-**Purpose**: Daily cron job to send reminder emails
-
-```typescript
-// supabase/functions/send-reminders/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-
-serve(async (req) => {
-  try {
-    const supabase = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
-
-    // Get users with email reminders enabled
-    const { data: preferences, error: prefError } = await supabase.from("user_notification_preferences").select("*").eq("email_reminders_enabled", true);
-
-    if (prefError) throw prefError;
-    if (!preferences?.length) {
-      return new Response(JSON.stringify({ message: "No users with reminders enabled" }), { status: 200, headers: { "Content-Type": "application/json" } });
-    }
-
-    let emailsSent = 0;
-
-    for (const pref of preferences) {
-      // Get user email
-      const {
-        data: { user },
-      } = await supabase.auth.admin.getUserById(pref.user_id);
-      if (!user?.email) continue;
-
-      // Get user's events for the reminder window
-      const today = new Date();
-      const maxDays = Math.max(...pref.reminder_days);
-      const endDate = new Date(today);
-      endDate.setDate(endDate.getDate() + maxDays);
-
-      const { data: events } = await supabase.from("events").select("*").eq("user_id", pref.user_id).gte("start_date", today.toISOString().split("T")[0]).lte("start_date", endDate.toISOString().split("T")[0]);
-
-      if (!events?.length) continue;
-
-      // Filter events matching reminder days
-      const upcomingEvents = events.filter((event) => {
-        const eventDate = new Date(event.start_date);
-        const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-        return pref.reminder_days.includes(daysUntil);
-      });
-
-      if (!upcomingEvents.length) continue;
-
-      // Build email content
-      const eventList = upcomingEvents
-        .map((e) => {
-          const eventDate = new Date(e.start_date);
-          const daysUntil = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-          return `<li><strong>${e.title}</strong> - ${eventDate.toLocaleDateString()} (in ${daysUntil} day${daysUntil !== 1 ? "s" : ""})</li>`;
-        })
-        .join("");
-
-      // Send email
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-        },
-        body: JSON.stringify({
-          from: "My Calendar <reminders@yourdomain.com>",
-          to: [user.email],
-          subject: `📅 Upcoming Events Reminder (${upcomingEvents.length} event${upcomingEvents.length !== 1 ? "s" : ""})`,
-          html: `
-            <h1>Upcoming Events</h1>
-            <p>You have the following events coming up:</p>
-            <ul>${eventList}</ul>
-            <hr>
-            <p><a href="https://my-calendar-frontend-mvp.vercel.app">Open My Calendar</a></p>
-            <p><small>To change your reminder preferences, visit Settings in the app.</small></p>
-          `,
-        }),
-      });
-
-      if (res.ok) {
-        emailsSent++;
-        // Update last_reminder_sent
-        await supabase.from("user_notification_preferences").update({ last_reminder_sent: new Date().toISOString() }).eq("user_id", pref.user_id);
-      }
-    }
-
-    return new Response(JSON.stringify({ success: true, emails_sent: emailsSent }), { status: 200, headers: { "Content-Type": "application/json" } });
-  } catch (error) {
-    console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-});
-```
-
-**Checklist:**
-
-- [x] Create Edge Function in Supabase Dashboard
-- [x] Deploy function
-- [x] Test manually via Dashboard invoke
-- [x] Verify emails are sent correctly
-
----
-
-### Step 5: Set Up Cron Job
-
-**Where**: Supabase Dashboard → Database → Cron
-
-Create a scheduled job to run `send-reminders` daily:
+**Cron jobs** — run in SQL Editor:
 
 ```sql
--- Enable pg_cron extension if not already enabled
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-
--- Create cron job (runs daily at 9 AM UTC)
-SELECT cron.schedule(
-  'send-daily-reminders',
-  '0 9 * * *',
-  $$
-  SELECT net.http_post(
-    url := 'https://your-project-ref.supabase.co/functions/v1/send-reminders',
-    headers := '{"Authorization": "Bearer YOUR_ANON_KEY"}'::jsonb
-  );
-  $$
-);
+SELECT cron.unschedule(jobname)
+FROM cron.job
+WHERE jobname IN ('send-daily-reminders', 'send-hourly-reminders');
 ```
 
-**Alternative**: Use Supabase Dashboard → Database → Extensions → pg_cron
+Verify: `SELECT * FROM cron.job;` should show **no** reminder jobs.
 
-**Checklist:**
+**Do NOT delete:**
+- Auth users
+- `calendar_events` table or data
+- `RESEND_API_KEY` secret (if test email already worked)
+- Project API keys in Settings → API
 
-- [x] Enable pg_cron extension
-- [x] Create cron job
-- [x] Verify job in cron.job table
-- [x] Monitor execution logs
+### A3. Settings — are they correct?
 
----
+Two separate settings systems (this is intentional for MVP):
 
-### Step 6: Update Frontend Service
+| Settings | Where | Used for |
+| -------- | ----- | -------- |
+| Theme, language, calendar week start, default reminder days for **new events** | `localStorage` via Settings page | Frontend only |
+| Email reminders on/off, reminder days, reminder **time**, timezone for **emails** | `user_notification_preferences` in Supabase | Edge Function `send-reminders` |
 
-Update `NotificationPreferencesService` to call the test email function:
+After cleanup, open the app → **Settings** and confirm:
+- [ ] Email reminders toggle works (saves to Supabase)
+- [ ] Timezone matches yours (e.g. `Europe/Helsinki`)
+- [ ] Reminder time set (e.g. 9:00 AM)
+- [ ] Reminder days checked (e.g. 1 day, 7 days)
 
-**File**: `src/app/services/notification-preferences.service.ts`
+Optional reset for testing (SQL Editor):
 
-Update the `sendTestEmail()` method to invoke the Edge Function:
-
-```typescript
-async sendTestEmail(): Promise<void> {
-  this._sending.set(true);
-  try {
-    const userId = this.supabase.currentUser()?.id;
-    if (!userId) throw new Error('User not authenticated');
-
-    const { error } = await this.supabase.client.functions.invoke(
-      'send-test-reminder-email',
-      { body: { user_id: userId } }
-    );
-
-    if (error) throw error;
-    this.notification.success('Test email sent! Check your inbox.');
-  } catch (error) {
-    console.error('Failed to send test email:', error);
-    this.notification.error('Failed to send test email. Please try again.');
-  } finally {
-    this._sending.set(false);
-  }
-}
+```sql
+UPDATE user_notification_preferences
+SET last_reminder_sent = NULL,
+    email_reminders_enabled = true
+WHERE user_id = 'YOUR_USER_ID';
 ```
 
-**Checklist:**
+---
 
-- [x] Update sendTestEmail method
-- [x] Test from Settings page
-- [x] Verify email received
+## Phase B — Secrets (what each key is)
+
+Set in **Supabase → Project Settings → Edge Functions → Secrets**.
+
+| Secret | Required? | What it is | What to do |
+| ------ | --------- | ---------- | ---------- |
+| `RESEND_API_KEY` | ✅ Yes | API key from [resend.com](https://resend.com) | **Keep** if test email worked. Create new only if compromised. |
+| `REMINDER_FROM_EMAIL` | ✅ Yes | Sender address Resend is allowed to send from, e.g. `My Calendar <onboarding@resend.dev>` | Must match a verified sender/domain in Resend. Test email used this. |
+| `APP_URL` | Optional | Link in reminder emails | `https://my-calendar-frontend-mvp.vercel.app` — function has this as default. |
+
+**Auto-injected by Supabase (do not add manually):**
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+🤝 **Checkpoint with assistant:** After cleanup, confirm in Dashboard that `RESEND_API_KEY` and `REMINDER_FROM_EMAIL` still exist. Tell me the `REMINDER_FROM_EMAIL` value format (not the API key).
 
 ---
 
-### Step 7: Testing & Verification
+## Phase C — Database migrations
 
-**Frontend Testing:**
+Run in **SQL Editor** in order. These files are in your repo — they do **not** run automatically on git push.
 
-- [ ] Toggle email reminders on/off
-- [ ] Select different reminder days
-- [ ] Change reminder time
-- [ ] Change timezone
-- [ ] Click "Send Test Email" → verify email arrives
+### C1. Preferences table
 
-**Backend Testing:**
+File: `supabase/migrations/001_user_notification_preferences.sql`
 
-- [ ] Invoke `send-test-reminder-email` from Supabase Dashboard
-- [ ] Invoke `send-reminders` manually
-- [ ] Check Edge Function logs for errors
-- [ ] Verify emails are received in inbox
+- Safe to re-run (`CREATE TABLE IF NOT EXISTS`)
+- Creates/ensures `user_notification_preferences` + RLS policies
 
-**Production Testing:**
+🤝 **Checkpoint:** Confirm table exists in Table Editor.
 
-- [ ] Create event 1 day from today
-- [ ] Enable email reminders with "1 day before"
-- [ ] Wait for next cron run (9 AM UTC)
-- [ ] Verify reminder email received
+### C2. Cron job (after functions deployed in Phase D)
 
----
+File: `supabase/migrations/002_cron_send_reminders.sql`
 
-## ✅ Completed (Archive)
+- Enables `pg_cron` + `pg_net`
+- Removes old jobs, creates `send-hourly-reminders` (every hour at `:00`)
+- Already has your project ref and anon key filled in
 
-<details>
-<summary>Phase 1-5 & 7 Completed Items (click to expand)</summary>
+⚠️ Run **after** Phase D (functions must exist first).
 
-### Phase 1-3: Core Features & Supabase
-
-- FullCalendar integration with views
-- Event/Contact/Occasion CRUD
-- Supabase authentication (email + Google OAuth)
-- PostgreSQL database with RLS
-- Optimistic UI updates
-
-### Phase 4: Polish & Accessibility
-
-- Loading spinners and error notifications
-- Global error handler service
-- ARIA labels on all elements
-- Keyboard navigation
-- Empty states and confirm dialogs
-- Dark mode (light/dark/auto)
-- Responsive hamburger menu
-- CSS animations
-
-### Phase 5: Production Deployment
-
-- Deployed to Vercel
-- Production Supabase configuration
-- Google OAuth working
-- All features tested
-
-### Phase 7: Internationalization
-
-- 4 languages (EN, RU, UA, FI)
-- TranslationService with signals
-- TranslatePipe for templates
-- Language selector in Settings
-
-</details>
+🤝 **Checkpoint:** Paste `SELECT * FROM cron.job;` result.
 
 ---
 
-## 🔮 Future Enhancements
+## Phase D — Deploy Edge Functions from repo
 
-### Phase 8: AI Features (Optional)
+Local code fixes (`repeat_annually`, types) are only live after deploy.
 
-- Natural language event parsing
-- Smart reminder suggestions
-- Gift/activity suggestions
+### Option 1 — CLI (recommended)
 
-### Post-MVP: Testing
+```bash
+npm install -g supabase   # if not installed
+supabase login
+cd /path/to/my-calendar-frontend-mvp
+supabase link --project-ref rntnwarjiejeqfrsyzvr
+supabase functions deploy send-test-reminder-email
+supabase functions deploy send-reminders
+```
 
-- Unit tests for services
-- Component tests for modals
-- E2E tests for critical flows
+### Option 2 — Dashboard
+
+Copy code from:
+- `supabase/functions/send-test-reminder-email/index.ts`
+- `supabase/functions/send-reminders/index.ts`
+
+🤝 **Checkpoint:** Invoke `send-test-reminder-email` from Dashboard with `{ "user_id": "YOUR_USER_ID" }`. Confirm email arrives.
 
 ---
 
-## Quick Reference
+## Phase E — End-to-end test (interactive)
 
-| Command         | Description                 |
-| --------------- | --------------------------- |
-| `npm start`     | Dev server (localhost:4200) |
-| `npm run lint`  | Run ESLint                  |
-| `npm run build` | Production build            |
+Do these in order. 🤝 Tell assistant the JSON response at each step if something fails.
 
-**Supabase Dashboard**: https://supabase.com/dashboard
+### E1. Test email (already works for you)
 
-**Production URL**: https://my-calendar-frontend-mvp.vercel.app
+App → Settings → **Send Test Email** → check inbox.
+
+### E2. Manual `send-reminders` test
+
+**Setup in app:**
+1. Email reminders **ON**
+2. Reminder time = **current hour** in your timezone
+3. Reminder days includes **1 day before**
+4. Create event **tomorrow** with **Reminder ON** and 1 day before
+
+**Reset send lock (SQL):**
+```sql
+UPDATE user_notification_preferences SET last_reminder_sent = NULL WHERE user_id = 'YOUR_USER_ID';
+```
+
+**Invoke:** Dashboard → `send-reminders` → body `{}`
+
+**Expected:** `{ "success": true, "emails_sent": 1 }`
+
+**If `emails_sent: 0`:** function ran but filters didn't match — wrong hour, no matching event, or reminder disabled on event. Ask assistant with your settings + event date.
+
+### E3. Cron test
+
+Wait until next hour (`:00`) or check:
+
+```sql
+SELECT status, return_message, start_time
+FROM cron.job_run_details
+ORDER BY start_time DESC
+LIMIT 5;
+```
+
+At your configured reminder hour, you should receive email without manual invoke.
+
+---
+
+## Phase F — Frontend deploy (when Supabase is verified)
+
+```bash
+git add .
+git commit -m "..."
+git push
+```
+
+Vercel redeploys Angular only. Reminder backend still needs Phase C–D separately.
+
+---
+
+## Progress tracker
+
+| Step | Status | Notes |
+| ---- | ------ | ----- |
+| A1 Audit queries | ⬜ | Paste results to assistant |
+| A2 Remove old cron + duplicate functions | ⬜ | |
+| A3 Verify Settings in app | ⬜ | |
+| B Secrets confirmed | ⬜ | Keep existing Resend keys |
+| C1 Migration 001 | ⬜ | |
+| D Deploy both functions | ⬜ | |
+| C2 Migration 002 (cron) | ⬜ | After D |
+| E1 Test email | ✅ | Already works |
+| E2 Manual send-reminders | ⬜ | |
+| E3 Cron verified | ⬜ | |
+| F Git push frontend | ⬜ | |
+
+---
+
+## ✅ Already complete (frontend / repo)
+
+- Month-only calendar, locale wiring, elderly UX
+- Email reminder UI in Settings
+- Edge Function code in `supabase/functions/`
+- Migrations in `supabase/migrations/`
+- Test email integration in app
+
+---
+
+## 🔮 Future (after reminders work)
+
+- Contacts & Occasions Supabase sync (routes disabled)
+- PWA / push notifications
+- Unit/E2E tests
+- CSV/ICS export
+
+---
+
+## Quick reference
+
+| Resource | URL / command |
+| -------- | ------------- |
+| Supabase Dashboard | https://supabase.com/dashboard |
+| Production app | https://my-calendar-frontend-mvp.vercel.app |
+| Setup details | [supabase/README.md](supabase/README.md) |
+| `npm start` | Local dev |
+| `npm run lint` | Lint |

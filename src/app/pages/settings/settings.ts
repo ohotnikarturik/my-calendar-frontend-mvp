@@ -31,7 +31,6 @@ import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { PageHeader } from '../../components/page-header/page-header';
 import {
-  COMMON_TIMEZONES,
   REMINDER_DAY_OPTIONS,
   type ThemeMode,
   type ExportFormat,
@@ -40,8 +39,8 @@ import { SUPPORTED_LANGUAGES, type Language } from '../../types/language.type';
 import {
   REMINDER_DAY_OPTIONS as EMAIL_REMINDER_DAY_OPTIONS,
   REMINDER_TIME_OPTIONS as EMAIL_REMINDER_TIME_OPTIONS,
-  COMMON_TIMEZONES as EMAIL_TIMEZONES,
 } from '../../types/notification-preferences.type';
+import { TimezoneSelectComponent } from '../../components/timezone-select/timezone-select';
 
 @Component({
   selector: 'settings',
@@ -58,6 +57,7 @@ import {
     MatDividerModule,
     PageHeader,
     TranslatePipe,
+    TimezoneSelectComponent,
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
@@ -80,14 +80,12 @@ export class SettingsComponent {
   protected readonly selectedFile = signal<File | null>(null);
 
   // Timezone and reminder options (from constants)
-  protected readonly timezones = COMMON_TIMEZONES;
   protected readonly reminderOptions = REMINDER_DAY_OPTIONS;
   protected readonly supportedLanguages = SUPPORTED_LANGUAGES;
 
   // Email reminder options
   protected readonly emailReminderDayOptions = EMAIL_REMINDER_DAY_OPTIONS;
   protected readonly emailReminderTimeOptions = EMAIL_REMINDER_TIME_OPTIONS;
-  protected readonly emailTimezones = EMAIL_TIMEZONES;
 
   // Settings update methods
   protected updateTimezone(timezone: string): void {
@@ -147,7 +145,13 @@ export class SettingsComponent {
       const events = this.eventsService.events();
       const contacts = this.contactsService.contacts();
       const occasions = this.occasionsService.occasions();
-      await this.settingsService.exportData(events, contacts, occasions);
+      const json = await this.settingsService.exportData(
+        events,
+        contacts,
+        occasions
+      );
+      const filename = `my-calendar-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      this.settingsService.downloadAsFile(json, filename);
       this.showSnackbar('Data exported successfully');
     } catch (error) {
       console.error('Export failed:', error);
@@ -203,6 +207,7 @@ export class SettingsComponent {
       console.error('Import failed:', error);
       const message = error instanceof Error ? error.message : 'Unknown error';
       this.showSnackbar(`Import failed: ${message}`);
+    } finally {
       this.isImporting.set(false);
     }
   }

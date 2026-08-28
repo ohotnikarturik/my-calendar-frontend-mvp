@@ -1,0 +1,11 @@
+# Supabase local config (optional — deploy via Dashboard or CLI)
+# See tasks.md for Resend setup and cron job configuration
+
+[project]
+id = "rntnwarjiejeqfrsyzvr"
+
+[functions.send-test-reminder-email]
+verify_jwt = false
+
+[functions.send-reminders]
+verify_jwt = false

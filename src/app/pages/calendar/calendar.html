@@ -12,7 +12,7 @@
   </page-header>
 
   @if (!eventsSvc.loading() && eventsSvc.events().length > 0) {
-  <div class="calendar-host fade-in"></div>
+  <div #calendarHost class="calendar-host fade-in"></div>
   } @if (eventsSvc.loading()) {
   <div class="loading-overlay fade-in">
     <div class="loading-state">

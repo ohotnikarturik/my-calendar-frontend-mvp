@@ -1,15 +1,8 @@
 /**
  * Production Environment Configuration
  *
- * Learning note: This file is used when building for production.
- * In a real production setup, you would:
- * 1. Set these values via CI/CD environment variables
- * 2. Or use a secrets management system
- * 3. Never hardcode production credentials in source code
- *
- * For deployment (e.g., Vercel, Netlify, Firebase Hosting):
- * - Set environment variables in the hosting platform's dashboard
- * - Update your build script to inject these values
+ * Same values as environment.ts — Angular swaps this file on production build.
+ * Keep in sync with .env and Vercel env vars if you change the Supabase project.
  */
 export const environment = {
   production: true,

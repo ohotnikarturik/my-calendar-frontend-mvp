@@ -1,18 +1,16 @@
 /**
  * Development Environment Configuration
  *
- * Learning note: Environment files allow you to configure different settings
- * for development vs production. Angular's build system automatically swaps
- * these files based on the build configuration.
+ * Angular reads THIS file at build time — not .env.
+ * Keep supabaseUrl + supabaseAnonKey in sync with .env (SUPABASE_URL, SUPABASE_ANON_KEY).
  *
- * IMPORTANT: Never commit real API keys to version control!
- * - Add environment.ts and environment.prod.ts to .gitignore
- * - Or use placeholder values and set real values via environment variables in CI/CD
+ * What goes where:
+ * - Here (public): Supabase URL + anon/publishable key — safe in the browser (RLS protects data)
+ * - .env (local, gitignored): same public keys + secrets for Supabase CLI
+ * - Supabase Dashboard secrets: RESEND_API_KEY, REMINDER_FROM_EMAIL (Edge Functions)
+ * - Supabase Dashboard Auth: Google OAuth client id/secret
  *
- * To get your Supabase credentials:
- * 1. Go to https://supabase.com and create a project
- * 2. Navigate to Settings → API
- * 3. Copy the Project URL and anon/public key
+ * Never put service_role key or RESEND_API_KEY in this file.
  */
 export const environment = {
   production: false,

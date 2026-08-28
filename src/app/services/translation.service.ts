@@ -1,8 +1,11 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { Language } from '../types/language.type';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
+import { DateAdapter } from '@angular/material/core';
+import {
+  Language,
+  languageToBcp47Locale,
+  detectAppLanguage,
+} from '../types/language.type';
 import { SettingsService } from './settings.service';
-
-// Import translation files
 import enTranslations from '../i18n/translations/en.json';
 import ruTranslations from '../i18n/translations/ru.json';
 import uaTranslations from '../i18n/translations/ua.json';
@@ -15,6 +18,7 @@ export type Translations = Record<string, TranslationValue>;
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
   private readonly settingsService = inject(SettingsService);
+  private readonly dateAdapter = inject<DateAdapter<Date>>(DateAdapter);
 
   private readonly translationMap: Record<Language, Translations> = {
     en: enTranslations,
@@ -29,6 +33,18 @@ export class TranslationService {
   );
 
   readonly currentLanguage = this._currentLanguage.asReadonly();
+
+  /** BCP 47 locale for Intl date/number formatting */
+  bcp47Locale(): string {
+    return languageToBcp47Locale(this._currentLanguage());
+  }
+
+  constructor() {
+    effect(() => {
+      const locale = languageToBcp47Locale(this._currentLanguage());
+      this.dateAdapter.setLocale(locale);
+    });
+  }
 
   // Computed translations based on current language
   readonly translations = computed(() => {
@@ -51,14 +67,7 @@ export class TranslationService {
       return savedLanguage;
     }
 
-    // 3. Fallback to browser language
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('ru')) return 'ru';
-    if (browserLang.startsWith('uk') || browserLang.startsWith('ua'))
-      return 'ua';
-    if (browserLang.startsWith('fi')) return 'fi';
-
-    return 'en'; // Default fallback
+    return detectAppLanguage();
   }
 
   /**

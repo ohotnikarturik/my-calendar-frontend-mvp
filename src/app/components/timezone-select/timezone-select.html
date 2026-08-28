@@ -1,0 +1,18 @@
+<mat-form-field appearance="outline" class="timezone-select-field">
+  <mat-label>{{ label() }}</mat-label>
+  <mat-select
+    [value]="value()"
+    (selectionChange)="onSelectionChange($event.value)"
+    [attr.aria-label]="ariaLabel()"
+  >
+    @for (group of timezoneRegions(); track group.region) {
+    <mat-optgroup [label]="group.region">
+      @for (tz of group.timezones; track tz.value) {
+      <mat-option [value]="tz.value">
+        {{ formatLabel(tz) }}
+      </mat-option>
+      }
+    </mat-optgroup>
+    }
+  </mat-select>
+</mat-form-field>

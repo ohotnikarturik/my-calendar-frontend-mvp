@@ -338,13 +338,13 @@ export class SupabaseService {
       this._currentUser.set(null);
 
       // Redirect to login
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error('Error during force logout:', error);
       // Even if signOut fails, clear local state and redirect
       this._session.set(null);
       this._currentUser.set(null);
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
   }
 

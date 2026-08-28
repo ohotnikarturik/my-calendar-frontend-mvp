@@ -10,10 +10,16 @@
  * be used as standalone utilities.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { TranslationService } from './translation.service';
 
 @Injectable({ providedIn: 'root' })
 export class DateUtilsService {
+  private readonly translationService = inject(TranslationService);
+
+  private get locale(): string {
+    return this.translationService.bcp47Locale();
+  }
   /**
    * Parse various date input formats into a Date object
    * Handles Date objects, ISO strings, and other string formats
@@ -131,7 +137,7 @@ export class DateUtilsService {
     const parsed = this.parseDate(date);
     if (!parsed) return '';
 
-    return parsed.toLocaleDateString('en-US', options);
+    return parsed.toLocaleDateString(this.locale, options);
   }
 
   /**
@@ -145,7 +151,7 @@ export class DateUtilsService {
     const parsed = this.parseDate(date);
     if (!parsed) return '';
 
-    return parsed.toLocaleDateString('en-US', {
+    return parsed.toLocaleDateString(this.locale, {
       month: 'long',
       day: 'numeric',
     });
@@ -164,7 +170,7 @@ export class DateUtilsService {
 
     // Use a placeholder year for formatting
     const date = new Date(2000, parsed.month - 1, parsed.day);
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+    return date.toLocaleDateString(this.locale, { month: 'long', day: 'numeric' });
   }
 
   /**
@@ -238,17 +244,19 @@ export class DateUtilsService {
     if (!parsed) return '';
 
     const days = this.daysUntil(parsed);
+    const t = (key: string, params?: Record<string, string | number>) =>
+      this.translationService.translate(key, params);
 
-    if (days < -1) return `${Math.abs(days)} days ago`;
-    if (days === -1) return 'Yesterday';
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Tomorrow';
-    if (days < 7) return `In ${days} days`;
-    if (days < 14) return 'In 1 week';
-    if (days < 30) return `In ${Math.floor(days / 7)} weeks`;
-    if (days < 60) return 'In 1 month';
-    if (days < 365) return `In ${Math.floor(days / 30)} months`;
-    return parsed.toLocaleDateString();
+    if (days < -1) return t('common.daysAgo', { count: Math.abs(days) });
+    if (days === -1) return t('common.yesterday');
+    if (days === 0) return t('common.today');
+    if (days === 1) return t('common.tomorrow');
+    if (days < 7) return t('common.inDays', { count: days });
+    if (days < 14) return t('common.inOneWeek');
+    if (days < 30) return t('common.inWeeks', { count: Math.floor(days / 7) });
+    if (days < 60) return t('common.inOneMonth');
+    if (days < 365) return t('common.inMonths', { count: Math.floor(days / 30) });
+    return parsed.toLocaleDateString(this.locale);
   }
 
   /**
@@ -297,7 +305,49 @@ export class DateUtilsService {
    */
   createDateFromParts(month: number, day: number, year?: number): Date {
     const useYear = year ?? new Date().getFullYear();
-    return new Date(useYear, month - 1, day);
+    const candidate = new Date(useYear, month - 1, day);
+    // Feb 29 in a non-leap year rolls to March — clamp to last day of month
+    if (candidate.getMonth() !== month - 1) {
+      return new Date(useYear, month, 0);
+    }
+    return candidate;
+  }
+
+  /**
+   * Project an annual event's stored date onto a specific calendar year.
+   * Preserves month/day from the stored date (e.g. 1990-05-20 → 2026-05-20).
+   */
+  getAnnualOccurrenceInYear(
+    start: Date | string | number | undefined | null,
+    year: number
+  ): Date | null {
+    const parsed = this.parseDate(start);
+    if (!parsed) return null;
+
+    return this.createDateFromParts(
+      parsed.getMonth() + 1,
+      parsed.getDate(),
+      year
+    );
+  }
+
+  /**
+   * Update only month/day on a stored date, preserving the original year.
+   * Used when dragging annual events on the calendar.
+   */
+  applyMonthDayToStoredDate(
+    storedStart: Date | string | number | undefined | null,
+    newMonthDay: Date
+  ): string | null {
+    const parsed = this.parseDate(storedStart);
+    if (!parsed) return null;
+
+    const updated = this.createDateFromParts(
+      newMonthDay.getMonth() + 1,
+      newMonthDay.getDate(),
+      parsed.getFullYear()
+    );
+    return this.toDateString(updated);
   }
 
   /**

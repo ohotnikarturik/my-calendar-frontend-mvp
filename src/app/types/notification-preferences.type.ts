@@ -5,6 +5,8 @@
  * Corresponds to user_notification_preferences table in Supabase
  */
 
+import { detectBrowserTimezone } from './timezone.type';
+
 export interface NotificationPreferences {
   id: string;
   user_id: string;
@@ -35,7 +37,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: Partial<NotificationPreferences> 
     email_reminders_enabled: true,
     reminder_days: [1, 7], // 1 day and 7 days before
     reminder_time: '09:00:00',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    timezone: detectBrowserTimezone(),
   };
 
 // Reminder day options for UI
@@ -58,19 +60,4 @@ export const REMINDER_TIME_OPTIONS = [
   { value: '12:00:00', label: '12:00 PM' },
   { value: '18:00:00', label: '6:00 PM' },
   { value: '20:00:00', label: '8:00 PM' },
-];
-
-// Common timezones for UI
-export const COMMON_TIMEZONES = [
-  { value: 'UTC', label: 'UTC' },
-  { value: 'America/New_York', label: 'Eastern Time (US)' },
-  { value: 'America/Chicago', label: 'Central Time (US)' },
-  { value: 'America/Denver', label: 'Mountain Time (US)' },
-  { value: 'America/Los_Angeles', label: 'Pacific Time (US)' },
-  { value: 'Europe/London', label: 'London' },
-  { value: 'Europe/Paris', label: 'Paris' },
-  { value: 'Europe/Berlin', label: 'Berlin' },
-  { value: 'Asia/Tokyo', label: 'Tokyo' },
-  { value: 'Asia/Shanghai', label: 'Shanghai' },
-  { value: 'Australia/Sydney', label: 'Sydney' },
 ];
