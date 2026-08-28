@@ -7,8 +7,8 @@ Email reminders use **Resend** via Supabase Edge Functions.
 Copy `.env.example` → `.env` for Supabase CLI. Valid `KEY=value` format only.
 
 ```bash
-# Uploads only non-SUPABASE_* vars (RESEND_API_KEY, REMINDER_FROM_EMAIL, APP_URL).
-# SUPABASE_* lines are skipped — Supabase injects those into Edge Functions automatically.
+# Uploads RESEND_API_KEY, REMINDER_FROM_EMAIL, APP_URL only.
+# ⚠️ Never run this if RESEND_API_KEY is empty in .env — it overwrites the cloud secret!
 supabase secrets set --env-file .env
 ```
 

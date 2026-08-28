@@ -7,22 +7,33 @@ const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const FROM_EMAIL =
   Deno.env.get('REMINDER_FROM_EMAIL') ?? 'My Calendar <onboarding@resend.dev>';
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+};
+
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
 serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
     const { user_id } = await req.json();
 
     if (!user_id) {
-      return new Response(JSON.stringify({ error: 'user_id required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ error: 'user_id required' }, 400);
     }
 
     if (!RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: 'RESEND_API_KEY not configured' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ error: 'RESEND_API_KEY not configured' }, 500);
     }
 
     const supabase = createClient(
@@ -35,10 +46,7 @@ serve(async (req: Request) => {
     } = await supabase.auth.admin.getUserById(user_id);
 
     if (!user?.email) {
-      return new Response(JSON.stringify({ error: 'User email not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ error: 'User email not found' }, 404);
     }
 
     const res = await fetch('https://api.resend.com/emails', {
@@ -65,21 +73,15 @@ serve(async (req: Request) => {
 
     if (!res.ok) {
       console.error('Resend error:', data);
-      return new Response(JSON.stringify({ error: 'Failed to send email', details: data }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return jsonResponse({ error: 'Failed to send email', details: data }, 500);
     }
 
-    return new Response(JSON.stringify({ success: true, id: data.id }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse({ success: true, id: data.id });
   } catch (error) {
     console.error('Error:', error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    return jsonResponse(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      500
     );
   }
 });

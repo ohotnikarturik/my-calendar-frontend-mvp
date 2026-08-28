@@ -8,11 +8,10 @@ _Last updated: 2026-08-29_
 
 | # | Task | Status | Do with assistant? |
 |---|------|--------|-------------------|
-| 1 | **E2** — Manual `send-reminders` test (event tomorrow + reminders ON) | ⬜ | 🤝 paste JSON response |
-| 2 | **A3** — Confirm Settings in app (timezone, reminder time, days) | ⬜ | optional |
-| 3 | **E3** — Wait for reminder hour or check `cron.job_run_details` | ⬜ | 🤝 if no email |
-| 4 | **F** — Git commit + push → Vercel | ⬜ | when ready |
-| 5 | Optional cleanup — remove `GOOGLE_*` from Edge Function secrets | ⬜ | Auth → Google is the right place |
+| 1 | **E2** — Manual `send-reminders` test | ⬜ | 🤝 paste JSON response |
+| 2 | **E3** — Wait for reminder hour or check `cron.job_run_details` | ⬜ | 🤝 if no email |
+| 3 | **F** — Git commit + push → Vercel | ⬜ | when ready |
+| 4 | Optional — remove `GOOGLE_*` from Edge Function secrets | ⬜ | Auth → Google is the right place |
 
 ---
 
@@ -43,7 +42,7 @@ git commit -m "Add Supabase reminder backend, env setup, and MVP fixes"
 git push
 ```
 
-Deploy functions separately (already done):
+Redeploy functions after code changes:
 
 ```bash
 supabase functions deploy send-test-reminder-email --use-api
@@ -52,18 +51,23 @@ supabase functions deploy send-reminders --use-api
 
 ---
 
-## ✅ Phase 6: Email Reminders — Supabase setup COMPLETE
+## ✅ Phase 6: Email Reminders — COMPLETE
 
 | Step | Status | Notes |
 |------|--------|-------|
-| Migration 001 — `user_notification_preferences` table | ✅ | Already existed; Settings + test email work |
+| Migration 001 — `user_notification_preferences` table | ✅ | |
 | Migration 002 — hourly cron `send-hourly-reminders` | ✅ | jobid 5, `0 * * * *`, active |
-| Secrets — `RESEND_API_KEY`, `REMINDER_FROM_EMAIL`, `APP_URL` | ✅ | In Dashboard |
-| Deploy `send-test-reminder-email` | ✅ | `--use-api`, 2026-08-29 |
-| Deploy `send-reminders` | ✅ | `--use-api`, 2026-08-29 |
-| Test email from Settings | ✅ | Works |
-| Supabase CLI installed | ✅ | Use `--use-api` (Docker/Desktop issue) |
-| `.env` + `.env.example` | ✅ | Local optional; secrets live in cloud |
+| Secrets — `RESEND_API_KEY`, `REMINDER_FROM_EMAIL`, `APP_URL` | ✅ | Re-set after empty `.env` sync |
+| Deploy `send-test-reminder-email` | ✅ | `--use-api` + CORS fix |
+| Deploy `send-reminders` | ✅ | `--use-api` |
+| Test email from Settings | ✅ | Works from browser (localhost + prod) |
+| Supabase CLI + `.env` setup | ✅ | Never `secrets set` with empty `RESEND_API_KEY` |
+
+### Fixes applied (2026-08-29)
+
+- Re-set `RESEND_API_KEY` in Dashboard (was wiped by `supabase secrets set --env-file .env`)
+- Added CORS/OPTIONS handling to `send-test-reminder-email` (browser preflight)
+- `REMINDER_FROM_EMAIL` = `My Calendar <onboarding@resend.dev>` ✅
 
 <details>
 <summary>Reference: Supabase deploy & secrets (click to expand)</summary>
@@ -94,7 +98,7 @@ supabase functions deploy send-reminders --use-api
 | `REMINDER_FROM_EMAIL` | `My Calendar <onboarding@resend.dev>` |
 | `APP_URL` | Vercel URL (optional) |
 
-`SUPABASE_*` vars in `.env` are **not** uploaded — Supabase injects them automatically.
+⚠️ Do **not** run `supabase secrets set --env-file .env` when `RESEND_API_KEY` is empty.
 
 ### Cron schedule
 
